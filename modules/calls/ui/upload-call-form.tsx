@@ -88,7 +88,10 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [stage, setStage] = useState<Stage>("idle");
-  const [file, setFile] = useState<File | null>(null);
+  // Several recordings can be queued; they upload one at a time and each processes on its own.
+  const [files, setFiles] = useState<File[]>([]);
+  const [current, setCurrent] = useState(0);
+  const file = files[current] ?? files[0] ?? null;
   const [dragging, setDragging] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const pending = stage !== "idle";
@@ -109,21 +112,25 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
     return () => clearInterval(timer);
   }, [stage, router]);
 
-  function choose(next: File | null) {
+  function choose(list: FileList | File[] | null) {
     setResult(null);
-    if (!next) return setFile(null);
-    const problem = problemWith(next);
-    if (problem) {
-      setFile(null);
-      if (inputRef.current) inputRef.current.value = "";
-      setResult({ tone: "error", message: problem });
-      return;
+    const picked = Array.from(list ?? []);
+    if (picked.length === 0) return clear();
+    const valid = picked.filter((f) => !problemWith(f));
+    const rejected = picked.filter((f) => problemWith(f));
+    setFiles(valid);
+    setCurrent(0);
+    if (valid.length === 0 && inputRef.current) inputRef.current.value = "";
+    if (rejected.length === 1) {
+      setResult({ tone: "error", message: `${rejected[0].name}: ${problemWith(rejected[0])}` });
+    } else if (rejected.length > 1) {
+      setResult({ tone: "error", message: `${rejected.length} files were skipped because they aren't audio or are too large.` });
     }
-    setFile(next);
   }
 
   function clear() {
-    setFile(null);
+    setFiles([]);
+    setCurrent(0);
     if (inputRef.current) inputRef.current.value = "";
   }
 
@@ -142,37 +149,59 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
     return json.data as T;
   }
 
+  /** Uploads one recording and starts its processing; returns the new call's id. */
+  async function send(next: File) {
+    // The recording goes straight to private storage; the API only gets its path.
+    setStage("uploading");
+    const upload = await api<{ path: string; token: string }>("/calls/uploads", { fileName: next.name, size: next.size });
+    await uploadRecordingWithToken(upload.path, upload.token, next);
+    setStage("processing");
+    const call = await api<{ id: string; status: string }>("/calls", {
+      path: upload.path,
+      fileName: next.name,
+      ...(members ? { employeeId: employeeId || null } : {}),
+    });
+    return call;
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!file || pending) return;
+    if (files.length === 0 || pending) return;
     setResult(null);
-    try {
-      // The recording goes straight to private storage; the API only gets its path.
-      setStage("uploading");
-      const upload = await api<{ path: string; token: string }>("/calls/uploads", {
-        fileName: file.name,
-        size: file.size,
-      });
-      await uploadRecordingWithToken(upload.path, upload.token, file);
+    const queue = [...files];
+    const failed: { name: string; error: string; callId?: string }[] = [];
+    let lastCallId: string | undefined;
+    for (const [i, next] of queue.entries()) {
+      setCurrent(i);
+      try {
+        lastCallId = (await send(next)).id;
+      } catch (err) {
+        failed.push({
+          name: next.name,
+          error: err instanceof Error ? err.message : "Processing failed.",
+          callId: (err as { callId?: string }).callId,
+        });
+      }
+      router.refresh();
+    }
 
-      setStage("processing");
-      const call = await api<{ id: string; status: string }>("/calls", {
-        path: upload.path,
-        fileName: file.name,
-        ...(members ? { employeeId: employeeId || null } : {}),
-      });
-      // With background processing the call comes back still processing and fills in later.
-      const message =
-        call.status === "processing" ? `${file.name} is uploaded and processing.` : `${file.name} is ready.`;
-      setResult({ tone: "success", message, callId: call.id });
-      clear();
-    } catch (err) {
+    // With background processing, calls come back still processing and fill in later.
+    const sent = queue.length - failed.length;
+    if (queue.length === 1) {
+      setResult(
+        failed.length
+          ? { tone: "error", message: failed[0].error, callId: failed[0].callId }
+          : { tone: "success", message: `${queue[0].name} is uploaded and processing.`, callId: lastCallId },
+      );
+    } else if (failed.length === 0) {
+      setResult({ tone: "success", message: `All ${sent} recordings are uploaded and processing. They appear below as they finish.` });
+    } else {
       setResult({
         tone: "error",
-        message: err instanceof Error ? err.message : "Processing failed.",
-        callId: (err as { callId?: string }).callId,
+        message: `${sent} of ${queue.length} uploaded. Not uploaded: ${failed.map((f) => `${f.name} (${f.error})`).join("; ")}`,
       });
     }
+    clear();
     setStage("idle");
     router.refresh();
   }
@@ -187,7 +216,9 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
             </span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-medium">{file.name}</span>
-              <span className="block text-xs text-muted">Usually about a minute. Keep this tab open.</span>
+              <span className="block text-xs text-muted">
+                {files.length > 1 ? `Recording ${current + 1} of ${files.length}. ` : ""}Keep this tab open until it&apos;s uploaded.
+              </span>
             </span>
           </div>
           <ol className="flex flex-1 flex-col gap-3">
@@ -211,7 +242,7 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
             onDrop={(e) => {
               e.preventDefault();
               setDragging(false);
-              choose(e.dataTransfer.files[0] ?? null);
+              choose(e.dataTransfer.files);
             }}
             className={cn(
               "flex min-w-0 flex-1 cursor-pointer items-center gap-4 rounded-2xl border border-dashed px-4 py-3.5 transition-colors has-focus-visible:border-accent has-focus-visible:ring-4 has-focus-visible:ring-accent/15",
@@ -223,19 +254,23 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-medium">
-                {file ? (
+                {files.length > 1 ? (
+                  `${files.length} recordings selected`
+                ) : file ? (
                   file.name
                 ) : dragging ? (
                   "Drop to add the recording"
                 ) : (
                   <>
-                    <span className="sm:hidden">Choose a call recording</span>
-                    <span className="hidden sm:inline">Drop a call recording, or choose a file</span>
+                    <span className="sm:hidden">Choose call recordings</span>
+                    <span className="hidden sm:inline">Drop call recordings, or choose files</span>
                   </>
                 )}
               </span>
               <span className="block text-xs text-muted">
-                {file ? formatSize(file.size) : `MP3, WAV or M4A, up to ${MAX_MB} MB`}
+                {file
+                  ? formatSize(files.reduce((sum, f) => sum + f.size, 0))
+                  : `MP3, WAV or M4A, up to ${MAX_MB} MB each. Several at once is fine.`}
               </span>
             </span>
             <input
@@ -245,7 +280,8 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
               name="recording"
               accept={`audio/*,${RECORDING_EXTENSIONS.join(",")}`}
               className="sr-only"
-              onChange={(e) => choose(e.target.files?.[0] ?? null)}
+              multiple
+              onChange={(e) => choose(e.target.files)}
             />
           </label>
           {file && (
@@ -277,7 +313,7 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
             </label>
           )}
           <button type="submit" disabled={!file} className={cn(primaryButton, "h-12 px-6 disabled:cursor-not-allowed disabled:opacity-50")}>
-            Process call
+            {files.length > 1 ? `Process ${files.length} calls` : "Process call"}
           </button>
         </div>
       )}
