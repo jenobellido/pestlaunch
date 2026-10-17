@@ -5,7 +5,7 @@ import { Card, CardTitle, EmptyState } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
 import { summarizeTeam, type CoachingCall, type EmployeeSummary } from "../model/team";
 
-const GRADE_DOT = { gold: "bg-orange", green: "bg-accent", below: "bg-danger" } as const;
+const GRADE_DOT = { gold: "bg-orange", green: "bg-success", below: "bg-danger" } as const;
 const GRADE_LABEL = { gold: "Gold", green: "Green", below: "Below" } as const;
 
 function initialsOf(name: string) {
@@ -14,7 +14,7 @@ function initialsOf(name: string) {
 }
 
 function scoreTone(score: number) {
-  return score >= 90 ? "bg-orange" : score >= 75 ? "bg-accent" : "bg-danger";
+  return score >= 90 ? "bg-orange" : score >= 75 ? "bg-success" : "bg-danger";
 }
 
 function formatDate(iso: string) {

@@ -6,14 +6,14 @@ type CallState = { status: CallStatus; outcome?: { resolution: CallResolution } 
 
 const STATUS: Record<CallStatus, { label: string; dot: string }> = {
   processing: { label: "Processing", dot: "bg-sky animate-pulse" },
-  ready: { label: "Ready", dot: "bg-accent" },
+  ready: { label: "Ready", dot: "bg-success" },
   failed: { label: "Failed", dot: "bg-danger" },
 };
 
 const RESOLUTION: Record<CallResolution, { label: string; dot: string }> = {
-  booked: { label: "Booked", dot: "bg-accent" },
-  retained: { label: "Retained", dot: "bg-accent" },
-  resolved: { label: "Resolved", dot: "bg-accent" },
+  booked: { label: "Booked", dot: "bg-success" },
+  retained: { label: "Retained", dot: "bg-success" },
+  resolved: { label: "Resolved", dot: "bg-success" },
   follow_up_needed: { label: "Follow-up needed", dot: "bg-orange" },
   unresolved: { label: "Unresolved", dot: "bg-orange" },
   cancelled: { label: "Cancelled", dot: "bg-danger" },

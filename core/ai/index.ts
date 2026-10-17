@@ -1,2 +1,2 @@
-export { AiError, generateObject, transcribeAudio } from "./groq";
-export type { WhisperResult, WhisperSegment } from "./groq";
+export { AiError, generateObject, transcribeAudio } from "./client";
+export type { WhisperResult, WhisperSegment } from "./client";

@@ -13,12 +13,26 @@ export type CallResolution =
   | "unresolved"
   | "follow_up_needed";
 
+/** Why a customer wanted to cancel, as a fixed category so reasons can be counted. */
+export const CANCEL_REASONS = [
+  "Price",
+  "No longer needed",
+  "Service quality",
+  "Moving",
+  "Switching company",
+  "Scheduling",
+  "Other",
+] as const;
+export type CancelReason = (typeof CANCEL_REASONS)[number];
+
 export interface CallOutcome {
   summary: string;
   resolution: CallResolution;
   /** Key facts pulled from the call, e.g. pest, address, appointment date, price quoted. */
   details: { label: string; value: string }[];
   followUps: string[];
+  /** Retention calls only: the main reason the customer wanted to cancel. */
+  cancelReason?: CancelReason | null;
 }
 
 export interface CallRecord {

@@ -19,7 +19,9 @@ npm run dev
 ```
 
 Put a Groq API key (https://console.groq.com) in `AI_API_KEY` in `.env.local`;
-transcription and call analysis use it.
+transcription and call analysis use it. The AI client works with any
+OpenAI-compatible API: to use OpenAI, set `AI_BASE_URL`, the model names and an
+OpenAI key as shown in `.env.example`. No code changes are needed.
 
 Open http://localhost:3000 and create an account. Locally, email confirmation
 is off and confirmation emails are caught by Mailpit at http://127.0.0.1:56424.

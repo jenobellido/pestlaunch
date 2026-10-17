@@ -1,61 +1,83 @@
-import Link from "next/link";
 import { Suspense } from "react";
-import { ChevronRight, LayoutGrid } from "lucide-react";
-import { requireTenantAccess } from "@/core/tenancy";
+import { LayoutGrid } from "lucide-react";
+import { can } from "@/core/tenancy";
+import { CALL_TYPE_GROUP, CALL_TYPE_LABELS } from "@/modules/calls";
+import { callScope, listCalls } from "@/modules/calls/server";
+import { isModuleEnabled } from "@/modules/registry";
+import { getScorecardResult } from "@/modules/scorecards";
 import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
-import { getEnabledModules } from "@/modules/registry";
+import { Overview, RangeChips } from "./_components/overview";
+import { requireModule } from "./_lib/require-module";
+import { inRange, parseRange, summarize, type DashboardCall } from "./_lib/insights";
 
-async function EnabledModules({ params }: { params: Promise<{ tenant: string }> }) {
-  const { tenant } = await params;
-  await requireTenantAccess(tenant);
-  const modules = await getEnabledModules(tenant);
+// The Overview answers an owner's questions at a glance: are sales calls closing, how many
+// cancels are we saving and why not, who's waiting on us, and how well calls follow the process.
+async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
+  const access = await requireModule(params, "calls");
+  const { tenant, user, permissions } = access;
+  const range = parseRange((await searchParams).range);
+  const [calls, scored] = await Promise.all([
+    listCalls(tenant.slug, callScope({ userId: user.id, permissions })),
+    isModuleEnabled(tenant.slug, "scorecards"),
+  ]);
+  const mine = !can(access, "calls.view_all");
+
+  const dashboardCalls: DashboardCall[] = calls.map((c) => {
+    const score = scored ? getScorecardResult(c.analyses) : null;
+    return {
+      id: c.id,
+      href: `/${tenant.slug}/calls/${c.id}`,
+      title: c.fileName.replace(/\.[^.]+$/, ""),
+      typeLabel: c.callType ? CALL_TYPE_LABELS[c.callType] : null,
+      group: c.callType ? CALL_TYPE_GROUP[c.callType] : null,
+      employeeId: c.employeeId,
+      employeeName: c.employeeName,
+      createdAt: c.createdAt,
+      durationSec: c.durationSec ?? 0,
+      status: c.status,
+      resolution: c.outcome?.resolution ?? null,
+      followUps: c.outcome?.followUps ?? [],
+      cancelReason: c.outcome?.cancelReason ?? null,
+      score: score ? { points: score.points, maxPoints: score.maxPoints, grade: score.grade } : null,
+    };
+  });
+
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {modules.map((m) => {
-        const nav = m.nav?.[0];
-        const Icon = nav?.icon ?? LayoutGrid;
-        return (
-          <li key={m.id}>
-            <Link
-              href={`/${tenant}${nav?.href ?? ""}`}
-              className="group flex h-full flex-col gap-4 rounded-[28px] bg-card p-6 transition-colors hover:bg-card-2"
-            >
-              <span className="flex size-11 items-center justify-center rounded-2xl bg-accent/15 text-accent">
-                <Icon className="size-5" aria-hidden />
-              </span>
-              <span className="flex-1">
-                <span className="block font-medium">{m.name}</span>
-                {m.description && <span className="mt-1 block text-sm text-muted">{m.description}</span>}
-              </span>
-              <span className="flex items-center gap-1 text-sm text-muted group-hover:text-fg">
-                Open
-                <ChevronRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
-              </span>
-            </Link>
-          </li>
-        );
-      })}
-    </ul>
+    <PageStack>
+      <PageHeader
+        title="Overview"
+        description={mine ? "How your calls are going." : `How calls are going at ${tenant.name}.`}
+        icon={LayoutGrid}
+        actions={<RangeChips base={`/${tenant.slug}`} range={range} />}
+      />
+      <Overview insights={summarize(inRange(dashboardCalls, range))} slug={tenant.slug} mine={mine} />
+    </PageStack>
   );
 }
 
-function EnabledModulesSkeleton() {
+function OverviewSkeleton() {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-hidden>
-      {Array.from({ length: 3 }, (_, i) => (
-        <Bone key={i} className="h-48 rounded-[28px]" />
-      ))}
+    <div className="space-y-6" aria-hidden>
+      <div className="flex items-center gap-4">
+        <Bone className="size-12 rounded-2xl" />
+        <div className="space-y-2">
+          <Bone className="h-6 w-40 rounded-full" />
+          <Bone className="h-4 w-64 rounded-full" />
+        </div>
+      </div>
+      <Bone className="h-28 rounded-[28px]" />
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+        <Bone className="h-96 rounded-[28px]" />
+        <Bone className="h-96 rounded-[28px]" />
+      </div>
     </div>
   );
 }
 
-export default function TenantDashboardPage({ params }: PageProps<"/[tenant]">) {
+export default function TenantDashboardPage(props: PageProps<"/[tenant]">) {
   return (
-    <PageStack>
-      <PageHeader title="Overview" description="Your Call Intelligence modules." icon={LayoutGrid} />
-      <Suspense fallback={<EnabledModulesSkeleton />}>
-        <EnabledModules params={params} />
-      </Suspense>
-    </PageStack>
+    <Suspense fallback={<OverviewSkeleton />}>
+      <OverviewBody {...props} />
+    </Suspense>
   );
 }

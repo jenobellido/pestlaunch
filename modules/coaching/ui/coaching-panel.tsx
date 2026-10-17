@@ -21,7 +21,7 @@ export function CoachingPanel({ feedback }: { feedback: CoachingFeedback | undef
           <ul className="mt-2 space-y-2 text-sm">
             {feedback.strengths.map((s) => (
               <li key={s} className="flex gap-2.5">
-                <ThumbsUp className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+                <ThumbsUp className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
                 <span className="text-fg/90">{s}</span>
               </li>
             ))}

@@ -2,10 +2,25 @@ import "server-only";
 import { z } from "zod";
 import { serverEnv } from "@/core/config/env";
 
-// Thin client for Groq's OpenAI-compatible API. Plain fetch keeps it dependency-free.
-// Groq doesn't train on API data, which the test brief requires for the call recordings.
+// Thin client for any OpenAI-compatible API: Groq by default, or OpenAI by setting AI_BASE_URL
+// and the model names (see .env.example). Plain fetch keeps it dependency-free. Neither Groq
+// nor OpenAI trains on API data by default, which the test brief requires for the recordings.
 
-const BASE_URL = "https://api.groq.com/openai/v1";
+const BASE_URL = serverEnv.AI_BASE_URL.replace(/\/+$/, "");
+
+/**
+ * Reasoning models (gpt-oss, OpenAI's gpt-5 and o-series) take a reasoning effort; OpenAI's own
+ * reasoning models also reject a custom temperature. Other models get temperature 0 and no effort.
+ */
+function samplingFor(model: string, reasoningEffort: "low" | "medium" | "high") {
+  const name = model.toLowerCase().split("/").pop() ?? "";
+  const openAiReasoning = /^(gpt-5|o\d)/.test(name);
+  const reasoning = openAiReasoning || name.startsWith("gpt-oss");
+  return {
+    ...(openAiReasoning ? {} : { temperature: 0 }),
+    ...(reasoning ? { reasoning_effort: reasoningEffort } : {}),
+  };
+}
 // The free tier allows 8,000 chat tokens a minute, so rate limits are waited out patiently.
 const MAX_ATTEMPTS = 6;
 const MAX_WAIT_MS = 60_000;
@@ -149,6 +164,12 @@ interface GenerateObjectOptions<T> {
   reasoningEffort?: "low" | "medium" | "high";
 }
 
+/** The JSON schema for strict structured output, without the "$schema" key some APIs reject. */
+function strictSchema(schema: z.ZodType) {
+  const { $schema: _ignored, ...rest } = z.toJSONSchema(schema, { target: "draft-7" }) as Record<string, unknown>;
+  return rest;
+}
+
 async function generateObjectOnce<T>(
   { name, schema, system, prompt, reasoningEffort = "medium" }: GenerateObjectOptions<T>,
   model: string,
@@ -158,15 +179,14 @@ async function generateObjectOnce<T>(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       model,
-      temperature: 0,
-      reasoning_effort: reasoningEffort,
+      ...samplingFor(model, reasoningEffort),
       messages: [
         { role: "system", content: system },
         { role: "user", content: prompt },
       ],
       response_format: {
         type: "json_schema",
-        json_schema: { name, strict: true, schema: z.toJSONSchema(schema, { target: "draft-7" }) },
+        json_schema: { name, strict: true, schema: strictSchema(schema) },
       },
     }),
   });

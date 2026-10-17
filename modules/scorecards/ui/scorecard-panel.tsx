@@ -6,7 +6,7 @@ import type { Grade, ScorecardResult } from "../model/types";
 
 const GRADE: Record<Grade, { label: string; badge: string; bar: string }> = {
   gold: { label: "Gold Standard", badge: "bg-orange text-on-orange", bar: "bg-orange" },
-  green: { label: "Green Standard", badge: "bg-badge-success text-on-badge-success", bar: "bg-accent" },
+  green: { label: "Green Standard", badge: "bg-badge-success text-on-badge-success", bar: "bg-success" },
   below: { label: "Below Standard", badge: "bg-badge-danger text-on-badge-danger", bar: "bg-danger" },
 };
 
@@ -47,7 +47,7 @@ export function ScorecardPanel({ result }: { result: ScorecardResult | null | un
               {items.map((i) => (
                 <li key={i.item} className="flex gap-2.5">
                   {i.passed ? (
-                    <Check className="mt-0.5 size-4 shrink-0 text-accent" aria-label="Passed" />
+                    <Check className="mt-0.5 size-4 shrink-0 text-success" aria-label="Passed" />
                   ) : (
                     <X className="mt-0.5 size-4 shrink-0 text-danger" aria-label="Missed" />
                   )}
