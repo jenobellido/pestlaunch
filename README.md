@@ -1,10 +1,51 @@
 # PestLaunch Call Intelligence
 
 Turns pest control phone calls into a transcript, call type, outcome,
-scorecard grade and coaching for the employee.
+scorecard grade and coaching for the employee, and shows the owner where
+calls are leaking money.
 
 Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 [ARCHITECTURE.md](ARCHITECTURE.md) for how the code is organized.
+
+## What it does
+
+| The brief asks to… | Where it is |
+| --- | --- |
+| Process a call recording | **Calls**: drag in an MP3, WAV or M4A (up to 50 MB). It uploads straight to private storage and processes in the background, with live progress. Failed calls can be retried. |
+| View the transcript | **Call page**: speaker-labelled transcript, synced to an audio player (click a line to jump), with search. |
+| See what type of call it was | New customer, Scheduling, Billing, Re-service, Retention or Other, defined from the call manuals; grouped like PestLaunch's Call Log (Sales, Service, Billing, Retention, Other). |
+| See the important outcome and details | Summary, resolution (booked, saved, cancelled, resolved, follow-up needed, unresolved), key facts (pest, price quoted, appointment…), open follow-ups and, for cancel calls, the reason. |
+| See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. |
+| See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. Per rep: average score, trend, most-missed steps, and **Plays** a manager can assign. |
+| Review all calls and results | **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
+
+Beyond the brief, it's ready for a real team:
+
+- Invite people with a link.
+- Permission-based roles, with custom roles.
+- Calls belong to the rep who made them.
+- Reps only see their own calls.
+
+## How it works
+
+1. The browser uploads the recording to a private Supabase bucket with a
+   one-time signed URL, so files never pass through the API.
+2. In the background, Whisper transcribes the call. A language model labels
+   who's speaking, then classifies the call and extracts the outcome. The
+   scorecard and coaching steps run in parallel. Each stage is saved as it
+   finishes.
+3. All model output is strict JSON checked against a schema. Quotes are only
+   shown if they really appear in the transcript, and the grade maths is
+   deterministic.
+
+Key decisions:
+
+- **Accuracy you can check:** every score cites the employee's own words.
+- **Modules:** Calls, Scorecards and Coaching can each be switched on or off
+  per company.
+- **Pluggable AI:** the client speaks to any OpenAI-compatible provider.
+- **Private call data:** recordings and customer data never leave private
+  storage.
 
 ## Local setup
 
@@ -55,9 +96,14 @@ the sidebar):
 
 - **Appearance:** System, Light or Dark. Saved in a cookie on this browser.
 - **Profile:** your display name.
-- **Company:** the company name (owners only). The URL doesn't change.
+- **Company:** the company name (needs `company.manage`). The URL doesn't
+  change.
 - **Modules:** turn Scorecards and Coaching on or off for the whole company
-  (owners only). Calls is the base module and is always on.
+  (needs `modules.manage`). Calls is the base module and is always on.
+- **Team:** members and their roles. Invite someone by email and role, and
+  copy the link to send them (needs `team.manage`).
+- **Roles:** what each role can do, with custom roles (needs `roles.manage`).
+  Every company starts with Owner, Manager and Rep.
 
 ## Known limitations
 
@@ -90,9 +136,17 @@ the sidebar):
 
 ## Next steps
 
-1. Run every test call and tune prompts for accuracy, including speaker labels
-   (needs the paid AI tier, or several days of the free one).
-2. Deploy.
+1. Switch the AI provider to OpenAI (configuration only), then run every test
+   call and tune prompts for accuracy, including speaker labels, against a
+   small hand-checked answer key.
+2. Turn Leaks into assignable follow-up tasks, like Plays, and alert the
+   owner when one appears.
+3. Create leads from unbooked sales calls and show them in a pipeline.
+4. Link callers to customers in the PestLaunch CRM, and import calls
+   automatically from the phone system instead of uploading them.
+5. A durable job queue for processing, and paging on the server for large
+   call libraries.
+6. Deploy.
 
 ## Call data
 
