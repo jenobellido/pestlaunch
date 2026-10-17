@@ -6,6 +6,10 @@ const schema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   SUPABASE_SECRET_KEY: z.string().min(1),
   DATABASE_URL: z.url(),
+  /** Groq API key, used for transcription and call analysis. */
+  AI_API_KEY: z.string().min(1),
+  AI_TRANSCRIPTION_MODEL: z.string().min(1).default("whisper-large-v3"),
+  AI_CHAT_MODEL: z.string().min(1).default("openai/gpt-oss-120b"),
 });
 
 /** Server-side environment, validated once at startup. */

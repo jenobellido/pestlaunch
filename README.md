@@ -18,6 +18,9 @@ npm run db:migrate    # applies migrations in drizzle/
 npm run dev
 ```
 
+Put a Groq API key (https://console.groq.com) in `AI_API_KEY` in `.env.local`;
+transcription and call analysis use it.
+
 Open http://localhost:3000 and create an account. Locally, email confirmation
 is off and confirmation emails are caught by Mailpit at http://127.0.0.1:56424.
 
@@ -45,8 +48,16 @@ Supabase projects on the default 543xx ports.
 
 ## Known limitations
 
-- Calls can't be processed yet: transcription, call analysis, scoring and
-  coaching are still placeholders.
+- Calls are transcribed, but call analysis, scoring and coaching are still
+  placeholders, so every call ends as "failed" after its transcript is saved.
+- Speaker labels come from a language model reading the transcript, not from
+  the audio, so they're occasionally swapped, mostly where two people talk
+  over each other. When a segment is split between speakers, the split's
+  timestamps are estimated from text length.
+- Groq's free tier allows 8,000 chat tokens a minute. A 20-minute call takes
+  about a minute to label because requests wait out the limit. The paid tier
+  removes this. The free tier also caps audio files at 25 MB (the app accepts
+  up to 50 MB).
 - Calls can be deleted through the API (`DELETE /api/[tenant]/calls/[id]`),
   but there's no delete button in the UI yet.
 - Processing runs inside the upload request. Long recordings will hit
@@ -55,11 +66,10 @@ Supabase projects on the default 543xx ports.
 
 ## Next steps
 
-1. Transcription with speaker labels.
-2. Call type and outcome, scorecard grading with evidence quotes, coaching.
-3. Process in the background and show progress in the UI.
-4. Run every test call and tune prompts for accuracy.
-5. Deploy.
+1. Call type and outcome, scorecard grading with evidence quotes, coaching.
+2. Process in the background and show progress in the UI.
+3. Run every test call and tune prompts for accuracy, including speaker labels.
+4. Deploy.
 
 ## Call data
 

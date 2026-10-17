@@ -26,9 +26,7 @@ export function ResolutionBadge({ resolution }: { resolution: CallResolution }) 
   return <Badge dot={r.dot}>{r.label}</Badge>;
 }
 
-export function formatDuration(sec: number) {
-  return `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
-}
+export { formatTimestamp as formatDuration } from "../lib/format";
 
 export function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });

@@ -1,5 +1,7 @@
+import { Children } from "react";
 import Link from "next/link";
 import { ArrowLeft, AudioLines } from "lucide-react";
+import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
 import { CALL_TYPE_LABELS } from "../config/call-types";
@@ -18,6 +20,8 @@ export function CallDetail({ call, children }: { call: CallRecord; children?: Re
     call.durationSec != null && formatDuration(call.durationSec),
     formatDate(call.createdAt),
   ].filter(Boolean);
+  // Panels can be switched off or not ready yet; without any, the call uses the full width.
+  const hasPanels = Children.toArray(children).length > 0;
 
   return (
     <PageStack>
@@ -45,7 +49,7 @@ export function CallDetail({ call, children }: { call: CallRecord; children?: Re
           {call.error}
         </p>
       )}
-      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_24rem]">
+      <div className={cn("grid items-start gap-6", hasPanels && "xl:grid-cols-[minmax(0,1fr)_24rem]")}>
         <div className="flex flex-col gap-6">
           {call.outcome && (
             <Card>
@@ -83,7 +87,7 @@ export function CallDetail({ call, children }: { call: CallRecord; children?: Re
             </Card>
           )}
         </div>
-        <aside className="flex flex-col gap-6 lg:sticky lg:top-6">{children}</aside>
+        {hasPanels && <aside className="flex flex-col gap-6 xl:sticky xl:top-6">{children}</aside>}
       </div>
     </PageStack>
   );
