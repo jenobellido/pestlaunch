@@ -4,6 +4,7 @@ import { and, asc, count, eq, gt, ne, sql } from "drizzle-orm";
 import { authUsers } from "drizzle-orm/supabase";
 import { db, schema } from "@/core/db";
 import { ALL_PERMISSIONS, type Permission } from "./permissions";
+import { canGrantRole } from "./rules";
 import { toRole } from "./tenant-repository";
 import type { Role } from "./types";
 
@@ -28,18 +29,6 @@ export interface Invite {
   role: Role;
   token: string;
   expiresAt: string;
-}
-
-// ---- Rules -------------------------------------------------------------------------
-
-/**
- * Nobody can hand out more than they have: a role may only be granted by someone holding all
- * of its permissions, and only an owner can grant the owner role. This stops a manager with
- * "team.manage" from promoting themselves or anyone else above their own level.
- */
-export function canGrantRole(granter: Role, role: Role) {
-  if (role.isOwner) return granter.isOwner;
-  return role.permissions.every((p) => granter.permissions.includes(p));
 }
 
 async function ownerCount(tenantId: string) {

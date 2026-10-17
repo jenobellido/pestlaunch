@@ -1,7 +1,8 @@
 export type { Role, Tenant } from "./types";
 export type { TenantAccess, TenantAccessResult } from "./access";
-export { can, checkTenantAccess, requireTenantAccess } from "./access";
+export { checkTenantAccess, requireTenantAccess } from "./access";
 export { ALL_PERMISSIONS, isPermission, PERMISSIONS, type Permission } from "./permissions";
+export { can, canGrantRole } from "./rules";
 export {
   createTenantForOwner,
   getTenantBySlug,
@@ -12,7 +13,6 @@ export {
 } from "./tenant-repository";
 export {
   acceptInvite,
-  canGrantRole,
   createInvite,
   createRole,
   deleteRole,

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { generateObject, transcribeAudio, type WhisperSegment } from "@/core/ai";
 import type { Speaker, TranscriptSegment } from "@/core/calls";
 import { formatTimestamp } from "../lib/format";
+import { countWords, isExactSplit, isSpeech, MIN_WORDS, mergeTurns, splitSegment } from "../lib/transcript";
 
 export interface TranscriptionResult {
   durationSec: number;
@@ -15,17 +16,6 @@ const VOCABULARY =
   "Termites, rodents, mice, roaches, ants, spiders, mosquitoes, bed bugs, wasps, " +
   "pest-free, quarterly service, re-service, initial service, technician, inspection, treatment, " +
   "recurring plan, autopay, invoice, cancellation.";
-
-/**
- * Whisper invents text for silence and hold music (often "Thank you."). It marks those
- * segments with a high no-speech probability: real speech in the test calls stays under
- * 0.25, a silent file scores 0.7. It can also place segments past the end of the audio.
- */
-function isSpeech(s: WhisperSegment, duration: number) {
-  if (!s.text.trim()) return false;
-  if (duration > 0 && s.start >= duration) return false;
-  return (s.no_speech_prob ?? 0) <= 0.5;
-}
 
 const SPEAKER = z.enum(["employee", "customer", "unknown"]);
 
@@ -58,9 +48,6 @@ Rules:
 - Use the conversation to decide: who asks for the address and offers appointments is the employee; who describes the pest problem at their home is the customer.
 - The transcription sometimes puts two speakers' words on one line. Only then, add that line to "splits" with its exact words, in order, cut into consecutive pieces with a speaker each. Don't change, add or drop any words. Most calls need no splits.`;
 
-/** Fewer words than this means the recording has no real conversation in it. */
-const MIN_WORDS = 5;
-
 /** Lines per labelling request. Smaller requests come back complete and valid more reliably. */
 const CHUNK = 40;
 /** Lines from the start of the call shown with every chunk: the greeting reveals who's who. */
@@ -72,8 +59,6 @@ const CONCURRENCY = 2;
 
 const numbered = (segments: WhisperSegment[], from: number) =>
   segments.map((s, i) => `[${from + i}] (${formatTimestamp(s.start)}) ${s.text.trim()}`).join("\n");
-
-const words = (text: string) => text.toLowerCase().replace(/[^a-z0-9']+/g, " ").trim();
 
 /** One line's speaker, or several pieces when it holds more than one turn. */
 type LineLabel = { speaker: Speaker; pieces?: { speaker: Speaker; text: string }[] };
@@ -100,9 +85,9 @@ async function labelChunk(segments: WhisperSegment[], from: number): Promise<Map
   for (const s of splits) {
     const original = segments[s.line];
     const label = labels.get(s.line);
-    if (!original || !label || !inChunk(s.line) || s.pieces.length < 2) continue;
+    if (!original || !label || !inChunk(s.line)) continue;
     // Accept a split only if its pieces are exactly the line's words, so nothing is invented.
-    if (words(s.pieces.map((p) => p.text).join(" ")) === words(original.text)) label.pieces = s.pieces;
+    if (isExactSplit(s.pieces, original.text)) label.pieces = s.pieces;
   }
   return labels;
 }
@@ -119,32 +104,8 @@ async function labelSpeakers(segments: WhisperSegment[]): Promise<TranscriptSegm
   return segments.flatMap((s, i) => {
     const label = labels.get(i) ?? { speaker: "unknown" as const };
     const text = s.text.trim();
-    if (!label.pieces) return [{ speaker: label.speaker, start: s.start, end: s.end, text }];
-    // Whisper has no timestamps inside a segment, so share its time out by text length.
-    const total = label.pieces.reduce((n, p) => n + p.text.length, 0) || 1;
-    let at = s.start;
-    return label.pieces.map((p) => {
-      const end = at + ((s.end - s.start) * p.text.length) / total;
-      const piece = { speaker: p.speaker, start: at, end, text: p.text.trim() };
-      at = end;
-      return piece;
-    });
+    return label.pieces ? splitSegment(s, label.pieces) : [{ speaker: label.speaker, start: s.start, end: s.end, text }];
   });
-}
-
-/** Joins consecutive lines from the same speaker into one turn, up to ~30s so timestamps stay useful. */
-function mergeTurns(segments: TranscriptSegment[]): TranscriptSegment[] {
-  const turns: TranscriptSegment[] = [];
-  for (const s of segments) {
-    const last = turns.at(-1);
-    if (last && last.speaker === s.speaker && s.start - last.end < 2 && s.end - last.start <= 30) {
-      last.end = s.end;
-      last.text = `${last.text} ${s.text}`;
-    } else {
-      turns.push({ ...s });
-    }
-  }
-  return turns;
 }
 
 /** Speech to text with speaker labels (employee vs customer). */
@@ -155,8 +116,7 @@ export async function transcribe(audio: File): Promise<TranscriptionResult> {
     .map((s) => (whisper.duration > 0 ? { ...s, end: Math.min(s.end, whisper.duration) } : s));
   // On silence Whisper can still return a confident "Thank you.", so judge by the whole call:
   // a real phone conversation has more than a handful of words.
-  const wordCount = speech.reduce((n, s) => n + s.text.trim().split(/\s+/).length, 0);
-  if (wordCount < MIN_WORDS) {
+  if (countWords(speech) < MIN_WORDS) {
     throw new Error("No conversation was found in this recording. Check it's a phone call with people talking.");
   }
 
