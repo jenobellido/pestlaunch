@@ -2,13 +2,8 @@ import { Check, ClipboardCheck, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle } from "@/shared/ui/card";
 import { SCORECARDS } from "../config/scorecards";
-import type { Grade, ScorecardResult } from "../model/types";
-
-const GRADE: Record<Grade, { label: string; badge: string; bar: string }> = {
-  gold: { label: "Gold Standard", badge: "bg-orange text-on-orange", bar: "bg-orange" },
-  green: { label: "Green Standard", badge: "bg-badge-success text-on-badge-success", bar: "bg-accent" },
-  below: { label: "Below Standard", badge: "bg-badge-danger text-on-badge-danger", bar: "bg-danger" },
-};
+import type { ScorecardResult } from "../model/types";
+import { GRADE } from "./grade-style";
 
 export function ScorecardPanel({ result }: { result: ScorecardResult | null | undefined }) {
   if (!result)

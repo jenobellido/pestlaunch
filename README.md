@@ -70,10 +70,11 @@ the sidebar):
   20-minute call takes about 4 minutes, mostly waiting out the limit. The paid tier
   removes this. The free tier also caps audio files at 25 MB (the app accepts
   up to 50 MB).
-- Calls can be deleted through the API (`DELETE /api/[tenant]/calls/[id]`),
-  but there's no delete button in the UI yet.
-- Processing runs inside the upload request. Long recordings will hit
+- Processing runs inside the upload request, so the upload panel asks you to
+  keep the tab open until the call is ready. Long recordings will hit
   serverless time limits once deployed.
+- Search and filters on the call library run in the browser over every call.
+  That's fine for hundreds of calls; thousands will need paging on the server.
 - The Coaching page is a placeholder; per-employee trends aren't built.
 - There's no way to invite teammates yet, so every workspace has one member,
   its owner. The manager and rep views of Settings (read-only company name

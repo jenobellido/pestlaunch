@@ -14,8 +14,9 @@ app/                     Routing only: thin pages, layouts, route handlers
   [tenant]/              UI, e.g. /noble-pest/calls
     _components/         TenantNav (enabled modules, Settings, user menu), PageSkeleton
     _lib/                requireModule (auth + membership + module check)
-    calls/               Call library + upload
-    calls/[callId]/      Call detail; composes panels from other modules
+    calls/               Call library + upload; adds the score column when scorecards is on
+    calls/[callId]/      Call detail; composes panels from other modules, passes the
+                         recording URL and whether the user may delete
     scorecards/          The scoring standards
     coaching/            Employee coaching
     settings/            Appearance, profile, company name, module switches
@@ -169,6 +170,18 @@ and mint accent pills, in dark and light.
 - Module nav items carry an icon (`nav[].icon` in `module.ts`), shown in the
   sidebar and the mobile bottom bar.
 
+## Calls UI
+
+| Page | What it does |
+| --- | --- |
+| Call library | Drag-and-drop upload, checked in the browser (type, 50 MB) before anything is sent. Progress shows the upload and processing steps with a timer, warns before leaving the page, and refreshes the list so the new call shows as processing. Four headline numbers (calls, win rate, open follow-ups, talk time). Filter by result and search by name, type, employee or summary, all in the browser. |
+| Call detail | Outcome first, then the scorecard and coaching panels (a sticky side column on wide screens), then the recording. The player sits on a speaker timeline (who talked when, and each side's share of talk time) and stays in view while the transcript scrolls. Clicking a line's time plays from there, the playing line is highlighted, and the transcript can be searched. Owners and managers can delete a call from here. A processing call refreshes itself. |
+
+The calls module never imports scorecards. The list's score column comes in
+through `CallsPage`'s `score` prop, which the app page fills with
+`ScoreBadge` from the scorecards module. The recording plays from a
+short-lived signed URL (`getCallRecordingUrl`), so the bucket stays private.
+
 ## Call types and scorecards
 
 From the call manuals in `../docs/call-manuals/`:
@@ -246,9 +259,10 @@ Managers and reps see the company name and module switches read-only.
 In place: auth, tenancy, module gating, database, scorecard data and grading
 maths, the UI for every page (Freehold design), the Settings page (theme,
 profile, company name, module switches), a branded app icon and 404 page,
-and call storage: uploads go to the private bucket, calls are saved in
-Postgres, and calls can be deleted through the API. Transcription with speaker labels, call type and outcome
-analysis, and scorecard grading work.
+the call library and call detail (filters, stats, a player synced to the
+transcript, delete), and call storage: uploads go to the private bucket and
+calls are saved in Postgres. Transcription with speaker labels, call type and
+outcome analysis, and scorecard grading work.
 
 Still a placeholder that throws: `coachingStep`. With the coaching module on,
 a call processed in the app ends as `failed` after its transcript, outcome
