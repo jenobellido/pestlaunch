@@ -135,7 +135,7 @@ async function generateWithRetries<T>(options: GenerateObjectOptions<T>, model: 
       // Our own shape check (no status), or Groq rejecting output that broke the schema.
       const invalidOutput =
         err instanceof AiError && (err.status === undefined || (err.status === 400 && /validate JSON|match the expected schema|failed_generation/i.test(err.message)));
-      if (!invalidOutput || attempt === 3) throw err;
+      if (!invalidOutput || attempt === 4) throw err;
     }
   }
 }

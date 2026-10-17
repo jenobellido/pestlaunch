@@ -23,11 +23,13 @@ const RESOLUTIONS = [
 const analysisSchema = z.object({
   callType: z.enum(CALL_TYPES),
   employeeName: z.string().nullable().describe("The employee's first name as said in the call, or null"),
-  summary: z.string().describe("2 to 3 plain sentences: why they called, what happened, how it ended"),
+  summary: z
+    .string()
+    .describe("2 to 3 plain sentences: who called whom and why, what happened, how it ended"),
   resolution: z.enum(RESOLUTIONS),
   details: z
     .array(z.object({ label: z.string(), value: z.string() }))
-    .describe("Key facts stated in the call, most important first, at most 8"),
+    .describe("Key facts stated in the call, most important first, at most 6, no repeats"),
   followUps: z.array(z.string()).describe("Concrete actions the office still has to take; empty if none"),
 });
 
@@ -50,9 +52,11 @@ Resolution (how the call ended):
 - follow_up_needed: the company still owes an action: a callback, manager approval, sending something, waiting on the customer.
 - unresolved: the caller's need wasn't met and no next step was agreed (e.g. declined the quote, call dropped).
 
-Details: only facts actually said in the call, never guesses. Use these labels when they apply: Pest, Service plan, Price quoted, Appointment, Technician, Cancellation reason, Retention offer, Payment, Customer name, Service address. Keep each value short. Write dates and times the way they were said (e.g. "Tuesday the 22nd, 1-3 pm"); never add a year, weekday or date that wasn't said.
+Direction: decide who placed the call. Inbound calls usually open with the employee answering with the company name; on outbound calls the employee introduces themselves after the customer says "hello". Say it right in the summary ("The employee called the customer to...").
 
-Follow-ups: only actions the employee promised or that clearly remain open in the call (e.g. "send the service agreement", "call back after manager approval"). Don't invent routine tasks. Leave it empty when nothing is left to do.
+Details: only facts actually said in the call, never guesses. Each fact once; don't repeat the summary, the appointment in other words, or describe the employee's manner (no "Apology" or "Confirmation" entries). Use these labels when they apply: Pest, Service plan, Price quoted, Appointment, Technician, Cancellation reason, Retention offer, Payment, Customer name, Service address. Keep each value short. Write dates and times the way they were said (e.g. "Tuesday the 22nd, 1-3 pm"); never add a year, weekday or date that wasn't said.
+
+Follow-ups: only actions the employee promised or that clearly remain open in the call (e.g. "send the service agreement", "call back after manager approval", "confirm the appointment once the customer checks their schedule"). Don't invent routine tasks. Leave it empty when nothing is left to do, but a "follow_up_needed" resolution always has at least one.
 
 The transcript speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
 

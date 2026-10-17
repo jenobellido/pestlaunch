@@ -89,7 +89,8 @@ async function labelChunk(segments: WhisperSegment[], from: number): Promise<Map
     name: "speaker_labels",
     schema: speakerLabels,
     system: SPEAKER_SYSTEM,
-    reasoningEffort: "low",
+    // Low effort mislabelled turns on the smaller fallback model; labels feed every later step.
+    reasoningEffort: "medium",
     prompt: [...context, `Label these lines (${from} to ${from + chunk.length - 1}):\n${numbered(chunk, from)}`].join("\n\n"),
   });
 

@@ -30,7 +30,7 @@ const SYSTEM = `You grade pest control phone calls against the company's call sc
 
 How to grade:
 - Judge only what the employee says. Each item passes only if the call clearly shows the behaviour in its criteria; the exact wording doesn't matter, the intent does.
-- Be strict but fair. A passing evidence quote must be copied exactly from the transcript, ideally the employee's own words. If you can't quote it, it didn't pass.
+- Be strict but fair. A passing evidence quote must be copied exactly from the transcript and must be the employee's own words, never the customer's (e.g. the customer saying "thank you" doesn't mean the employee thanked them). If you can't quote the employee, it didn't pass.
 - An item that doesn't fit the call can still be judged on its intent (e.g. with no cost, agreeing to the plan is the close).
 - Grade every numbered item exactly once.
 - The speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
@@ -59,7 +59,10 @@ export async function gradeCall(card: Scorecard, transcript: readonly Transcript
   });
 
   const byItem = new Map(graded.items.map((g) => [g.item, g]));
-  const transcriptWords = words(transcript.map((s) => s.text).join(" "));
+  // Points are for what the employee says, so a quote must come from their lines (or unlabelled
+  // ones). A quote found only in the customer's lines doesn't count.
+  const employeeWords = words(transcript.filter((s) => s.speaker !== "customer").map((s) => s.text).join(" "));
+  const customerWords = words(transcript.filter((s) => s.speaker === "customer").map((s) => s.text).join(" "));
   let n = 0;
 
   const items: ScorecardItemResult[] = card.sections.flatMap((section) =>
@@ -81,7 +84,17 @@ export async function gradeCall(card: Scorecard, transcript: readonly Transcript
       }
       // Keep a quote only if it's really in the transcript, so every quote shown can be trusted.
       const quote = g.evidence?.trim();
-      const verified = quote && words(quote) && transcriptWords.includes(words(quote)) ? quote : null;
+      const q = quote ? words(quote) : "";
+      if (g.passed && q && !employeeWords.includes(q) && customerWords.includes(q)) {
+        return {
+          section: section.title,
+          item: it.name,
+          passed: false,
+          evidence: null,
+          reason: "Only the customer said this; the employee didn't.",
+        };
+      }
+      const verified = q && employeeWords.includes(q) ? quote! : null;
       return { section: section.title, item: it.name, passed: g.passed, evidence: verified, reason: g.reason.trim() };
     }),
   );

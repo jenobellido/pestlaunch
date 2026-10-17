@@ -73,7 +73,8 @@ export async function coachCall(callType: CallType, transcript: readonly Transcr
   });
 
   // Keep a quote only if it's really in the transcript, so every quote shown can be trusted.
-  const transcriptWords = words(transcript.map((s) => s.text).join(" "));
+  // Feedback quotes the employee, so only their lines (or unlabelled ones) count.
+  const transcriptWords = words(transcript.filter((s) => s.speaker !== "customer").map((s) => s.text).join(" "));
   const verified = (quote: string | null) => {
     const q = quote?.trim();
     return q && words(q) && transcriptWords.includes(words(q)) ? q : null;
