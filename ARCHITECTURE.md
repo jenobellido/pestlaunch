@@ -143,7 +143,15 @@ error:
    phone menu option. The prompt asks for facts said in the call only, with
    dates as spoken and no invented follow-ups.
 3. **Module steps**: run the `CallAnalysisStep` of every enabled module
-   (scorecards, coaching). Each result is stored under `analyses[moduleId]`.
+   (scorecards, coaching) in parallel. Each result is stored under
+   `analyses[moduleId]`.
+   - Scoring: see "Call types and scorecards" below.
+   - Coaching (`modules/coaching/server/coaching-step.ts`): grounded in the
+     manuals' four-step call process plus notes for sales, retention and
+     re-service calls. Returns up to 3 strengths (only things the employee
+     actually did), up to 3 improvements, each with a quote and a line the
+     employee could say next time, and one focus for the next call. Quotes are
+     kept only if they appear in the transcript.
 
 The calls module never imports scorecards or coaching. The route asks
 `registry.server.ts` for the enabled steps and passes them in. Turning a module
@@ -247,9 +255,9 @@ In place: auth, tenancy, module gating, database, scorecard data and grading
 maths, the UI for every page (Freehold design), the Settings page (theme,
 profile, company name, module switches), a branded app icon and 404 page,
 and call storage: uploads go to the private bucket, calls are saved in
-Postgres, and calls can be deleted through the API. Transcription with speaker labels, call type and outcome
-analysis, and scorecard grading work.
+Postgres, and calls can be deleted through the API. The whole pipeline
+works: transcription with speaker labels, call type and outcome analysis,
+scorecard grading and coaching, so calls end as `ready`.
 
-Still a placeholder that throws: `coachingStep`. With the coaching module on,
-a call processed in the app ends as `failed` after its transcript, outcome
-and score are saved.
+Not built yet: background processing (processing runs inside the upload
+request) and the per-employee Coaching page.

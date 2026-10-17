@@ -59,9 +59,6 @@ the sidebar):
 
 ## Known limitations
 
-- Calls are transcribed, analyzed and graded, but coaching is still a
-  placeholder, so with the coaching module on a call ends as "failed" after
-  its transcript, outcome and score are saved.
 - Speaker labels come from a language model reading the transcript, not from
   the audio, so they're occasionally swapped, mostly where two people talk
   over each other. When a segment is split between speakers, the split's
@@ -82,9 +79,9 @@ the sidebar):
 
 ## Next steps
 
-1. Coaching.
-2. Process in the background and show progress in the UI.
-3. Run every test call and tune prompts for accuracy, including speaker labels.
+1. Process in the background and show progress in the UI.
+2. Run every test call and tune prompts for accuracy, including speaker labels.
+3. Per-employee coaching page: scores and recurring feedback over time.
 4. Deploy.
 
 ## Call data
