@@ -142,7 +142,21 @@ export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, c
     >
         {call.outcome && (
           <Card className="min-w-0 xl:col-start-1">
-            <CardTitle>Outcome</CardTitle>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <CardTitle>Outcome</CardTitle>
+              {call.outcome.cancelReason && (
+                <span
+                  className={cn(
+                    "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                    call.outcome.resolution === "retained"
+                      ? "bg-badge-success text-on-badge-success"
+                      : "bg-badge-danger text-on-badge-danger",
+                  )}
+                >
+                  {call.outcome.resolution === "retained" ? "Saved" : "Lost"} · {call.outcome.cancelReason}
+                </span>
+              )}
+            </div>
             <p className="mt-2 leading-relaxed text-fg/90">{call.outcome.summary}</p>
             {call.outcome.details.length > 0 && (
               <dl className="mt-5 grid gap-3 sm:grid-cols-2">
