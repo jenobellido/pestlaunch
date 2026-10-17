@@ -78,7 +78,9 @@ the sidebar):
   worker) would resume automatically.
 - Search and filters on the call library run in the browser over every call.
   That's fine for hundreds of calls; thousands will need paging on the server.
-- The Coaching page is a placeholder; per-employee trends aren't built.
+- The Coaching page groups calls by the employee name heard in the call, so
+  a misheard name splits one person into two. Linking calls to team members
+  needs teammate accounts first.
 - There's no way to invite teammates yet, so every workspace has one member,
   its owner. The manager and rep views of Settings (read-only company name
   and modules) are built but can't be reached without editing the database.
@@ -88,8 +90,7 @@ the sidebar):
 
 1. Run every test call and tune prompts for accuracy, including speaker labels
    (needs the paid AI tier, or several days of the free one).
-2. Per-employee coaching page: scores and recurring feedback over time.
-3. Deploy.
+2. Deploy.
 
 ## Call data
 

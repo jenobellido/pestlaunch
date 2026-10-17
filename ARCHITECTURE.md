@@ -300,4 +300,9 @@ coaching, so calls end as `ready`.
 Calls process in the background with progress shown, stalled calls are
 detected, and failed calls can be retried.
 
-Not built yet: the per-employee Coaching page.
+The Coaching page (`modules/coaching/ui/coaching-page.tsx`) groups ready
+calls by employee: average share of scorecard points (scorecards differ in
+size), trend of the newer half of calls vs the older half, grade counts, the
+three most-missed steps, the latest focus and recent calls. The app layer
+(`app/[tenant]/coaching/page.tsx`) builds a plain `CoachingCall` list from
+the calls and scorecards modules, so the coaching module imports neither.
