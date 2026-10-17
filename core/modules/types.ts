@@ -6,6 +6,8 @@ export interface ModuleNavItem {
   label: string;
   /** Path relative to the tenant root, e.g. "/customers". */
   href: string;
+  /** Shown in the sidebar and the mobile nav. */
+  icon?: React.ComponentType<{ className?: string }>;
 }
 
 export interface ModuleManifest<Id extends string = string> {

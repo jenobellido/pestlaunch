@@ -1,31 +1,45 @@
-import { PageHeader } from "@/shared/ui/page-header";
+import { Check, ClipboardCheck } from "lucide-react";
+import { Badge, Card, CardTitle } from "@/shared/ui/card";
+import { PageHeader, PageStack } from "@/shared/ui/page-header";
 import { SCORECARDS } from "../config/scorecards";
 import { maxPoints } from "../model/grade";
 
 export function ScorecardsPage() {
   return (
-    <>
-      <PageHeader title="Scorecards" />
-      <div className="grid gap-8 md:grid-cols-3">
+    <PageStack>
+      <PageHeader
+        title="Scorecards"
+        description="What every call is graded against, from the PestLaunch call manuals."
+        icon={ClipboardCheck}
+      />
+      <div className="grid items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3">
         {Object.values(SCORECARDS).map((card) => (
-          <section key={card.id}>
-            <h2 className="font-semibold">{card.name}</h2>
-            <p className="mb-3 text-sm text-zinc-500">
-              Gold {card.thresholds.gold}/{maxPoints(card)} · Green {card.thresholds.green}+
-            </p>
-            {card.sections.map((s) => (
-              <div key={s.title} className="mb-3 text-sm">
-                <p className="font-medium">{s.title}</p>
-                <ul className="list-disc pl-5 text-zinc-600 dark:text-zinc-400">
-                  {s.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </section>
+          <Card key={card.id}>
+            <CardTitle>{card.name}</CardTitle>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Badge dot="bg-orange">
+                Gold {card.thresholds.gold}/{maxPoints(card)}
+              </Badge>
+              <Badge dot="bg-accent">Green {card.thresholds.green}+</Badge>
+            </div>
+            <div className="mt-6 space-y-5">
+              {card.sections.map((s) => (
+                <div key={s.title}>
+                  <p className="text-xs text-muted">{s.title}</p>
+                  <ul className="mt-2 space-y-2 text-sm">
+                    {s.items.map((item) => (
+                      <li key={item} className="flex gap-2.5">
+                        <Check className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
+                        <span className="text-fg/90">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </Card>
         ))}
       </div>
-    </>
+    </PageStack>
   );
 }

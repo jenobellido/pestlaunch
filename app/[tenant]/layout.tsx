@@ -1,15 +1,13 @@
 import { Suspense } from "react";
-import { TenantNav } from "./_components/tenant-nav";
+import { TenantNav, TenantNavSkeleton } from "./_components/tenant-nav";
 
 export default function TenantLayout({ children, params }: LayoutProps<"/[tenant]">) {
   return (
-    <div className="flex flex-1">
-      <aside className="sticky top-0 h-screen w-56 shrink-0 border-r border-black/10 p-4 dark:border-white/10">
-        <Suspense fallback={null}>
-          <TenantNav params={params} />
-        </Suspense>
-      </aside>
-      <main className="flex-1 p-8">
+    <div className="flex min-h-dvh flex-1 gap-6 bg-panel p-4 pb-24 sm:p-6 sm:pb-24 md:pb-6">
+      <Suspense fallback={<TenantNavSkeleton />}>
+        <TenantNav params={params} />
+      </Suspense>
+      <main className="min-w-0 flex-1">
         <Suspense fallback={null}>{children}</Suspense>
       </main>
     </div>
