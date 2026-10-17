@@ -15,6 +15,8 @@ export class AiError extends Error {
     message: string,
     /** HTTP status from the API, when the error came from a response. */
     readonly status?: number,
+    /** Set when a usage limit was reached: how long until the model can be used again. */
+    readonly retryAfterMs?: number,
   ) {
     super(message);
   }
@@ -38,6 +40,7 @@ async function request(path: string, init: RequestInit): Promise<Response> {
       throw new AiError(
         `The AI service's usage limit has been reached. It resets in about ${minutes} minute${minutes === 1 ? "" : "s"}; retry the call then.`,
         429,
+        waitMs,
       );
     }
     const retryable = res.status === 429 || res.status >= 500;
@@ -93,13 +96,45 @@ export async function transcribeAudio(audio: File, options: { prompt?: string } 
  * occasionally produces output that fails validation, so that is retried.
  */
 export async function generateObject<T>(options: GenerateObjectOptions<T>): Promise<T> {
+  const models = chatModels();
+  for (const [i, model] of models.entries()) {
+    try {
+      return await generateWithRetries(options, model);
+    } catch (err) {
+      // Usage limit on this model (e.g. the free daily tokens): remember it, use the next one.
+      const limited = err instanceof AiError && err.retryAfterMs !== undefined;
+      if (!limited || i === models.length - 1) throw err;
+      limitedUntil.set(model, Date.now() + err.retryAfterMs!);
+      console.warn(`[ai] ${model} hit its usage limit; using ${models[i + 1]} instead`);
+    }
+  }
+  throw new AiError("No AI model is available right now.");
+}
+
+/**
+ * Models that have hit a usage limit, until when. Kept per server process, so later calls
+ * go straight to the fallback instead of waiting on another rejection first.
+ */
+const globalForAi = globalThis as unknown as { aiLimitedUntil?: Map<string, number> };
+const limitedUntil = (globalForAi.aiLimitedUntil ??= new Map<string, number>());
+
+/** The main chat model, then the fallback. A model still inside a known limit goes last. */
+function chatModels() {
+  const all = [serverEnv.AI_CHAT_MODEL, serverEnv.AI_CHAT_FALLBACK_MODEL].filter(
+    (m, i, list) => m.trim() !== "" && list.indexOf(m) === i,
+  );
+  const available = (m: string) => (limitedUntil.get(m) ?? 0) <= Date.now();
+  return [...all.filter(available), ...all.filter((m) => !available(m))];
+}
+
+async function generateWithRetries<T>(options: GenerateObjectOptions<T>, model: string): Promise<T> {
   for (let attempt = 1; ; attempt++) {
     try {
-      return await generateObjectOnce(options);
+      return await generateObjectOnce(options, model);
     } catch (err) {
       // Our own shape check (no status), or Groq rejecting output that broke the schema.
       const invalidOutput =
-        err instanceof AiError && (err.status === undefined || (err.status === 400 && /validate JSON/i.test(err.message)));
+        err instanceof AiError && (err.status === undefined || (err.status === 400 && /validate JSON|match the expected schema|failed_generation/i.test(err.message)));
       if (!invalidOutput || attempt === 3) throw err;
     }
   }
@@ -114,18 +149,15 @@ interface GenerateObjectOptions<T> {
   reasoningEffort?: "low" | "medium" | "high";
 }
 
-async function generateObjectOnce<T>({
-  name,
-  schema,
-  system,
-  prompt,
-  reasoningEffort = "medium",
-}: GenerateObjectOptions<T>): Promise<T> {
+async function generateObjectOnce<T>(
+  { name, schema, system, prompt, reasoningEffort = "medium" }: GenerateObjectOptions<T>,
+  model: string,
+): Promise<T> {
   const res = await request("/chat/completions", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: serverEnv.AI_CHAT_MODEL,
+      model,
       temperature: 0,
       reasoning_effort: reasoningEffort,
       messages: [

@@ -29,16 +29,23 @@ function isSpeech(s: WhisperSegment, duration: number) {
 
 const SPEAKER = z.enum(["employee", "customer", "unknown"]);
 
+// Flat on purpose: every line is just a number and a speaker, and the rare split lines are
+// listed separately. Smaller fallback models follow this shape far more reliably.
 const speakerLabels = z.object({
   lines: z.array(
     z.object({
       line: z.number().int().describe("The line number in brackets"),
       speaker: SPEAKER.describe("Who says this line, or most of it"),
-      split: z
-        .array(z.object({ speaker: SPEAKER, text: z.string() }))
-        .describe("Empty unless the line holds two speakers; then the line's exact words, in order, cut into pieces"),
     }),
   ),
+  splits: z
+    .array(
+      z.object({
+        line: z.number().int(),
+        pieces: z.array(z.object({ speaker: SPEAKER, text: z.string() })),
+      }),
+    )
+    .describe("Only lines that hold two speakers: the line's exact words, in order, cut into pieces. Usually empty"),
 });
 
 const SPEAKER_SYSTEM = `You label who is speaking in a phone call transcript from a pest control company.
@@ -49,7 +56,7 @@ Rules:
 - Label every numbered line in the "Label these lines" section exactly once, in order. Lines in the context sections are only there to help; don't label them.
 - "unknown" is only for recorded messages, phone menus, voicemail greetings and hold messages, or a third person who is neither.
 - Use the conversation to decide: who asks for the address and offers appointments is the employee; who describes the pest problem at their home is the customer.
-- The transcription sometimes puts two speakers' words on one line. Only then, fill "split" with that line's exact words, in order, cut into consecutive pieces with a speaker each. Don't change, add or drop any words. Otherwise leave "split" empty.`;
+- The transcription sometimes puts two speakers' words on one line. Only then, add that line to "splits" with its exact words, in order, cut into consecutive pieces with a speaker each. Don't change, add or drop any words. Most calls need no splits.`;
 
 /** Fewer words than this means the recording has no real conversation in it. */
 const MIN_WORDS = 5;
@@ -78,7 +85,7 @@ async function labelChunk(segments: WhisperSegment[], from: number): Promise<Map
   const overlapFrom = Math.max(OPENING, from - OVERLAP);
   if (from > overlapFrom) context.push(`Just before (context):\n${numbered(segments.slice(overlapFrom, from), overlapFrom)}`);
 
-  const { lines } = await generateObject({
+  const { lines, splits } = await generateObject({
     name: "speaker_labels",
     schema: speakerLabels,
     system: SPEAKER_SYSTEM,
@@ -86,14 +93,15 @@ async function labelChunk(segments: WhisperSegment[], from: number): Promise<Map
     prompt: [...context, `Label these lines (${from} to ${from + chunk.length - 1}):\n${numbered(chunk, from)}`].join("\n\n"),
   });
 
+  const inChunk = (line: number) => line >= from && line < from + chunk.length;
   const labels = new Map<number, LineLabel>();
-  for (const l of lines) {
-    const original = segments[l.line];
-    if (!original || l.line < from || l.line >= from + chunk.length) continue;
+  for (const l of lines) if (inChunk(l.line)) labels.set(l.line, { speaker: l.speaker });
+  for (const s of splits) {
+    const original = segments[s.line];
+    const label = labels.get(s.line);
+    if (!original || !label || !inChunk(s.line) || s.pieces.length < 2) continue;
     // Accept a split only if its pieces are exactly the line's words, so nothing is invented.
-    const validSplit =
-      l.split.length > 1 && words(l.split.map((p) => p.text).join(" ")) === words(original.text);
-    labels.set(l.line, { speaker: l.speaker, pieces: validSplit ? l.split : undefined });
+    if (words(s.pieces.map((p) => p.text).join(" ")) === words(original.text)) label.pieces = s.pieces;
   }
   return labels;
 }

@@ -66,8 +66,11 @@ the sidebar):
 - Groq's free tier allows 8,000 chat tokens a minute and 200,000 a day on
   `gpt-oss-120b`. A 20-minute call takes about 4 minutes, mostly waiting out
   the per-minute limit, and the daily limit covers only a handful of long
-  calls. When it's used up, calls fail with a message saying when to retry.
-  The paid Dev tier removes both limits. The free tier also caps audio files
+  calls. When it's used up, the app switches to `gpt-oss-20b`, which has its
+  own daily allowance; it gave the same type, outcome and score on a test
+  call but is a smaller model, so results may be less precise. When both are
+  used up, calls fail with a message saying when to retry. The paid Dev tier
+  removes these limits. The free tier also caps audio files
   at 25 MB (the app accepts up to 50 MB).
 - Processing runs in the background with Next's `after()`, not a durable job
   queue. If the server stops mid-way, the call shows as failed after 10

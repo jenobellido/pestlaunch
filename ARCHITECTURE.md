@@ -133,8 +133,13 @@ again, reusing its transcript when it has one. The retry claims the row
 with one conditional update, so two clicks can't start it twice.
 
 AI rate limits are retried using Retry-After. A wait longer than a minute
-(e.g. a daily token limit) fails the call at once with a message saying when
-to retry.
+(e.g. Groq's free daily token limit) moves the request to the fallback chat
+model (`AI_CHAT_FALLBACK_MODEL`, default `gpt-oss-20b`), and the server
+remembers the main model is limited until it resets, so later requests go
+straight to the fallback. If the fallback is limited too, the call fails at
+once with a message saying when to retry. The speaker-label schema is kept
+flat (a number and a speaker per line, splits listed separately) because the
+smaller model follows flat shapes more reliably.
 
 The pipeline downloads the recording and saves each stage as it finishes, so
 a failure keeps whatever already worked and sets status `failed` with the
