@@ -159,7 +159,10 @@ hasn't moved on for 10 minutes is shown as failed. `POST
 again, reusing its transcript when it has one. The retry claims the row
 with one conditional update, so two clicks can't start it twice.
 
-AI rate limits are retried using Retry-After. A wait longer than a minute
+Answers are also checked for completeness: grading must cover every
+scorecard item, and speaker labelling every line, or the request is retried.
+Without this, a model that stops early would make skipped items count as
+missed. AI rate limits are retried using Retry-After. A wait longer than a minute
 (e.g. Groq's free daily token limit) moves the request to the fallback chat
 model (`AI_CHAT_FALLBACK_MODEL`, default `gpt-oss-20b`), and the server
 remembers the main model is limited until it resets, so later requests go
@@ -210,6 +213,15 @@ error:
 The calls module never imports scorecards or coaching. The route asks
 `registry.server.ts` for the enabled steps and passes them in. Turning a module
 off for a tenant removes both its UI and its processing step.
+
+## Demo data
+
+`scripts/seed-demo.ts` (`npm run seed:demo -- <company>`) adds seven invented
+calls from `scripts/demo-calls.ts`, covering every call type and outcome, and
+runs them through the real pipeline minus transcription. It's for showing
+the app without exposing real recordings. Scripts import server code through
+`scripts/allow-server-only.cjs`, which points the `server-only` guard at an
+empty module outside Next.
 
 ## Overview dashboard
 

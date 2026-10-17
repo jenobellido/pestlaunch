@@ -51,10 +51,17 @@ function itemList(card: Scorecard) {
 }
 
 export async function gradeCall(card: Scorecard, transcript: readonly TranscriptSegment[]): Promise<ScorecardResult> {
+  const itemCount = maxPoints(card);
   const graded = await generateObject({
     name: "scorecard_grading",
     schema: gradingSchema,
     system: SYSTEM,
+    // A skipped item would otherwise count as missed, so an incomplete grading is retried.
+    check: ({ items }) => {
+      const seen = new Set(items.map((i) => i.item));
+      const missing = Array.from({ length: itemCount }, (_, n) => n).filter((n) => !seen.has(n));
+      return missing.length ? `items ${missing.join(", ")} weren't graded` : null;
+    },
     prompt: `Scorecard: ${card.name}\n${itemList(card)}\n\nTranscript:\n${transcriptText(transcript)}`,
   });
 
@@ -80,6 +87,7 @@ export async function gradeCall(card: Scorecard, transcript: readonly Transcript
         };
       }
       if (!g) {
+        // Unreachable after the completeness check, kept as a safe default.
         return { section: section.title, item: it.name, passed: false, evidence: null, reason: "Not assessed." };
       }
       // Keep a quote only if it's really in the transcript, so every quote shown can be trusted.

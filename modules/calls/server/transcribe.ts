@@ -89,6 +89,11 @@ async function labelChunk(segments: WhisperSegment[], from: number): Promise<Map
     name: "speaker_labels",
     schema: speakerLabels,
     system: SPEAKER_SYSTEM,
+    check: ({ lines: labelled }) => {
+      const seen = new Set(labelled.map((l) => l.line));
+      const missing = chunk.map((_, i) => from + i).filter((n) => !seen.has(n));
+      return missing.length ? `lines ${missing.join(", ")} weren't labelled` : null;
+    },
     // Low effort mislabelled turns on the smaller fallback model; labels feed every later step.
     reasoningEffort: "medium",
     prompt: [...context, `Label these lines (${from} to ${from + chunk.length - 1}):\n${numbered(chunk, from)}`].join("\n\n"),

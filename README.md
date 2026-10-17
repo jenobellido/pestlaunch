@@ -88,6 +88,7 @@ Supabase projects on the default 543xx ports.
 | `npm run db:migrate` | Apply pending migrations |
 | `npm run db:reset` | Wipe the local database and re-apply all migrations |
 | `npm run db:studio` | Drizzle Studio |
+| `npm run seed:demo -- <company>` | Adds 7 invented demo calls (every call type and outcome) to a company and runs them through analysis, scoring and coaching. No real call data; no audio. |
 
 ## Settings
 

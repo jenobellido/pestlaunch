@@ -162,6 +162,11 @@ interface GenerateObjectOptions<T> {
   prompt: string;
   /** How much the model thinks first. Thinking tokens count against rate limits; use "low" for simple tasks. */
   reasoningEffort?: "low" | "medium" | "high";
+  /**
+   * Checks the answer beyond its shape, e.g. that every item was graded. Return a problem to
+   * have the request retried like any other invalid output, or null when it's complete.
+   */
+  check?: (data: T) => string | null;
 }
 
 /** The JSON schema for strict structured output, without the "$schema" key some APIs reject. */
@@ -171,7 +176,7 @@ function strictSchema(schema: z.ZodType) {
 }
 
 async function generateObjectOnce<T>(
-  { name, schema, system, prompt, reasoningEffort = "medium" }: GenerateObjectOptions<T>,
+  { name, schema, system, prompt, reasoningEffort = "medium", check }: GenerateObjectOptions<T>,
   model: string,
 ): Promise<T> {
   const res = await request("/chat/completions", {
@@ -202,5 +207,7 @@ async function generateObjectOnce<T>(
   }
   const parsed = schema.safeParse(data);
   if (!parsed.success) throw new AiError(`The AI answer didn't match the expected shape: ${parsed.error.message}`);
+  const problem = check?.(parsed.data);
+  if (problem) throw new AiError(`The AI answer was incomplete: ${problem}`);
   return parsed.data;
 }
