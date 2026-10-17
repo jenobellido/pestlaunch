@@ -144,8 +144,11 @@ export function UploadCallForm({ tenantSlug }: { tenantSlug: string }) {
       await uploadRecordingWithToken(upload.path, upload.token, file);
 
       setStage("processing");
-      const call = await api<{ id: string }>("/calls", { path: upload.path, fileName: file.name });
-      setResult({ tone: "success", message: `${file.name} is ready.`, callId: call.id });
+      const call = await api<{ id: string; status: string }>("/calls", { path: upload.path, fileName: file.name });
+      // With background processing the call comes back still processing and fills in later.
+      const message =
+        call.status === "processing" ? `${file.name} is uploaded and processing.` : `${file.name} is ready.`;
+      setResult({ tone: "success", message, callId: call.id });
       clear();
     } catch (err) {
       setResult({

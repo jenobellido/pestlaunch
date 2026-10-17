@@ -1,7 +1,7 @@
 import { CallsPage } from "@/modules/calls";
 import { isModuleEnabled } from "@/modules/registry";
-import { ScoreBadge } from "@/modules/scorecards";
 import { requireModule } from "../_lib/require-module";
+import { ScoreBadge } from "./_components/score-badge";
 
 export default async function Page({ params }: PageProps<"/[tenant]/calls">) {
   const { tenant } = await requireModule(params, "calls");

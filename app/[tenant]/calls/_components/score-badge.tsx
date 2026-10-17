@@ -1,8 +1,13 @@
+import { getScorecardResult, type Grade } from "@/modules/scorecards";
 import { cn } from "@/shared/lib/cn";
-import { GRADE } from "./grade-style";
-import { getScorecardResult } from "./scorecard-panel";
 
-/** A call's points and grade, compact enough for a list row. */
+const GRADE: Record<Grade, { label: string; dot: string }> = {
+  gold: { label: "Gold Standard", dot: "bg-orange" },
+  green: { label: "Green Standard", dot: "bg-accent" },
+  below: { label: "Below Standard", dot: "bg-danger" },
+};
+
+/** A call's points and grade, compact enough for a row in the call library. */
 export function ScoreBadge({ analyses }: { analyses: Record<string, unknown> }) {
   const result = getScorecardResult(analyses);
   if (!result) return <span className="text-sm text-muted">Not scored</span>;

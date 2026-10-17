@@ -186,8 +186,9 @@ and mint accent pills, in dark and light.
 | Call detail | Outcome first, then the scorecard and coaching panels (a sticky side column on wide screens), then the recording. The player sits on a speaker timeline (who talked when, and each side's share of talk time) and stays in view while the transcript scrolls. Clicking a line's time plays from there, the playing line is highlighted, and the transcript can be searched. Owners and managers can delete a call from here. A processing call refreshes itself. |
 
 The calls module never imports scorecards. The list's score column comes in
-through `CallsPage`'s `score` prop, which the app page fills with
-`ScoreBadge` from the scorecards module. The recording plays from a
+through `CallsPage`'s `score` prop, which the app page fills with its own
+`ScoreBadge` (`app/[tenant]/calls/_components/`), built on the scorecards
+module's public `getScorecardResult`. The recording plays from a
 short-lived signed URL (`getCallRecordingUrl`), so the bucket stays private.
 
 ## Call types and scorecards
