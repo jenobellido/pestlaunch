@@ -49,7 +49,7 @@ export function AuthVisual() {
               {ITEMS.map((item) => (
                 <li key={item.label} className="flex items-center gap-2.5">
                   {item.passed ? (
-                    <Check className="size-4 text-accent" />
+                    <Check className="size-4 text-success" />
                   ) : (
                     <X className="size-4 text-danger" />
                   )}

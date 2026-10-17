@@ -3,7 +3,7 @@ import { cn } from "@/shared/lib/cn";
 
 const GRADE: Record<Grade, { label: string; dot: string }> = {
   gold: { label: "Gold Standard", dot: "bg-orange" },
-  green: { label: "Green Standard", dot: "bg-accent" },
+  green: { label: "Green Standard", dot: "bg-success" },
   below: { label: "Below Standard", dot: "bg-danger" },
 };
 
