@@ -27,6 +27,8 @@ export interface CoachingCall {
 
 export interface EmployeeSummary {
   name: string;
+  /** The team member, when the group's calls are assigned to one. */
+  employeeId: string | null;
   calls: CoachingCall[];
   scoredCalls: number;
   /** Average share of points earned, 0 to 100, across scored calls. Scorecards differ in size. */
@@ -75,6 +77,7 @@ export function summarizeTeam(calls: CoachingCall[]): EmployeeSummary[] {
 
     return {
       name: group[0].employeeName ?? UNKNOWN,
+      employeeId: group[0].employeeId,
       calls: newestFirst,
       scoredCalls: scored.length,
       averageScore: average(scores),

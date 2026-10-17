@@ -99,7 +99,7 @@ modules/<name>/
 - **Permissions, not roles:** the app only ever checks permissions
   (`can(access, "calls.delete")`), listed in `core/tenancy/permissions.ts`:
   `calls.upload`, `calls.view_all`, `calls.assign`, `calls.delete`,
-  `team.manage`, `roles.manage`, `company.manage`, `modules.manage`. A role is
+  `coaching.manage`, `team.manage`, `roles.manage`, `company.manage`, `modules.manage`. A role is
   a per-tenant row holding a list of them, so a tenant can add custom roles
   in Settings without code changes. Every tenant starts with Owner (every
   permission, locked), Manager (calls and team) and Rep (upload only).
@@ -356,3 +356,11 @@ size), trend of the newer half of calls vs the older half, grade counts, the
 three most-missed steps, the latest focus and recent calls. The app layer
 (`app/[tenant]/coaching/page.tsx`) builds a plain `CoachingCall` list from
 the calls and scorecards modules, so the coaching module imports neither.
+
+**Plays** (`coaching_plays`, owned by the coaching module): a concrete thing
+for one team member to work on. When a member misses the same scorecard step
+on at least two calls, their card suggests a play ("Work on 'Expectation
+Statement'"), and anyone with `coaching.manage` assigns it in one click. The
+assignee sees it under "Your plays" and marks it done. Managers see and
+remove every play. The buttons are app-layer server actions passed into the
+coaching module's page through slots.

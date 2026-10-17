@@ -49,7 +49,7 @@ function Trend({ value }: { value: number | null }) {
   );
 }
 
-function EmployeeCard({ employee }: { employee: EmployeeSummary }) {
+function EmployeeCard({ employee, action }: { employee: EmployeeSummary; action?: React.ReactNode }) {
   const score = employee.averageScore;
   return (
     <Card className="flex flex-col gap-5">
@@ -119,6 +119,8 @@ function EmployeeCard({ employee }: { employee: EmployeeSummary }) {
         </div>
       )}
 
+      {action}
+
       <div className="mt-auto">
         <p className="text-xs text-muted">Recent calls</p>
         <ul className="-mx-2 mt-1">
@@ -153,8 +155,20 @@ function EmployeeCard({ employee }: { employee: EmployeeSummary }) {
   );
 }
 
-/** Team coaching: per-employee scores, trends, most-missed steps and the current focus. */
-export function CoachingPage({ calls }: { calls: CoachingCall[] }) {
+/**
+ * Team coaching: per-employee scores, trends, most-missed steps and the current focus.
+ * `plays` and `employeeAction` are slots the app layer fills (assigning coaching plays needs
+ * server actions, which live there).
+ */
+export function CoachingPage({
+  calls,
+  plays,
+  employeeAction,
+}: {
+  calls: CoachingCall[];
+  plays?: React.ReactNode;
+  employeeAction?: (employee: EmployeeSummary) => React.ReactNode;
+}) {
   const team = summarizeTeam(calls);
   const scored = calls.filter((c) => c.score);
   const teamAverage = scored.length
@@ -172,6 +186,7 @@ export function CoachingPage({ calls }: { calls: CoachingCall[] }) {
         description="How each employee is doing on the call process, and what to work on next."
         icon={MessageSquareText}
       />
+      {calls.length === 0 && plays}
       {calls.length === 0 ? (
         <EmptyState icon={MessageSquareText} title="No reviewed calls yet" className="min-h-80">
           Once calls are processed, each employee&apos;s scores, trends and coaching show up here.
@@ -192,9 +207,14 @@ export function CoachingPage({ calls }: { calls: CoachingCall[] }) {
               hint={teamTopMiss ? teamTopMiss[0] : "No scored calls yet"}
             />
           </div>
+          {plays}
           <div className="grid items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3">
             {team.map((employee) => (
-              <EmployeeCard key={`${employee.name}-${employee.calls[0]?.id}`} employee={employee} />
+              <EmployeeCard
+                key={`${employee.name}-${employee.calls[0]?.id}`}
+                employee={employee}
+                action={employeeAction?.(employee)}
+              />
             ))}
           </div>
         </>

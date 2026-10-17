@@ -43,6 +43,13 @@
       "when": 1792250629191,
       "tag": "0005_drop_member_role",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792253443596,
+      "tag": "0006_coaching_plays",
+      "breakpoints": true
     }
   ]
 }
