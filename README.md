@@ -59,15 +59,15 @@ the sidebar):
 
 ## Known limitations
 
-- Calls are transcribed and analyzed (call type, outcome, details), but
-  scoring and coaching are still placeholders, so a call ends as "failed"
-  after its transcript and outcome are saved.
+- Calls are transcribed, analyzed and graded, but coaching is still a
+  placeholder, so with the coaching module on a call ends as "failed" after
+  its transcript, outcome and score are saved.
 - Speaker labels come from a language model reading the transcript, not from
   the audio, so they're occasionally swapped, mostly where two people talk
   over each other. When a segment is split between speakers, the split's
   timestamps are estimated from text length.
-- Groq's free tier allows 8,000 chat tokens a minute. A 20-minute call takes
-  about a minute to label because requests wait out the limit. The paid tier
+- Groq's free tier allows 8,000 chat tokens a minute. The full pipeline for a
+  20-minute call takes about 4 minutes, mostly waiting out the limit. The paid tier
   removes this. The free tier also caps audio files at 25 MB (the app accepts
   up to 50 MB).
 - Calls can be deleted through the API (`DELETE /api/[tenant]/calls/[id]`),
@@ -82,7 +82,7 @@ the sidebar):
 
 ## Next steps
 
-1. Scorecard grading with evidence quotes, then coaching.
+1. Coaching.
 2. Process in the background and show progress in the UI.
 3. Run every test call and tune prompts for accuracy, including speaker labels.
 4. Deploy.
