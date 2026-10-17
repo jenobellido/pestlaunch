@@ -169,11 +169,21 @@ From the call manuals in `../docs/call-manuals/`:
 | Scheduling, billing, re-service | All Calls | 12 | 12 | 11 |
 | Other | Not scored | | | |
 
-On sales calls with no objections, the 4 objection points are awarded
-automatically. The scorecards are data in
-`modules/scorecards/config/scorecards.ts`. The LLM decides pass/fail per item
-with a supporting quote, and the points and grade are computed in code so
-the maths is deterministic.
+Sections follow the manuals' four steps (Validate, Understand, Solve,
+Verify), plus Pricing and Objections on sales calls. On sales calls with no
+objections, the 4 objection points are awarded automatically.
+
+The scorecards are data in `modules/scorecards/config/scorecards.ts`. Each
+item carries its criteria, paraphrased from the manual's definition of that
+step; the grader and the Scorecards page both show them, so managers and the
+AI judge by the same rule.
+
+Grading (`modules/scorecards/server/scoring-step.ts`): one structured-output
+request gets pass/fail, an evidence quote and a one-line reason per item,
+plus whether the customer raised objections. A quote is kept only if its
+words really appear in the transcript, so every quote shown can be trusted.
+Points and grade are computed in code from the scorecard, never by the
+model.
 
 ## Module toggling
 
@@ -203,9 +213,9 @@ the maths is deterministic.
 In place: auth, tenancy, module gating, database, scorecard data and grading
 maths, the UI for every page (Freehold design), and call storage: uploads go
 to the private bucket, calls are saved in Postgres, and calls can be deleted
-through the API. Transcription with speaker labels, and call type and
-outcome analysis work.
+through the API. Transcription with speaker labels, call type and outcome
+analysis, and scorecard grading work.
 
-Still placeholders that throw: `scoringStep`, `coachingStep`. So a call
-processed in the app currently ends as `failed` after its transcript and
-outcome are saved.
+Still a placeholder that throws: `coachingStep`. With the coaching module on,
+a call processed in the app ends as `failed` after its transcript, outcome
+and score are saved.

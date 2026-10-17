@@ -53,8 +53,10 @@ export function ScorecardPanel({ result }: { result: ScorecardResult | null | un
                   )}
                   <span className="min-w-0">
                     <span className={i.passed ? "text-fg/90" : "text-fg"}>{i.item}</span>
-                    {i.evidence && (
+                    {i.evidence ? (
                       <span className="mt-0.5 block text-xs text-muted">&ldquo;{i.evidence}&rdquo;</span>
+                    ) : (
+                      i.reason && <span className="mt-0.5 block text-xs text-muted">{i.reason}</span>
                     )}
                   </span>
                 </li>
