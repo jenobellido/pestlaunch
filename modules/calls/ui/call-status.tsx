@@ -1,5 +1,5 @@
 import { Badge } from "@/shared/ui/card";
-import type { CallResolution, CallStatus } from "../model/types";
+import type { CallResolution, CallStatus, ProcessingStage } from "../model/types";
 
 /** Just what's needed to tell where a call stands. */
 type CallState = { status: CallStatus; outcome?: { resolution: CallResolution } };
@@ -18,6 +18,17 @@ const RESOLUTION: Record<CallResolution, { label: string; dot: string }> = {
   unresolved: { label: "Unresolved", dot: "bg-orange" },
   cancelled: { label: "Cancelled", dot: "bg-danger" },
 };
+
+/** The pipeline steps in order, as the UI describes them while a call is processing. */
+export const PROCESSING_STEPS: { stage: ProcessingStage; label: string }[] = [
+  { stage: "transcribing", label: "Transcribing the recording" },
+  { stage: "analyzing", label: "Working out the call type and outcome" },
+  { stage: "reviewing", label: "Scoring the call and writing coaching" },
+];
+
+export function processingLabel(stage: ProcessingStage | undefined) {
+  return `${PROCESSING_STEPS.find((s) => s.stage === stage)?.label ?? "Getting started"}…`;
+}
 
 /** How a call ended, for the list filters and the stats. */
 export type CallGroup = "won" | "follow_up" | "lost" | "failed" | "processing";

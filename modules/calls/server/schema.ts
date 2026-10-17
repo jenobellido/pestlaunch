@@ -1,7 +1,7 @@
 import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { CallType, TranscriptSegment } from "@/core/calls";
 import { tenants } from "@/core/db/schema";
-import type { CallOutcome } from "../model/types";
+import type { CallOutcome, ProcessingStage } from "../model/types";
 
 // Owned by the calls module; drizzle.config.ts picks up every modules/*/server/schema.ts.
 // RLS is on with no policies, like every table (see core/db/schema.ts).
@@ -19,6 +19,8 @@ export const calls = pgTable(
     /** Object path in the private "recordings" bucket. */
     recordingPath: text().notNull(),
     status: callStatus().notNull().default("processing"),
+    /** Pipeline step while processing; null otherwise. */
+    stage: text().$type<ProcessingStage>(),
     error: text(),
     employeeName: text(),
     durationSec: integer(),

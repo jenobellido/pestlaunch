@@ -5,7 +5,8 @@ import type { CallRecord } from "../model/types";
 import { listCalls } from "../server/call-repository";
 import { CallList, type CallListItem } from "./call-list";
 import { CallStats } from "./call-stats";
-import { callGroup, callTitle, formatDateTime, formatDuration } from "./call-status";
+import { AutoRefresh } from "./auto-refresh";
+import { callGroup, callTitle, formatDateTime, formatDuration, processingLabel } from "./call-status";
 import { UploadCallForm } from "./upload-call-form";
 
 interface CallsPageProps {
@@ -19,7 +20,7 @@ interface CallsPageProps {
 
 function subtitleOf(call: CallRecord) {
   if (call.status === "failed") return call.error ?? "Processing failed.";
-  if (call.status === "processing") return "Transcribing and analyzing…";
+  if (call.status === "processing") return processingLabel(call.stage);
   return call.outcome?.summary ?? "";
 }
 
@@ -48,6 +49,8 @@ export async function CallsPage({ tenantSlug, score }: CallsPageProps) {
 
   return (
     <PageStack>
+      {/* Processing runs on the server after upload; keep the list current until it's done. */}
+      {calls.some((c) => c.status === "processing") && <AutoRefresh everyMs={5000} />}
       <PageHeader
         title="Calls"
         description="Upload a recording to get its transcript, outcome, score and coaching."

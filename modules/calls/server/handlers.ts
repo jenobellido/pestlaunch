@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import { z } from "zod";
 import type { CallAnalysisStep } from "@/core/calls";
 import type { ModuleRouteHandler } from "@/core/modules";
@@ -11,13 +12,14 @@ import {
   RECORDING_EXTENSIONS,
 } from "@/core/storage";
 import { getTenantBySlug } from "@/core/tenancy";
-import { deleteCallRow, getCall, insertCall, listCalls } from "./call-repository";
+import { claimCallForRetry, deleteCallRow, getCall, insertCall, listCalls } from "./call-repository";
 import { processCall } from "./process-call";
 
 // Uploading is two requests, so recordings go straight to storage, not through this API:
 //   1. POST /calls/uploads  → a private path plus a one-time upload token
 //   2. the browser uploads the file to storage with the token
-//   3. POST /calls          → creates the call for that path and processes it
+//   3. POST /calls          → creates the call for that path and returns it as "processing";
+//                             the pipeline runs after the response (next/server `after`)
 
 const fail = (error: string, status: number) => Response.json({ error }, { status });
 
@@ -82,10 +84,29 @@ export async function createCallHandler(
   if ((await getRecordingSize(path)) === null) return fail("Upload the recording before processing it.", 409);
 
   const row = await insertCall({ tenantId: id, fileName, recordingPath: path });
-  await processCall({ id: row.id, tenant, fileName, recordingPath: path }, steps);
+  // Processing takes from seconds to minutes, so it runs after the response. The UI shows
+  // the call as processing and refreshes until it's ready.
+  after(() => processCall({ id: row.id, tenant, fileName, recordingPath: path }, steps));
 
-  const call = await getCall(tenant, row.id);
-  return Response.json({ data: call }, { status: call?.status === "failed" ? 422 : 201 });
+  return Response.json({ data: await getCall(tenant, row.id) }, { status: 202 });
+}
+
+/** Runs a failed or stalled call again, reusing its transcript when it has one. */
+export async function retryCallHandler(
+  tenant: string,
+  callId: string,
+  steps: readonly CallAnalysisStep[],
+): Promise<Response> {
+  const row = await claimCallForRetry(tenant, callId);
+  if (!row) {
+    const call = await getCall(tenant, callId);
+    return call ? fail("This call is already processing or finished.", 409) : fail("Not found", 404);
+  }
+  const transcript = row.transcript ?? undefined;
+  after(() =>
+    processCall({ id: row.id, tenant, fileName: row.fileName, recordingPath: row.recordingPath }, steps, { transcript }),
+  );
+  return Response.json({ data: await getCall(tenant, row.id) }, { status: 202 });
 }
 
 /** Removes the call and its recording, e.g. when the business no longer needs it. */

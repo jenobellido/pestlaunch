@@ -1,6 +1,6 @@
 import { Children } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, AudioLines, CalendarDays, Clock, Loader, UserRound } from "lucide-react";
+import { AlertTriangle, ArrowLeft, AudioLines, CalendarDays, Check, Clock, Loader, UserRound } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Badge, Card, CardTitle } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
@@ -8,8 +8,9 @@ import { CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
 import { AutoRefresh } from "./auto-refresh";
 import { CallPlayer, CallPlayerProvider } from "./call-player";
-import { CallResultBadge, callTitle, formatDateTime, formatDuration } from "./call-status";
+import { CallResultBadge, callTitle, formatDateTime, formatDuration, PROCESSING_STEPS } from "./call-status";
 import { DeleteCallButton } from "./delete-call-button";
+import { RetryCallButton } from "./retry-call-button";
 import { TranscriptView } from "./transcript-view";
 
 interface CallDetailProps {
@@ -75,16 +76,36 @@ export function CallDetail({ call, recordingUrl, canDelete, children }: CallDeta
             {(call.outcome || call.transcript) && (
               <p className="mt-2 text-muted">What finished before the error is shown below.</p>
             )}
+            <RetryCallButton tenantSlug={call.tenant} callId={call.id} />
           </div>
         </div>
       )}
       {call.status === "processing" && (
-        <div role="status" className="flex items-center gap-3 rounded-[28px] bg-card p-5 text-sm">
-          <Loader className="size-5 shrink-0 animate-spin text-sky motion-reduce:animate-none" aria-hidden />
-          <div>
-            <p className="font-medium">Processing this call</p>
-            <p className="text-muted">The transcript, outcome and score appear here as soon as they&apos;re ready.</p>
-          </div>
+        <div role="status" className="rounded-[28px] bg-card p-5 text-sm">
+          <p className="font-medium">Processing this call</p>
+          <p className="text-muted">Each part appears here as soon as it&apos;s ready. You can leave this page.</p>
+          <ol className="mt-4 space-y-2.5">
+            {PROCESSING_STEPS.map((step, i) => {
+              const current = PROCESSING_STEPS.findIndex((s) => s.stage === call.stage);
+              const state = i < current ? "done" : i === current ? "active" : "waiting";
+              return (
+                <li key={step.stage} className="flex items-center gap-2.5">
+                  {state === "done" ? (
+                    <Check className="size-4 shrink-0 text-accent" aria-hidden />
+                  ) : state === "active" ? (
+                    <Loader className="size-4 shrink-0 animate-spin text-sky motion-reduce:animate-none" aria-hidden />
+                  ) : (
+                    <span className="mx-1 size-2 shrink-0 rounded-full bg-line-strong" aria-hidden />
+                  )}
+                  <span className={state === "waiting" ? "text-muted" : "text-fg"}>
+                    {step.label}
+                    {state === "done" && <span className="sr-only"> (done)</span>}
+                    {state === "active" && <span className="sr-only"> (in progress)</span>}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
         </div>
       )}
 

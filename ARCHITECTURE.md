@@ -115,8 +115,26 @@ the 4.5 MB request limit on serverless hosts:
 2. The browser uploads the file straight to storage with that token
    (`core/storage/client.ts`).
 3. `POST /api/[tenant]/calls` with `{ path, fileName }` checks the file is
-   there, creates the `calls` row (status `processing`) and runs
-   `modules/calls/server/process-call.ts`.
+   there, creates the `calls` row (status `processing`) and answers 202 right
+   away. `modules/calls/server/process-call.ts` runs after the response with
+   Next's `after()`; the route sets `maxDuration = 300` so the platform lets
+   it finish.
+
+While a call processes, `stage` records the step (transcribing, analyzing,
+reviewing). The call list refreshes every 5 seconds while any call is
+processing, and the call page every 4 seconds with a step-by-step progress
+card.
+
+`after()` isn't a durable queue: if the server stops mid-way (a deploy, a
+crash, a platform time limit), the row would stay `processing`. A call that
+hasn't moved on for 10 minutes is shown as failed. `POST
+/api/[tenant]/calls/[callId]/retry` (the Retry button) runs a failed call
+again, reusing its transcript when it has one. The retry claims the row
+with one conditional update, so two clicks can't start it twice.
+
+AI rate limits are retried using Retry-After. A wait longer than a minute
+(e.g. a daily token limit) fails the call at once with a message saying when
+to retry.
 
 The pipeline downloads the recording and saves each stage as it finishes, so
 a failure keeps whatever already worked and sets status `failed` with the
@@ -274,5 +292,7 @@ calls are saved in Postgres. The whole pipeline works: transcription with
 speaker labels, call type and outcome analysis, scorecard grading and
 coaching, so calls end as `ready`.
 
-Not built yet: background processing (processing runs inside the upload
-request) and the per-employee Coaching page.
+Calls process in the background with progress shown, stalled calls are
+detected, and failed calls can be retried.
+
+Not built yet: the per-employee Coaching page.

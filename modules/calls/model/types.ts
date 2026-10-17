@@ -2,6 +2,9 @@ import type { CallType, TranscriptSegment } from "@/core/calls";
 
 export type CallStatus = "processing" | "ready" | "failed";
 
+/** Where a processing call is in the pipeline. */
+export type ProcessingStage = "transcribing" | "analyzing" | "reviewing";
+
 export type CallResolution =
   | "booked"
   | "retained"
@@ -24,6 +27,8 @@ export interface CallRecord {
   fileName: string;
   employeeName: string | null;
   status: CallStatus;
+  /** Set while `status` is "processing". */
+  stage?: ProcessingStage;
   error?: string;
   createdAt: string;
   durationSec?: number;

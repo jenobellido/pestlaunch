@@ -29,6 +29,17 @@ async function request(path: string, init: RequestInit): Promise<Response> {
     });
     if (res.ok) return res;
 
+    const retryAfter = Number(res.headers.get("retry-after"));
+    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 1000 * 2 ** attempt;
+    // A wait longer than we're willing to sit through (e.g. a daily token limit) fails now,
+    // with a message the user can act on, instead of retrying until the job is cut off.
+    if (res.status === 429 && waitMs > MAX_WAIT_MS) {
+      const minutes = Math.ceil(waitMs / 60_000);
+      throw new AiError(
+        `The AI service's usage limit has been reached. It resets in about ${minutes} minute${minutes === 1 ? "" : "s"}; retry the call then.`,
+        429,
+      );
+    }
     const retryable = res.status === 429 || res.status >= 500;
     if (!retryable || attempt === MAX_ATTEMPTS) {
       const body = await res.text().catch(() => "");
@@ -41,9 +52,7 @@ async function request(path: string, init: RequestInit): Promise<Response> {
       })();
       throw new AiError(`AI request failed (${res.status}): ${message ?? (body.slice(0, 200) || res.statusText)}`, res.status);
     }
-    const retryAfter = Number(res.headers.get("retry-after"));
-    const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 1000 * 2 ** attempt;
-    await new Promise((r) => setTimeout(r, Math.min(waitMs, MAX_WAIT_MS)));
+    await new Promise((r) => setTimeout(r, waitMs));
   }
 }
 

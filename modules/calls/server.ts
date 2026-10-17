@@ -7,4 +7,5 @@ export {
   deleteCallHandler,
   getCallHandler,
   listCallsHandler,
+  retryCallHandler,
 } from "./server/handlers";

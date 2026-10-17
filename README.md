@@ -63,13 +63,16 @@ the sidebar):
   the audio, so they're occasionally swapped, mostly where two people talk
   over each other. When a segment is split between speakers, the split's
   timestamps are estimated from text length.
-- Groq's free tier allows 8,000 chat tokens a minute. The full pipeline for a
-  20-minute call takes about 4 minutes, mostly waiting out the limit. The paid tier
-  removes this. The free tier also caps audio files at 25 MB (the app accepts
-  up to 50 MB).
-- Processing runs inside the upload request, so the upload panel asks you to
-  keep the tab open until the call is ready. Long recordings will hit
-  serverless time limits once deployed.
+- Groq's free tier allows 8,000 chat tokens a minute and 200,000 a day on
+  `gpt-oss-120b`. A 20-minute call takes about 4 minutes, mostly waiting out
+  the per-minute limit, and the daily limit covers only a handful of long
+  calls. When it's used up, calls fail with a message saying when to retry.
+  The paid Dev tier removes both limits. The free tier also caps audio files
+  at 25 MB (the app accepts up to 50 MB).
+- Processing runs in the background with Next's `after()`, not a durable job
+  queue. If the server stops mid-way, the call shows as failed after 10
+  minutes and can be retried. A queue (e.g. Inngest or a database-backed
+  worker) would resume automatically.
 - Search and filters on the call library run in the browser over every call.
   That's fine for hundreds of calls; thousands will need paging on the server.
 - The Coaching page is a placeholder; per-employee trends aren't built.
@@ -80,10 +83,10 @@ the sidebar):
 
 ## Next steps
 
-1. Process in the background and show progress in the UI.
-2. Run every test call and tune prompts for accuracy, including speaker labels.
-3. Per-employee coaching page: scores and recurring feedback over time.
-4. Deploy.
+1. Run every test call and tune prompts for accuracy, including speaker labels
+   (needs the paid AI tier, or several days of the free one).
+2. Per-employee coaching page: scores and recurring feedback over time.
+3. Deploy.
 
 ## Call data
 
