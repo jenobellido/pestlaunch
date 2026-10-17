@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PestLaunch Call Intelligence
 
-## Getting Started
+Turns pest control phone calls into a transcript, call type, outcome,
+scorecard grade and coaching for the employee.
 
-First, run the development server:
+Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
+[ARCHITECTURE.md](ARCHITECTURE.md) for how the code is organized.
+
+## Local setup
+
+Requires Node 22+ and Docker.
 
 ```bash
+npm install
+cp .env.example .env.local
+npm run db:start      # starts Supabase in Docker; prints the keys for .env.local
+npm run db:migrate    # applies migrations in drizzle/
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 and create an account. Locally, email confirmation
+is off and confirmation emails are caught by Mailpit at http://127.0.0.1:56424.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+This project uses ports 56420–56429, so it can run beside other local
+Supabase projects on the default 543xx ports.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| URL | What |
+| --- | --- |
+| http://localhost:3000 | App |
+| http://127.0.0.1:56423 | Supabase Studio |
+| http://127.0.0.1:56424 | Mailpit (local email) |
 
-## Learn More
+## Scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Next.js dev server |
+| `npm run typecheck` | Generate route types and run tsc |
+| `npm run lint` | ESLint, including architecture import rules |
+| `npm run db:start` / `db:stop` | Start or stop the local Supabase stack |
+| `npm run db:generate` | Create a migration from changes to `core/db/schema.ts` |
+| `npm run db:migrate` | Apply pending migrations |
+| `npm run db:reset` | Wipe the local database and re-apply all migrations |
+| `npm run db:studio` | Drizzle Studio |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Call data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The call recordings used to test this are real customer calls. They are never
+committed to this repository. Keep them outside the repo or in private storage.

@@ -9,9 +9,12 @@ import { requireModule } from "../../_lib/require-module";
 // The app layer composes modules: the call detail comes from `calls`, and
 // panels from other modules are added only when the tenant has them enabled.
 export default async function Page({ params }: PageProps<"/[tenant]/calls/[callId]">) {
-  const tenant = await requireModule(params, "calls");
+  const { tenant } = await requireModule(params, "calls");
   const { callId } = await params;
-  const [call, enabled] = await Promise.all([getCall(tenant, callId), getEnabledModuleIds(tenant)]);
+  const [call, enabled] = await Promise.all([
+    getCall(tenant.slug, callId),
+    getEnabledModuleIds(tenant.slug),
+  ]);
   if (!call) notFound();
 
   return (

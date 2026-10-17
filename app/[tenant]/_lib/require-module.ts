@@ -1,18 +1,20 @@
 import { notFound } from "next/navigation";
+import { requireTenantAccess, type TenantAccess } from "@/core/tenancy";
 import { isModuleEnabled, type ModuleId } from "@/modules/registry";
 
 /**
- * Call at the top of every page, route handler and server action that belongs
- * to a module. Next renders layouts and pages in parallel, so a check in a
- * layout alone would not stop a disabled module's page from rendering.
+ * Call at the top of every page that belongs to a module. Checks the user is
+ * signed in, is a member of the tenant, and has the module enabled.
  *
- * Returns the tenant slug, or 404s when the module is off for that tenant.
+ * Next renders layouts and pages in parallel, so a check in a layout alone
+ * would not stop a page from rendering and sending its data.
  */
 export async function requireModule(
   params: Promise<{ tenant: string }>,
   moduleId: ModuleId,
-): Promise<string> {
+): Promise<TenantAccess> {
   const { tenant } = await params;
+  const access = await requireTenantAccess(tenant);
   if (!(await isModuleEnabled(tenant, moduleId))) notFound();
-  return tenant;
+  return access;
 }

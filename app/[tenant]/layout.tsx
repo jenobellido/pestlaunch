@@ -4,7 +4,7 @@ import { TenantNav } from "./_components/tenant-nav";
 export default function TenantLayout({ children, params }: LayoutProps<"/[tenant]">) {
   return (
     <div className="flex flex-1">
-      <aside className="w-56 shrink-0 border-r border-black/10 p-4 dark:border-white/10">
+      <aside className="sticky top-0 h-screen w-56 shrink-0 border-r border-black/10 p-4 dark:border-white/10">
         <Suspense fallback={null}>
           <TenantNav params={params} />
         </Suspense>

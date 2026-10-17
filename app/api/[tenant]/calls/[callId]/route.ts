@@ -1,10 +1,7 @@
 import { getCallHandler } from "@/modules/calls/server";
-import { isModuleEnabled } from "@/modules/registry";
+import { withModule } from "../../_lib/with-module";
 
-export async function GET(_req: Request, ctx: RouteContext<"/api/[tenant]/calls/[callId]">) {
-  const { tenant, callId } = await ctx.params;
-  if (!(await isModuleEnabled(tenant, "calls"))) {
-    return Response.json({ error: "Not found" }, { status: 404 });
-  }
-  return getCallHandler(tenant, callId);
+export async function GET(req: Request, ctx: RouteContext<"/api/[tenant]/calls/[callId]">) {
+  const { callId } = await ctx.params;
+  return withModule("calls", (_req, { tenant }) => getCallHandler(tenant, callId))(req, ctx);
 }

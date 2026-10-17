@@ -25,5 +25,5 @@ export type ModuleSettings = Readonly<Record<string, boolean | undefined>>;
 /** A route handler that runs only after the module has been checked for the tenant. */
 export type ModuleRouteHandler = (
   req: Request,
-  ctx: { tenant: string },
+  ctx: { tenant: string; userId: string; role: "owner" | "manager" | "rep" },
 ) => Promise<Response>;
