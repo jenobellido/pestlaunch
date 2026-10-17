@@ -44,6 +44,11 @@ const eslintConfig = defineConfig([
       }],
     },
   },
+  // CommonJS loaders for command-line scripts (scripts/*.cjs) have to use require().
+  {
+    files: ["**/*.cjs"],
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -51,6 +56,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local agent worktrees (not in git).
+    ".claude/**",
   ]),
 ]);
 

@@ -3,11 +3,12 @@ import { z } from "zod";
 import { generateObject } from "@/core/ai";
 import type { CallAnalysisStep, TranscriptSegment } from "@/core/calls";
 import { SCORECARDS } from "../config/scorecards";
-import { gradeFor, maxPoints, scorecardFor } from "../model/grade";
-import type { Scorecard, ScorecardItemResult, ScorecardResult } from "../model/types";
+import { maxPoints, scorecardFor } from "../model/grade";
+import { scoreCall } from "../model/score-call";
+import type { Scorecard, ScorecardResult } from "../model/types";
 
-// The model only judges each item and quotes its evidence. Points and grade are
-// computed here, so the maths is always consistent with the scorecard.
+// The model only judges each item and quotes its evidence. Points, grade and quote checks
+// are computed by scoreCall (model/score-call.ts), so the maths always matches the scorecard.
 
 const gradingSchema = z.object({
   objectionsRaised: z
@@ -34,9 +35,6 @@ How to grade:
 - An item that doesn't fit the call can still be judged on its intent (e.g. with no cost, agreeing to the plan is the close).
 - Grade every numbered item exactly once.
 - The speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
-
-/** Words only, so a quote matches the transcript despite punctuation and casing. */
-const words = (text: string) => text.toLowerCase().replace(/[^a-z0-9']+/g, " ").trim();
 
 function transcriptText(segments: readonly TranscriptSegment[]) {
   const name = { employee: "Employee", customer: "Customer", unknown: "Other" } as const;
@@ -65,50 +63,7 @@ export async function gradeCall(card: Scorecard, transcript: readonly Transcript
     prompt: `Scorecard: ${card.name}\n${itemList(card)}\n\nTranscript:\n${transcriptText(transcript)}`,
   });
 
-  const byItem = new Map(graded.items.map((g) => [g.item, g]));
-  // Points are for what the employee says, so a quote must come from their lines (or unlabelled
-  // ones). A quote found only in the customer's lines doesn't count.
-  const employeeWords = words(transcript.filter((s) => s.speaker !== "customer").map((s) => s.text).join(" "));
-  const customerWords = words(transcript.filter((s) => s.speaker === "customer").map((s) => s.text).join(" "));
-  let n = 0;
-
-  const items: ScorecardItemResult[] = card.sections.flatMap((section) =>
-    section.items.map((it) => {
-      const g = byItem.get(n++);
-      // Sales: no objections means the rep earns the whole objection section.
-      if (section.autoAwardWhenNotApplicable && !graded.objectionsRaised) {
-        return {
-          section: section.title,
-          item: it.name,
-          passed: true,
-          evidence: null,
-          reason: "No objections were raised, so these points are awarded automatically.",
-          autoAwarded: true,
-        };
-      }
-      if (!g) {
-        // Unreachable after the completeness check, kept as a safe default.
-        return { section: section.title, item: it.name, passed: false, evidence: null, reason: "Not assessed." };
-      }
-      // Keep a quote only if it's really in the transcript, so every quote shown can be trusted.
-      const quote = g.evidence?.trim();
-      const q = quote ? words(quote) : "";
-      if (g.passed && q && !employeeWords.includes(q) && customerWords.includes(q)) {
-        return {
-          section: section.title,
-          item: it.name,
-          passed: false,
-          evidence: null,
-          reason: "Only the customer said this; the employee didn't.",
-        };
-      }
-      const verified = q && employeeWords.includes(q) ? quote! : null;
-      return { section: section.title, item: it.name, passed: g.passed, evidence: verified, reason: g.reason.trim() };
-    }),
-  );
-
-  const points = items.filter((i) => i.passed).length;
-  return { scorecardId: card.id, points, maxPoints: maxPoints(card), grade: gradeFor(card, points), items };
+  return scoreCall(card, graded, transcript);
 }
 
 export const scoringStep: CallAnalysisStep<ScorecardResult | null> = {

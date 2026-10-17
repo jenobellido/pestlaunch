@@ -18,11 +18,6 @@ export type TenantAccessResult =
   | { ok: true; access: TenantAccess }
   | { ok: false; reason: "unauthenticated" | "not_found" };
 
-/** Whether the member has a permission. */
-export function can(access: Pick<TenantAccess, "permissions">, permission: Permission) {
-  return access.permissions.includes(permission);
-}
-
 /**
  * Resolves whether the current user may access a tenant. Unknown tenants and
  * tenants the user isn't a member of look the same, so slugs can't be probed.

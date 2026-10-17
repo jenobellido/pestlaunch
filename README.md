@@ -83,12 +83,17 @@ Supabase projects on the default 543xx ports.
 | `npm run dev` | Next.js dev server |
 | `npm run typecheck` | Generate route types and run tsc |
 | `npm run lint` | ESLint, including architecture import rules |
+| `npm test` | Unit tests (Vitest), once. `npm run test:watch` re-runs them on save |
 | `npm run db:start` / `db:stop` | Start or stop the local Supabase stack |
 | `npm run db:generate` | Create a migration from changes to `core/db/schema.ts` or a module's `server/schema.ts` |
 | `npm run db:migrate` | Apply pending migrations |
 | `npm run db:reset` | Wipe the local database and re-apply all migrations |
 | `npm run db:studio` | Drizzle Studio |
 | `npm run seed:demo -- <company>` | Adds 7 invented demo calls (every call type and outcome) to a company and runs them through analysis, scoring and coaching. No real call data; no audio. |
+
+CI (`.github/workflows/ci.yml`) runs `npm ci`, typecheck, lint and the unit
+tests on Node 22 for every push and pull request. None of them need a
+database or env vars.
 
 ## Settings
 
