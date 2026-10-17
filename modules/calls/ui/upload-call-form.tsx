@@ -71,7 +71,19 @@ function Step({ state, label, detail }: { state: "done" | "active" | "waiting"; 
   );
 }
 
-export function UploadCallForm({ tenantSlug }: { tenantSlug: string }) {
+/** A team member a call can be assigned to. */
+export interface AssignableMember {
+  id: string;
+  name: string;
+}
+
+/**
+ * `members` is passed only to people allowed to assign calls: they choose whose call it is.
+ * Everyone else's uploads are theirs, decided on the server.
+ */
+export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; members?: AssignableMember[] }) {
+  const [employeeId, setEmployeeId] = useState("");
+  const employeeSelectId = useId();
   const router = useRouter();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -144,7 +156,11 @@ export function UploadCallForm({ tenantSlug }: { tenantSlug: string }) {
       await uploadRecordingWithToken(upload.path, upload.token, file);
 
       setStage("processing");
-      const call = await api<{ id: string; status: string }>("/calls", { path: upload.path, fileName: file.name });
+      const call = await api<{ id: string; status: string }>("/calls", {
+        path: upload.path,
+        fileName: file.name,
+        ...(members ? { employeeId: employeeId || null } : {}),
+      });
       // With background processing the call comes back still processing and fills in later.
       const message =
         call.status === "processing" ? `${file.name} is uploaded and processing.` : `${file.name} is ready.`;
@@ -241,6 +257,24 @@ export function UploadCallForm({ tenantSlug }: { tenantSlug: string }) {
             >
               <X className="size-4" aria-hidden />
             </button>
+          )}
+          {members && (
+            <label htmlFor={employeeSelectId} className="flex flex-col justify-center gap-1 sm:w-56">
+              <span className="text-xs text-muted">Whose call?</span>
+              <select
+                id={employeeSelectId}
+                value={employeeId}
+                onChange={(e) => setEmployeeId(e.target.value)}
+                className="h-10 w-full rounded-xl border border-line bg-card px-3 text-sm outline-none transition-colors hover:border-line-strong focus:border-accent focus:ring-4 focus:ring-accent/15"
+              >
+                <option value="">Work it out from the call</option>
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
           <button type="submit" disabled={!file} className={cn(primaryButton, "h-12 px-6 disabled:cursor-not-allowed disabled:opacity-50")}>
             Process call

@@ -8,8 +8,8 @@ export const GET = withModule("calls", listCallsHandler);
 // tier can take a few minutes, so allow the platform's longest run for this route.
 export const maxDuration = 300;
 
-// Create a call for an uploaded recording ({ path, fileName }, see calls/uploads) and
-// process it, running the analysis steps of every module the tenant has enabled.
-export const POST = withModule("calls", async (req, { tenant }) =>
-  createCallHandler(req, tenant, await getAnalysisSteps(tenant)),
+// Create a call for an uploaded recording ({ path, fileName, employeeId? }, see calls/uploads)
+// and process it, running the analysis steps of every module the tenant has enabled.
+export const POST = withModule("calls", async (req, { tenant, userId, permissions }) =>
+  createCallHandler(req, tenant, { userId, permissions }, await getAnalysisSteps(tenant)),
 );

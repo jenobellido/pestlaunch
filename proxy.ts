@@ -11,7 +11,9 @@ export async function proxy(request: NextRequest) {
   // API routes answer 401 themselves instead of redirecting.
   if (pathname.startsWith("/api/")) return response;
 
-  if (!userId && !PUBLIC_PATHS.has(pathname)) {
+  // Invite links are opened before the invitee has an account.
+  const isPublic = PUBLIC_PATHS.has(pathname) || pathname.startsWith("/invite/");
+  if (!userId && !isPublic) {
     const url = new URL("/login", request.url);
     url.searchParams.set("next", pathname);
     return redirectWithSession(response, url);

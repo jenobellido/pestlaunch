@@ -8,7 +8,7 @@ export const maxDuration = 300;
 /** Runs a failed or stalled call through processing again. */
 export async function POST(req: Request, ctx: RouteContext<"/api/[tenant]/calls/[callId]/retry">) {
   const { callId } = await ctx.params;
-  return withModule("calls", async (_req, { tenant }) =>
-    retryCallHandler(tenant, callId, await getAnalysisSteps(tenant)),
+  return withModule("calls", async (_req, { tenant, userId, permissions }) =>
+    retryCallHandler(tenant, callId, { userId, permissions }, await getAnalysisSteps(tenant)),
   )(req, ctx);
 }

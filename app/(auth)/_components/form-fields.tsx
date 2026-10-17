@@ -14,12 +14,14 @@ export function Field({
   type = "text",
   defaultValue,
   autoComplete,
+  readOnly,
 }: {
   label: string;
   name: string;
   type?: string;
   defaultValue?: string;
   autoComplete?: string;
+  readOnly?: boolean;
 }) {
   const id = useId();
   const [revealed, setRevealed] = useState(false);
@@ -37,6 +39,7 @@ export function Field({
           required
           defaultValue={defaultValue}
           autoComplete={autoComplete}
+          readOnly={readOnly}
           className={cn(controlClass, isPassword && "pr-12")}
         />
         {isPassword && (

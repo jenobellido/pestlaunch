@@ -1,5 +1,6 @@
 import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { CallType, TranscriptSegment } from "@/core/calls";
+import { authUsers } from "drizzle-orm/supabase";
 import { tenants } from "@/core/db/schema";
 import type { CallOutcome, ProcessingStage } from "../model/types";
 
@@ -22,6 +23,9 @@ export const calls = pgTable(
     /** Pipeline step while processing; null otherwise. */
     stage: text().$type<ProcessingStage>(),
     error: text(),
+    /** The team member the call belongs to: set on upload, matched from the call, or assigned later. */
+    employeeId: uuid().references(() => authUsers.id, { onDelete: "set null" }),
+    /** The employee's name as heard in the call. A hint only; `employeeId` is the source of truth. */
     employeeName: text(),
     durationSec: integer(),
     callType: text().$type<CallType>(),

@@ -3,7 +3,14 @@
 import { refresh, updateTag } from "next/cache";
 import { z } from "zod";
 import { getCurrentUser, updateDisplayName } from "@/core/auth";
-import { checkTenantAccess, renameTenant, setTenantModules, tenantCacheTag } from "@/core/tenancy";
+import {
+  can,
+  checkTenantAccess,
+  renameTenant,
+  setTenantModules,
+  tenantCacheTag,
+  updateMemberDisplayName,
+} from "@/core/tenancy";
 import { baseModuleId, getEnabledModuleIds, moduleRegistry, type ModuleId } from "@/modules/registry";
 
 /** State of a one-field settings form. `value` echoes the input back after an error. */
@@ -26,10 +33,13 @@ export async function updateProfile(_prev: FieldFormState, formData: FormData): 
   const parsed = displayName.safeParse(value);
   if (!parsed.success) return { status: "error", fieldError: parsed.error.issues[0].message, value };
 
-  if (!(await getCurrentUser())) return { status: "error", message: SESSION_ENDED, value };
+  const user = await getCurrentUser();
+  if (!user) return { status: "error", message: SESSION_ENDED, value };
 
   const { ok } = await updateDisplayName(parsed.data);
   if (!ok) return { status: "error", message: "We couldn't save your name. Try again.", value };
+  // Calls and coaching show the member name stored on each membership.
+  await updateMemberDisplayName(user.id, parsed.data);
 
   // The name shows in the sidebar, so re-render the page with the refreshed session.
   refresh();
@@ -47,8 +57,8 @@ export async function updateCompanyName(
 
   const access = await checkTenantAccess(slug);
   if (!access.ok) return { status: "error", message: SESSION_ENDED, value };
-  if (access.access.role !== "owner") {
-    return { status: "error", message: "Only owners can change the company name.", value };
+  if (!can(access.access, "company.manage")) {
+    return { status: "error", message: "You don't have permission to change the company name.", value };
   }
 
   await renameTenant(access.access.tenant.id, parsed.data);
@@ -61,7 +71,7 @@ const moduleToggle = z.object({ moduleId: z.enum(moduleIds), enabled: z.boolean(
 
 export type ModuleToggleResult = { ok: true } | { ok: false; error: string };
 
-/** Turns a module on or off for the tenant. Owners only. */
+/** Turns a module on or off for the tenant. Needs "modules.manage". */
 export async function setModuleEnabled(
   slug: string,
   moduleId: string,
@@ -72,7 +82,9 @@ export async function setModuleEnabled(
 
   const access = await checkTenantAccess(slug);
   if (!access.ok) return { ok: false, error: SESSION_ENDED };
-  if (access.access.role !== "owner") return { ok: false, error: "Only owners can change modules." };
+  if (!can(access.access, "modules.manage")) {
+    return { ok: false, error: "You don't have permission to change modules." };
+  }
 
   const manifest = moduleRegistry.find((m) => m.id === parsed.data.moduleId)!;
   if (manifest.id === baseModuleId && !enabled) {

@@ -18,6 +18,6 @@ export function withModule(moduleId: ModuleId, handler: ModuleRouteHandler) {
     if (!(await isModuleEnabled(tenant, moduleId))) {
       return Response.json({ error: "Not found" }, { status: 404 });
     }
-    return handler(req, { tenant, userId: result.access.user.id, role: result.access.role });
+    return handler(req, { tenant, userId: result.access.user.id, permissions: result.access.permissions });
   };
 }

@@ -3,9 +3,10 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import { db, schema } from "@/core/db";
 import { slugify } from "./slug";
-import type { MemberRole, Tenant } from "./types";
+import { ALL_PERMISSIONS, DEFAULT_ROLES, isPermission } from "./permissions";
+import type { Role, Tenant } from "./types";
 
-const { tenants, tenantMembers, tenantModules } = schema;
+const { tenants, tenantMembers, tenantModules, tenantRoles } = schema;
 
 export function tenantCacheTag(slug: string) {
   return `tenant:${slug}`;
@@ -32,27 +33,40 @@ export async function getTenantBySlug(slug: string): Promise<Tenant | null> {
   };
 }
 
-export async function getMemberRole(tenantId: string, userId: string): Promise<MemberRole | null> {
+/** Turns a role row into a Role; the owner role always has every permission. */
+export function toRole(row: typeof tenantRoles.$inferSelect): Role {
+  return {
+    id: row.id,
+    name: row.name,
+    isOwner: row.isOwner,
+    permissions: row.isOwner ? ALL_PERMISSIONS : row.permissions.filter(isPermission),
+  };
+}
+
+/** The member's role in a tenant, or null when they aren't a member. */
+export async function getMemberRole(tenantId: string, userId: string): Promise<Role | null> {
   const [row] = await db
-    .select({ role: tenantMembers.role })
+    .select({ role: tenantRoles })
     .from(tenantMembers)
+    .innerJoin(tenantRoles, eq(tenantRoles.id, tenantMembers.roleId))
     .where(and(eq(tenantMembers.tenantId, tenantId), eq(tenantMembers.userId, userId)))
     .limit(1);
-  return row?.role ?? null;
+  return row ? toRole(row.role) : null;
 }
 
 /** Tenants the user belongs to, oldest membership first. */
 export async function listUserTenants(userId: string) {
   return db
-    .select({ slug: tenants.slug, name: tenants.name, role: tenantMembers.role })
+    .select({ slug: tenants.slug, name: tenants.name, role: tenantRoles.name })
     .from(tenantMembers)
     .innerJoin(tenants, eq(tenants.id, tenantMembers.tenantId))
+    .innerJoin(tenantRoles, eq(tenantRoles.id, tenantMembers.roleId))
     .where(eq(tenantMembers.userId, userId))
     .orderBy(asc(tenantMembers.createdAt));
 }
 
-/** Creates a tenant with a unique slug and makes the user its owner. */
-export async function createTenantForOwner(name: string, userId: string) {
+/** Creates a tenant with a unique slug, its default roles, and makes the user its owner. */
+export async function createTenantForOwner(name: string, userId: string, displayName: string) {
   const base = slugify(name);
   return db.transaction(async (tx) => {
     for (let attempt = 0; attempt < 5; attempt++) {
@@ -63,7 +77,12 @@ export async function createTenantForOwner(name: string, userId: string) {
         .onConflictDoNothing({ target: tenants.slug })
         .returning();
       if (!tenant) continue;
-      await tx.insert(tenantMembers).values({ tenantId: tenant.id, userId, role: "owner" });
+      const roles = await tx
+        .insert(tenantRoles)
+        .values(DEFAULT_ROLES.map((r) => ({ tenantId: tenant.id, name: r.name, permissions: r.permissions, isOwner: r.key === "owner" })))
+        .returning();
+      const owner = roles.find((r) => r.isOwner)!;
+      await tx.insert(tenantMembers).values({ tenantId: tenant.id, userId, roleId: owner.id, displayName });
       return tenant;
     }
     throw new Error("Could not generate a unique company URL.");

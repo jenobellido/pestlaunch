@@ -1,17 +1,27 @@
-import { deleteCallHandler, getCallHandler } from "@/modules/calls/server";
+import { assignCallHandler, deleteCallHandler, getCallHandler } from "@/modules/calls/server";
 import { withModule } from "../../_lib/with-module";
 
-export async function GET(req: Request, ctx: RouteContext<"/api/[tenant]/calls/[callId]">) {
+type Ctx = RouteContext<"/api/[tenant]/calls/[callId]">;
+
+export async function GET(req: Request, ctx: Ctx) {
   const { callId } = await ctx.params;
-  return withModule("calls", (_req, { tenant }) => getCallHandler(tenant, callId))(req, ctx);
+  return withModule("calls", (_req, { tenant, userId, permissions }) =>
+    getCallHandler(tenant, callId, { userId, permissions }),
+  )(req, ctx);
 }
 
-/** Owners and managers can delete a call and its recording. */
-export async function DELETE(req: Request, ctx: RouteContext<"/api/[tenant]/calls/[callId]">) {
+/** Reassigns the call: { employeeId } or { employeeId: null }. Needs "calls.assign". */
+export async function PATCH(req: Request, ctx: Ctx) {
   const { callId } = await ctx.params;
-  return withModule("calls", (_req, { tenant, role }) =>
-    role === "rep"
-      ? Promise.resolve(Response.json({ error: "Only owners and managers can delete calls." }, { status: 403 }))
-      : deleteCallHandler(tenant, callId),
+  return withModule("calls", (r, { tenant, userId, permissions }) =>
+    assignCallHandler(r, tenant, callId, { userId, permissions }),
+  )(req, ctx);
+}
+
+/** Deletes the call and its recording. Needs "calls.delete". */
+export async function DELETE(req: Request, ctx: Ctx) {
+  const { callId } = await ctx.params;
+  return withModule("calls", (_req, { tenant, userId, permissions }) =>
+    deleteCallHandler(tenant, callId, { userId, permissions }),
   )(req, ctx);
 }

@@ -2,15 +2,21 @@ import { Phone } from "lucide-react";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
 import { CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
-import { listCalls } from "../server/call-repository";
+import { listCalls, type CallScope } from "../server/call-repository";
 import { CallList, type CallListItem } from "./call-list";
 import { CallStats } from "./call-stats";
 import { AutoRefresh } from "./auto-refresh";
 import { callGroup, callTitle, formatDateTime, formatDuration, processingLabel } from "./call-status";
-import { UploadCallForm } from "./upload-call-form";
+import { UploadCallForm, type AssignableMember } from "./upload-call-form";
 
 interface CallsPageProps {
   tenantSlug: string;
+  /** Which calls this member may see (see callScope). */
+  scope: CallScope;
+  /** Whether this member may upload calls. */
+  canUpload: boolean;
+  /** Team members to choose from on upload; only for members who may assign calls. */
+  members?: AssignableMember[];
   /**
    * Renders a call's score for the list. Passed in by the app layer when the
    * scorecards module is on, since modules can't import each other.
@@ -24,8 +30,8 @@ function subtitleOf(call: CallRecord) {
   return call.outcome?.summary ?? "";
 }
 
-export async function CallsPage({ tenantSlug, score }: CallsPageProps) {
-  const calls = await listCalls(tenantSlug);
+export async function CallsPage({ tenantSlug, scope, canUpload, members, score }: CallsPageProps) {
+  const calls = await listCalls(tenantSlug, scope);
 
   // Everything the list shows is prepared here, so dates are formatted once, on the server.
   const items: CallListItem[] = calls.map((call) => {
@@ -56,7 +62,7 @@ export async function CallsPage({ tenantSlug, score }: CallsPageProps) {
         description="Upload a recording to get its transcript, outcome, score and coaching."
         icon={Phone}
       />
-      <UploadCallForm tenantSlug={tenantSlug} />
+      {canUpload && <UploadCallForm tenantSlug={tenantSlug} members={members} />}
       {calls.length > 0 && <CallStats calls={calls} />}
       <CallList items={items} showScore={score != null} />
     </PageStack>

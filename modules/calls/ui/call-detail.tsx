@@ -6,19 +6,23 @@ import { Badge, Card, CardTitle } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
 import { CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
+import { AssignCall } from "./assign-call";
 import { AutoRefresh } from "./auto-refresh";
 import { CallPlayer, CallPlayerProvider } from "./call-player";
 import { CallResultBadge, callTitle, formatDateTime, formatDuration, PROCESSING_STEPS } from "./call-status";
 import { DeleteCallButton } from "./delete-call-button";
 import { RetryCallButton } from "./retry-call-button";
 import { TranscriptView } from "./transcript-view";
+import type { AssignableMember } from "./upload-call-form";
 
 interface CallDetailProps {
   call: CallRecord;
   /** Signed URL for the recording, or null when it can't be played. */
   recordingUrl: string | null;
-  /** Owners and managers can delete calls. */
+  /** Whether the viewer has the "calls.delete" permission. */
   canDelete: boolean;
+  /** Team members to reassign the call to; only for viewers with "calls.assign". */
+  assignableMembers?: AssignableMember[];
   /** Panels other modules contribute (scorecard, coaching); the app layer fills it. */
   children?: React.ReactNode;
 }
@@ -33,7 +37,7 @@ function Meta({ icon: Icon, children }: { icon: React.ComponentType<{ className?
 }
 
 /** Call header, outcome, player and transcript, with other modules' panels beside them. */
-export function CallDetail({ call, recordingUrl, canDelete, children }: CallDetailProps) {
+export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, children }: CallDetailProps) {
   const title = callTitle(call.fileName);
   // Panels can be switched off or not ready yet; without any, the call uses the full width.
   const hasPanels = Children.toArray(children).length > 0;
@@ -61,7 +65,23 @@ export function CallDetail({ call, recordingUrl, canDelete, children }: CallDeta
         />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted sm:pl-16">
           {call.callType && <Badge>{CALL_TYPE_LABELS[call.callType]}</Badge>}
-          <Meta icon={UserRound}>{call.employeeName ?? "Unknown employee"}</Meta>
+          {assignableMembers ? (
+            <AssignCall
+              tenantSlug={call.tenant}
+              callId={call.id}
+              employeeId={call.employeeId}
+              members={assignableMembers}
+            />
+          ) : (
+            <Meta icon={UserRound}>{call.employeeName ?? "Unknown employee"}</Meta>
+          )}
+          {/* The name heard in the call is a hint; flag it when it doesn't match the assignment. */}
+          {call.employeeId &&
+            call.heardEmployeeName &&
+            call.employeeName &&
+            call.heardEmployeeName.split(/\s+/)[0].toLowerCase() !== call.employeeName.split(/\s+/)[0].toLowerCase() && (
+              <span className="text-xs text-orange">Employee in the call said &ldquo;{call.heardEmployeeName}&rdquo;</span>
+            )}
           {call.durationSec != null && <Meta icon={Clock}>{formatDuration(call.durationSec)}</Meta>}
           <Meta icon={CalendarDays}>{formatDateTime(call.createdAt)}</Meta>
         </div>

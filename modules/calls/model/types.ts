@@ -25,7 +25,12 @@ export interface CallRecord {
   id: string;
   tenant: string;
   fileName: string;
+  /** Who the call belongs to: the assigned team member's name, else the name heard in the call. */
   employeeName: string | null;
+  /** The team member the call belongs to; null while unassigned. */
+  employeeId: string | null;
+  /** The employee's name as heard in the call, kept as a hint (e.g. to spot a wrong assignment). */
+  heardEmployeeName: string | null;
   status: CallStatus;
   /** Set while `status` is "processing". */
   stage?: ProcessingStage;

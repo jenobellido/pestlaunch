@@ -194,7 +194,7 @@ export function CoachingPage({ calls }: { calls: CoachingCall[] }) {
           </div>
           <div className="grid items-start gap-6 lg:grid-cols-2 2xl:grid-cols-3">
             {team.map((employee) => (
-              <EmployeeCard key={employee.name} employee={employee} />
+              <EmployeeCard key={`${employee.name}-${employee.calls[0]?.id}`} employee={employee} />
             ))}
           </div>
         </>

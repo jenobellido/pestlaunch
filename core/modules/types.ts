@@ -1,3 +1,5 @@
+import type { Permission } from "@/core/tenancy/permissions";
+
 /**
  * A module is a self-contained business feature (customers, scheduling, …)
  * that can be switched on or off per tenant.
@@ -27,5 +29,5 @@ export type ModuleSettings = Readonly<Record<string, boolean | undefined>>;
 /** A route handler that runs only after the module has been checked for the tenant. */
 export type ModuleRouteHandler = (
   req: Request,
-  ctx: { tenant: string; userId: string; role: "owner" | "manager" | "rep" },
+  ctx: { tenant: string; userId: string; permissions: readonly Permission[] },
 ) => Promise<Response>;

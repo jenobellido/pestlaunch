@@ -1,6 +1,7 @@
 import "server-only";
 import type { CallAnalysisStep, TranscriptSegment } from "@/core/calls";
 import { downloadRecording } from "@/core/storage";
+import { listMembers } from "@/core/tenancy";
 import { analyzeCall } from "./analyze-call";
 import { updateCall } from "./call-repository";
 import { transcribe } from "./transcribe";
@@ -13,7 +14,14 @@ import { transcribe } from "./transcribe";
  * and a failure keeps what already worked. Pass `transcript` to skip transcription on a retry.
  */
 export async function processCall(
-  call: { id: string; tenant: string; fileName: string; recordingPath: string },
+  call: {
+    id: string;
+    tenant: string;
+    tenantId: string;
+    fileName: string;
+    recordingPath: string;
+    employeeId: string | null;
+  },
   steps: readonly CallAnalysisStep[],
   options: { transcript?: TranscriptSegment[] } = {},
 ): Promise<void> {
@@ -30,7 +38,10 @@ export async function processCall(
 
     await updateCall(call.id, { stage: "analyzing" });
     const { callType, employeeName, outcome } = await analyzeCall(segments);
-    await updateCall(call.id, { callType, employeeName, outcome, stage: "reviewing" });
+    // Unassigned calls (uploaded with "work it out from the call") get the team member whose
+    // name the employee gave, when exactly one member matches.
+    const employeeId = call.employeeId ?? (await matchEmployee(call.tenantId, employeeName));
+    await updateCall(call.id, { callType, employeeName, employeeId, outcome, stage: "reviewing" });
 
     const input = { tenant: call.tenant, callId: call.id, callType, transcript: segments };
     const results = await Promise.all(steps.map((s) => s.run(input)));
@@ -45,4 +56,13 @@ export async function processCall(
       error: err instanceof Error ? err.message : "Processing failed",
     });
   }
+}
+
+/** The one team member whose first name matches the name heard in the call, if any. */
+async function matchEmployee(tenantId: string, heardName: string | null): Promise<string | null> {
+  const first = (name: string) => name.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+  const heard = heardName ? first(heardName) : "";
+  if (!heard) return null;
+  const matches = (await listMembers(tenantId)).filter((m) => first(m.displayName) === heard);
+  return matches.length === 1 ? matches[0].userId : null;
 }

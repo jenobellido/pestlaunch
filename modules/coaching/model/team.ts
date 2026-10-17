@@ -10,6 +10,8 @@ export interface CoachingCall {
   title: string;
   /** e.g. "Retention". */
   callType: string | null;
+  /** The team member the call belongs to. Calls are grouped by this when it's set. */
+  employeeId: string | null;
   employeeName: string | null;
   createdAt: string;
   /** Missing when the call type isn't scored or the scorecards module is off. */
@@ -44,12 +46,15 @@ const percent = (s: NonNullable<CoachingCall["score"]>) => (s.points / Math.max(
 const average = (values: number[]) =>
   values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
 
-/** Groups calls by employee (names compared case-insensitively) and summarises each. */
+/**
+ * Groups calls by team member, and unassigned calls by the name heard in the call (compared
+ * case-insensitively), then summarises each group.
+ */
 export function summarizeTeam(calls: CoachingCall[]): EmployeeSummary[] {
   const groups = new Map<string, CoachingCall[]>();
   for (const call of calls) {
     const name = call.employeeName?.trim() || UNKNOWN;
-    const key = name.toLowerCase();
+    const key = call.employeeId ? `member:${call.employeeId}` : `heard:${name.toLowerCase()}`;
     groups.set(key, [...(groups.get(key) ?? []), { ...call, employeeName: name }]);
   }
 

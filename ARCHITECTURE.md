@@ -33,7 +33,9 @@ core/                    Platform code every tenant gets. Not toggleable.
   config/                Validated server environment variables
   db/                    Drizzle schema and Postgres client
   modules/               Module manifest types, defineModule, dependency resolver
-  tenancy/               Tenants, membership, access checks
+  tenancy/               Tenants, membership, access checks, permissions and roles
+                         (permissions.ts), team: members, roles, invites
+                         (team-repository.ts)
   storage/               Private recordings bucket: signed uploads, download, playback URL, delete
                          (client.ts is the browser upload helper)
   ai/                    Groq client: Whisper transcription and structured-output chat
@@ -89,9 +91,33 @@ modules/<name>/
   per-module `analyses`. Rows belong to a tenant and are always queried by it.
 - **Auth** is Supabase Auth with email and password, using cookies through
   `@supabase/ssr`. `proxy.ts` refreshes the session on every request.
-- **Tenancy:** `tenants`, `tenant_members` (role: owner, manager or rep) and
-  `tenant_modules` (per-tenant module overrides). Sign-up creates the user, a
-  tenant and an owner membership.
+- **Tenancy:** `tenants`, `tenant_members` (with a `role_id` and a
+  `display_name`), `tenant_roles`, `tenant_invites` and `tenant_modules`
+  (per-tenant module overrides). Sign-up creates the user, a tenant with the
+  default roles, and an owner membership.
+- **Permissions, not roles:** the app only ever checks permissions
+  (`can(access, "calls.delete")`), listed in `core/tenancy/permissions.ts`:
+  `calls.upload`, `calls.view_all`, `calls.assign`, `calls.delete`,
+  `team.manage`, `roles.manage`, `company.manage`, `modules.manage`. A role is
+  a per-tenant row holding a list of them, so a tenant can add custom roles
+  in Settings without code changes. Every tenant starts with Owner (every
+  permission, locked), Manager (calls and team) and Rep (upload only).
+  Guards: nobody can grant a role, or build one, with permissions they don't
+  have; only an owner can make someone an owner; a tenant can't lose its last
+  owner.
+- **Invites:** a link with a random token (`/invite/[token]`, valid 14 days).
+  The invitee signs up (the email is locked to the invited address, and no
+  company is created) or logs in, and joins with the invite's role. Only the
+  invited email can accept it. No email server is needed: the inviter copies
+  the link.
+- **Calls belong to members.** `calls.employee_id` is the team member; the
+  name heard in the call (`employee_name`) is only a hint. A member without
+  `calls.assign` uploads calls as their own, whatever the recording says.
+  Someone with it picks the member, or leaves "Work it out from the call",
+  and processing assigns the one member whose first name matches the heard
+  name. Calls can be reassigned on the call page, which flags a mismatch with
+  the heard name. Without `calls.view_all` a member only sees their own calls
+  and coaching, enforced in the queries (`callScope`), so other calls 404.
 - **Authorization** is enforced in the app, not by RLS. Every table has RLS
   enabled with no policies, so Supabase's public REST API returns nothing.
   The server reads data over a direct Postgres connection and checks access
@@ -265,16 +291,18 @@ while a module it depends on is off.
 
 `/[tenant]/settings`, linked at the bottom of the sidebar and in the mobile
 bar. Every change is a server action with zod validation and a server-side
-role check.
+permission check.
 
 | Section | Who can change it | Saved in |
 | --- | --- | --- |
 | Appearance | Everyone | `pestlaunch-theme` cookie (browser only) |
 | Profile (display name) | Everyone, for themselves | Supabase Auth user metadata (`full_name`); the session is refreshed so the new name shows at once |
-| Company name | Owners | `tenants.name`; the URL slug never changes |
-| Modules | Owners | `tenant_modules` |
+| Company name | `company.manage` | `tenants.name`; the URL slug never changes |
+| Modules | `modules.manage` | `tenant_modules` |
+| Team (invites, member roles, remove) | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
+| Roles (custom roles, permissions) | `roles.manage`; everyone sees the roles | `tenant_roles` |
 
-Managers and reps see the company name and module switches read-only.
+Without the permission a section shows read-only.
 
 ## Adding a module
 

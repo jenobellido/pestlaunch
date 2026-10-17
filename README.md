@@ -78,12 +78,12 @@ the sidebar):
   worker) would resume automatically.
 - Search and filters on the call library run in the browser over every call.
   That's fine for hundreds of calls; thousands will need paging on the server.
-- The Coaching page groups calls by the employee name heard in the call, so
-  a misheard name splits one person into two. Linking calls to team members
-  needs teammate accounts first.
-- There's no way to invite teammates yet, so every workspace has one member,
-  its owner. The manager and rep views of Settings (read-only company name
-  and modules) are built but can't be reached without editing the database.
+- Invites are links the inviter copies and sends; the app doesn't email them.
+- "Work it out from the call" matches the heard employee name to a member by
+  first name only, and leaves the call unassigned when no single member
+  matches. It can be reassigned on the call page.
+- There are no sub-teams inside a company yet (e.g. a manager who only sees
+  their own reps). Roles are company-wide.
 - The theme is saved per browser, not per account.
 
 ## Next steps

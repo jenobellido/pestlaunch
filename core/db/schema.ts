@@ -1,4 +1,4 @@
-import { boolean, index, pgEnum, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, pgTable, primaryKey, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { authUsers } from "drizzle-orm/supabase";
 
 // RLS is enabled on every table with no policies, so Supabase's public Data
@@ -7,14 +7,32 @@ import { authUsers } from "drizzle-orm/supabase";
 
 const createdAt = () => timestamp({ withTimezone: true }).notNull().defaultNow();
 
-export const memberRole = pgEnum("member_role", ["owner", "manager", "rep"]);
-
 export const tenants = pgTable("tenants", {
   id: uuid().primaryKey().defaultRandom(),
   slug: text().notNull().unique(),
   name: text().notNull(),
   createdAt: createdAt(),
 }).enableRLS();
+
+/**
+ * A tenant's roles: named sets of permissions (see core/tenancy/permissions.ts). Every tenant
+ * gets Owner, Manager and Rep; custom roles are just more rows. `isOwner` marks the role that
+ * always has every permission and can't be edited or deleted, so a tenant can't lock itself out.
+ */
+export const tenantRoles = pgTable(
+  "tenant_roles",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    tenantId: uuid()
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    name: text().notNull(),
+    permissions: text().array().notNull().default([]),
+    isOwner: boolean().notNull().default(false),
+    createdAt: createdAt(),
+  },
+  (t) => [unique().on(t.tenantId, t.name), index().on(t.tenantId)],
+).enableRLS();
 
 export const tenantMembers = pgTable(
   "tenant_members",
@@ -25,10 +43,37 @@ export const tenantMembers = pgTable(
     userId: uuid()
       .notNull()
       .references(() => authUsers.id, { onDelete: "cascade" }),
-    role: memberRole().notNull().default("rep"),
+    roleId: uuid()
+      .notNull()
+      .references(() => tenantRoles.id, { onDelete: "restrict" }),
+    /** Shown on calls and coaching; copied from the user's profile name and kept in sync. */
+    displayName: text(),
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.tenantId, t.userId] }), index().on(t.userId)],
+).enableRLS();
+
+/**
+ * A pending invitation. The link carries `token`; whoever opens it signed in (or after signing
+ * up) joins the tenant with `roleId`. No email server needed: the inviter shares the link.
+ */
+export const tenantInvites = pgTable(
+  "tenant_invites",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    tenantId: uuid()
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    email: text().notNull(),
+    roleId: uuid()
+      .notNull()
+      .references(() => tenantRoles.id, { onDelete: "cascade" }),
+    token: text().notNull().unique(),
+    invitedBy: uuid().references(() => authUsers.id, { onDelete: "set null" }),
+    expiresAt: timestamp({ withTimezone: true }).notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [index().on(t.tenantId)],
 ).enableRLS();
 
 /** Per-tenant module overrides. A missing row means the module's default applies. */
