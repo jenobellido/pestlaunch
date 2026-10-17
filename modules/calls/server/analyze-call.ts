@@ -3,7 +3,7 @@ import { z } from "zod";
 import { generateObject } from "@/core/ai";
 import { CALL_TYPES, type CallType, type TranscriptSegment } from "@/core/calls";
 import { formatTimestamp } from "../lib/format";
-import type { CallOutcome, CallResolution } from "../model/types";
+import { CANCEL_REASONS, type CallOutcome, type CallResolution } from "../model/types";
 
 export interface CallAnalysis {
   callType: CallType;
@@ -31,6 +31,10 @@ const analysisSchema = z.object({
     .array(z.object({ label: z.string(), value: z.string() }))
     .describe("Key facts stated in the call, most important first, at most 6, no repeats"),
   followUps: z.array(z.string()).describe("Concrete actions the office still has to take; empty if none"),
+  cancelReason: z
+    .enum(CANCEL_REASONS)
+    .nullable()
+    .describe("Retention calls only: the main reason the customer wanted to cancel; null for other calls"),
 });
 
 // Call types and outcomes follow the PestLaunch office and sales call manuals.
@@ -58,6 +62,8 @@ Details: only facts actually said in the call, never guesses. Each fact once; do
 
 Follow-ups: only actions the employee promised or that clearly remain open in the call (e.g. "send the service agreement", "call back after manager approval", "confirm the appointment once the customer checks their schedule"). Don't invent routine tasks. Leave it empty when nothing is left to do, but a "follow_up_needed" resolution always has at least one.
 
+Cancel reason (retention calls only, else null): the customer's main reason, even if they were saved. Price = cost or budget; No longer needed = no pests anymore or the problem is solved; Service quality = pests came back, missed or late visits, technician issues; Moving = selling or leaving the area; Switching company = going to a competitor or doing it themselves; Scheduling = visit times don't work; Other = anything else, such as a death in the family.
+
 The transcript speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
 
 function transcriptText(segments: readonly TranscriptSegment[]) {
@@ -82,6 +88,7 @@ export async function analyzeCall(transcript: readonly TranscriptSegment[]): Pro
       resolution: result.resolution,
       details: result.details.filter((d) => d.label.trim() && d.value.trim()).slice(0, 8),
       followUps: result.followUps.map((f) => f.trim()).filter(Boolean),
+      cancelReason: result.callType === "retention" ? result.cancelReason : null,
     },
   };
 }
