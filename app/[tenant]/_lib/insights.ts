@@ -34,6 +34,8 @@ export interface DashboardCall {
 
 export type LeakKind = "sale_not_closed" | "cancelled" | "follow_up" | "below_standard";
 
+const LEAK_ORDER: Record<LeakKind, number> = { sale_not_closed: 0, cancelled: 1, follow_up: 2, below_standard: 3 };
+
 export interface Leak {
   call: DashboardCall;
   kind: LeakKind;
@@ -148,10 +150,11 @@ export function summarize(calls: DashboardCall[]) {
     reps.set(key, r);
   }
 
+  // Lost money first (unclosed sales, cancellations), then callers waiting on us, then quality.
   const leaks = ready
     .map(leakFor)
     .filter((l): l is Leak => l !== null)
-    .sort((a, b) => b.call.createdAt.localeCompare(a.call.createdAt));
+    .sort((a, b) => LEAK_ORDER[a.kind] - LEAK_ORDER[b.kind] || b.call.createdAt.localeCompare(a.call.createdAt));
 
   return {
     totals: {
