@@ -17,6 +17,7 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | See the important outcome and details | Summary, resolution (booked, saved, cancelled, resolved, follow-up needed, unresolved), key facts (pest, price quoted, appointment…), open follow-ups and, for cancel calls, the reason. |
 | See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. |
 | See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. Per rep: average score, trend, most-missed steps, and **Plays** a manager can assign. |
+| (beyond the brief) Follow leads | **Pipeline**: every new-customer call becomes a lead (New, Contacted, Booked, Lost) with the customer, pest, price and next step. |
 | Review all calls and results | **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
 
 Beyond the brief, it's ready for a real team:
@@ -147,12 +148,11 @@ the sidebar):
    small hand-checked answer key.
 2. Notify people when a follow-up is assigned to them (email or SMS), and
    alert the owner when a new leak appears.
-3. Create leads from unbooked sales calls and show them in a pipeline.
-4. Link callers to customers in the PestLaunch CRM, and import calls
+3. Link callers to customers in the PestLaunch CRM, and import calls
    automatically from the phone system instead of uploading them.
-5. A durable job queue for processing, and paging on the server for large
+4. A durable job queue for processing, and paging on the server for large
    call libraries.
-6. Deploy.
+5. Deploy.
 
 ## Call data
 

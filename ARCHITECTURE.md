@@ -225,6 +225,17 @@ the app without exposing real recordings. Scripts import server code through
 `scripts/allow-server-only.cjs`, which points the `server-only` guard at an
 empty module outside Next.
 
+## Pipeline
+
+`/[tenant]/pipeline` (a second nav item from the calls module) shows every
+new-customer call as a lead on a board: New, Contacted, Booked, Lost. The
+`leads` table is owned by the calls module, one row per sales call. Processing
+creates the lead once the call is analyzed (booked calls start as Booked,
+the rest as New) with the customer name, pest and price from the call's
+details; a migration backfilled existing calls. Each card links to its call
+and shows the next follow-up; a stage control moves it. Members without
+`calls.view_all` see and move only leads from their own calls.
+
 ## Overview dashboard
 
 `/[tenant]` answers an owner's questions at a glance, for 7 days, 30 days or

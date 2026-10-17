@@ -4,6 +4,7 @@ import { downloadRecording } from "@/core/storage";
 import { listMembers } from "@/core/tenancy";
 import { analyzeCall } from "./analyze-call";
 import { updateCall } from "./call-repository";
+import { upsertLeadForCall } from "./lead-repository";
 import { transcribe } from "./transcribe";
 
 /**
@@ -42,6 +43,8 @@ export async function processCall(
     // name the employee gave, when exactly one member matches.
     const employeeId = call.employeeId ?? (await matchEmployee(call.tenantId, employeeName));
     await updateCall(call.id, { callType, employeeName, employeeId, outcome, stage: "reviewing" });
+    // Every new-customer call is a sales opportunity on the pipeline.
+    if (callType === "new_customer") await upsertLeadForCall({ id: call.id, tenantId: call.tenantId }, outcome);
 
     const input = { tenant: call.tenant, callId: call.id, callType, transcript: segments };
     const results = await Promise.all(steps.map((s) => s.run(input)));

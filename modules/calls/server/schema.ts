@@ -66,3 +66,31 @@ export const callTasks = pgTable(
   },
   (t) => [index().on(t.tenantId, t.assigneeId), index().on(t.callId)],
 ).enableRLS();
+
+export const leadStage = pgEnum("lead_stage", ["new", "contacted", "booked", "lost"]);
+
+/**
+ * A sales opportunity from a new-customer call. Created when the call is analyzed (booked
+ * calls start as "booked", the rest as "new") and moved along the pipeline by the team.
+ */
+export const leads = pgTable(
+  "leads",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    tenantId: uuid()
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    callId: uuid()
+      .notNull()
+      .unique()
+      .references(() => calls.id, { onDelete: "cascade" }),
+    stage: leadStage().notNull().default("new"),
+    customerName: text(),
+    /** What they need, e.g. "Ants in the kitchen". */
+    need: text(),
+    priceQuoted: text(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index().on(t.tenantId, t.stage)],
+).enableRLS();
