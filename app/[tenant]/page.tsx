@@ -1,8 +1,8 @@
 import { Suspense } from "react";
 import { LayoutGrid } from "lucide-react";
-import { can } from "@/core/tenancy";
+import { can, listMembers } from "@/core/tenancy";
 import { CALL_TYPE_GROUP, CALL_TYPE_LABELS } from "@/modules/calls";
-import { callScope, listCalls } from "@/modules/calls/server";
+import { callScope, listCalls, listTasks } from "@/modules/calls/server";
 import { isModuleEnabled } from "@/modules/registry";
 import { getScorecardResult } from "@/modules/scorecards";
 import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
@@ -16,9 +16,13 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
   const access = await requireModule(params, "calls");
   const { tenant, user, permissions } = access;
   const range = parseRange((await searchParams).range);
-  const [calls, scored] = await Promise.all([
+  const canAssign = can(access, "calls.assign");
+  const [calls, scored, tasks, members] = await Promise.all([
     listCalls(tenant.slug, callScope({ userId: user.id, permissions })),
     isModuleEnabled(tenant.slug, "scorecards"),
+    // People who assign follow-ups see the team's tasks; everyone else only their own.
+    listTasks(tenant.id, canAssign ? {} : { assigneeId: user.id }),
+    canAssign ? listMembers(tenant.id) : Promise.resolve(null),
   ]);
   const mine = !can(access, "calls.view_all");
 
@@ -50,7 +54,14 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
         icon={LayoutGrid}
         actions={<RangeChips base={`/${tenant.slug}`} range={range} />}
       />
-      <Overview insights={summarize(inRange(dashboardCalls, range))} slug={tenant.slug} mine={mine} />
+      <Overview
+        insights={summarize(inRange(dashboardCalls, range))}
+        slug={tenant.slug}
+        mine={mine}
+        tasks={tasks}
+        members={members?.map((m) => ({ id: m.userId, name: m.displayName })) ?? null}
+        currentUserId={user.id}
+      />
     </PageStack>
   );
 }

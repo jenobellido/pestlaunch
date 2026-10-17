@@ -12,3 +12,4 @@ export {
   retryCallHandler,
   type Viewer,
 } from "./server/handlers";
+export { createTask, deleteTask, findTask, listTasks, setTaskStatus, type CallTask } from "./server/task-repository";

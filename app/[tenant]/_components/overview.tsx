@@ -13,6 +13,7 @@ import {
 import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle, EmptyState } from "@/shared/ui/card";
 import { RANGES, type Insights, type LeakKind, type Range } from "../_lib/insights";
+import { AssignTask, TasksCard, type Assignee, type TaskRow } from "./tasks";
 
 const LEAK_STYLE: Record<LeakKind, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
   sale_not_closed: { icon: CircleDollarSign, tone: "bg-orange/15 text-orange" },
@@ -84,17 +85,40 @@ function Tile({
   );
 }
 
-export function Overview({ insights, slug, mine }: { insights: Insights; slug: string; mine: boolean }) {
+export function Overview({
+  insights,
+  slug,
+  mine,
+  tasks,
+  members,
+  currentUserId,
+}: {
+  insights: Insights;
+  slug: string;
+  mine: boolean;
+  tasks: TaskRow[];
+  /** Teammates to assign leaks to; only for viewers with "calls.assign". */
+  members: Assignee[] | null;
+  currentUserId: string;
+}) {
+  // A leak with an open task shows who owns it instead of the Assign control.
+  const ownerByCall = new Map(tasks.filter((t) => t.status === "open").map((t) => [t.callId, t.assigneeName]));
+  const tasksCard = (
+    <TasksCard slug={slug} tasks={tasks} canManage={members !== null} currentUserId={currentUserId} />
+  );
   const { totals, sales, retention, quality, leaks, reps } = insights;
 
   if (totals.calls === 0) {
     return (
+      <>
+      {tasks.length > 0 && tasksCard}
       <EmptyState icon={Phone} title="No calls in this period" className="min-h-80">
         <p>Upload call recordings and this page fills with close rates, saved cancels, follow-ups and scores.</p>
         <Link href={`/${slug}/calls`} className="mt-4 inline-flex items-center gap-1 font-medium text-accent hover:underline">
           Go to Calls <ArrowRight className="size-4" aria-hidden />
         </Link>
       </EmptyState>
+      </>
     );
   }
 
@@ -163,11 +187,12 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
             <ul className="mt-3">
               {leaks.slice(0, 8).map(({ call, kind, label, detail }) => {
                 const { icon: Icon, tone } = LEAK_STYLE[kind];
+                const owner = ownerByCall.get(call.id);
                 return (
-                  <li key={call.id} className="border-t border-line">
+                  <li key={call.id} className="flex items-center gap-2 border-t border-line pr-4 transition-colors hover:bg-card-2 sm:pr-5">
                     <Link
                       href={call.href}
-                      className="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-card-2 sm:px-6"
+                      className="group flex min-w-0 flex-1 items-center gap-3 py-3.5 pl-5 sm:pl-6"
                     >
                       <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tone)}>
                         <Icon className="size-4" aria-hidden />
@@ -184,6 +209,15 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
                       </span>
                       <ChevronRight className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" aria-hidden />
                     </Link>
+                    {owner ? (
+                      <span className="max-w-28 shrink-0 truncate rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
+                        {owner.split(/\s+/)[0]}
+                      </span>
+                    ) : (
+                      members && (
+                        <AssignTask slug={slug} callId={call.id} title={`${label}: ${detail}`.slice(0, 200)} members={members} />
+                      )
+                    )}
                   </li>
                 );
               })}
@@ -200,6 +234,7 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
         </Card>
 
         <div className="flex min-w-0 flex-col gap-6">
+          {tasksCard}
           {!mine && reps.length > 0 && (
             <Card>
               <div className="flex items-center justify-between gap-3">

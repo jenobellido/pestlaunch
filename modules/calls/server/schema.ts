@@ -38,3 +38,31 @@ export const calls = pgTable(
   },
   (t) => [index().on(t.tenantId, t.createdAt.desc())],
 ).enableRLS();
+
+export const taskStatus = pgEnum("call_task_status", ["open", "done"]);
+
+/**
+ * A follow-up someone owes on a call (call the lead back, send the agreement, try to win back
+ * a cancellation). Created from a Leak or a call's follow-ups and assigned to a team member.
+ */
+export const callTasks = pgTable(
+  "call_tasks",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    tenantId: uuid()
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    callId: uuid()
+      .notNull()
+      .references(() => calls.id, { onDelete: "cascade" }),
+    assigneeId: uuid()
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    assignedBy: uuid().references(() => authUsers.id, { onDelete: "set null" }),
+    title: text().notNull(),
+    status: taskStatus().notNull().default("open"),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp({ withTimezone: true }),
+  },
+  (t) => [index().on(t.tenantId, t.assigneeId), index().on(t.callId)],
+).enableRLS();

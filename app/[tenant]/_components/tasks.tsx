@@ -1,0 +1,187 @@
+"use client";
+
+import Link from "next/link";
+import { useId, useState, useTransition } from "react";
+import { Check, ListTodo, UserPlus, X } from "lucide-react";
+import { cn } from "@/shared/lib/cn";
+import { Spinner } from "@/shared/ui/button";
+import { assignTask, removeTask, setTaskDone, type TaskResult } from "../_lib/task-actions";
+
+export interface TaskRow {
+  id: string;
+  callId: string;
+  callTitle: string;
+  assigneeId: string;
+  assigneeName: string;
+  title: string;
+  status: "open" | "done";
+}
+
+export interface Assignee {
+  id: string;
+  name: string;
+}
+
+function useAction() {
+  const [pending, start] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const run = (action: () => Promise<TaskResult>) => {
+    setError(null);
+    start(async () => {
+      const result = await action();
+      if (!result.ok) setError(result.error);
+    });
+  };
+  return { pending, error, run };
+}
+
+/** "Assign" on a leak: choosing a teammate creates a follow-up task on that call. */
+export function AssignTask({
+  slug,
+  callId,
+  title,
+  members,
+}: {
+  slug: string;
+  callId: string;
+  title: string;
+  members: Assignee[];
+}) {
+  const id = useId();
+  const { pending, error, run } = useAction();
+  return (
+    <span className="relative inline-flex shrink-0 items-center">
+      <label htmlFor={id} className="sr-only">
+        Assign a follow-up
+      </label>
+      <span
+        className={cn(
+          "pointer-events-none absolute left-2.5 flex items-center text-muted",
+          pending && "text-accent",
+        )}
+        aria-hidden
+      >
+        {pending ? <Spinner className="size-3.5" /> : <UserPlus className="size-3.5" />}
+      </span>
+      <select
+        id={id}
+        value=""
+        disabled={pending}
+        onChange={(e) => {
+          const assigneeId = e.target.value;
+          if (assigneeId) run(() => assignTask(slug, callId, assigneeId, title));
+        }}
+        title={error ?? "Assign a follow-up"}
+        className={cn(
+          "h-8 w-[6.75rem] cursor-pointer appearance-none rounded-full border bg-card pr-3 pl-8 text-xs font-medium outline-none transition-colors hover:border-accent focus:border-accent focus:ring-4 focus:ring-accent/15",
+          error ? "border-danger text-danger" : "border-line text-fg",
+        )}
+      >
+        <option value="">{error ? "Try again" : "Assign"}</option>
+        {members.map((m) => (
+          <option key={m.id} value={m.id}>
+            {m.name}
+          </option>
+        ))}
+      </select>
+    </span>
+  );
+}
+
+function TaskItem({
+  slug,
+  task,
+  canManage,
+  mine,
+}: {
+  slug: string;
+  task: TaskRow;
+  canManage: boolean;
+  mine: boolean;
+}) {
+  const { pending, error, run } = useAction();
+  const done = task.status === "done";
+  return (
+    <li className="flex items-start gap-3 py-3">
+      <button
+        type="button"
+        disabled={pending || (!mine && !canManage)}
+        aria-label={done ? `Reopen: ${task.title}` : `Mark done: ${task.title}`}
+        onClick={() => run(() => setTaskDone(slug, task.id, !done))}
+        className={cn(
+          "press mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors",
+          done ? "border-success bg-success text-accent-ink" : "border-line-strong hover:border-accent",
+        )}
+      >
+        {pending ? <Spinner className="size-3" /> : done ? <Check className="size-3.5" strokeWidth={3} aria-hidden /> : null}
+      </button>
+      <div className="min-w-0 flex-1 text-sm">
+        <p className={cn("line-clamp-2", done && "text-muted line-through")}>{task.title}</p>
+        <p className="mt-0.5 text-xs text-muted">
+          <Link href={`/${slug}/calls/${task.callId}`} className="hover:text-fg hover:underline">
+            {task.callTitle}
+          </Link>
+          {!mine && ` · ${task.assigneeName}`}
+        </p>
+        {error && (
+          <p role="alert" className="mt-1 text-xs text-danger">
+            {error}
+          </p>
+        )}
+      </div>
+      {canManage && (
+        <button
+          type="button"
+          aria-label={`Remove: ${task.title}`}
+          disabled={pending}
+          onClick={() => run(() => removeTask(slug, task.id))}
+          className="press flex size-8 shrink-0 items-center justify-center rounded-full text-muted hover:bg-card-2 hover:text-fg"
+        >
+          <X className="size-4" aria-hidden />
+        </button>
+      )}
+    </li>
+  );
+}
+
+/** Follow-up tasks: the viewer's own, or the whole team's for people who assign them. */
+export function TasksCard({
+  slug,
+  tasks,
+  canManage,
+  currentUserId,
+}: {
+  slug: string;
+  tasks: TaskRow[];
+  canManage: boolean;
+  currentUserId: string;
+}) {
+  const open = tasks.filter((t) => t.status === "open");
+  const recentDone = tasks.filter((t) => t.status === "done").slice(0, 3);
+  if (tasks.length === 0 && !canManage) return null;
+  return (
+    <section className="rounded-[28px] bg-card p-5 sm:p-6">
+      <div className="flex items-center gap-3">
+        <span className="flex size-9 items-center justify-center rounded-xl bg-accent/15 text-accent">
+          <ListTodo className="size-4" aria-hidden />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-[15px] font-medium">{canManage ? "Follow-up tasks" : "Your tasks"}</h2>
+          <p className="text-sm text-muted">
+            {canManage ? "Leaks assigned to the team. Use Assign on a leak to add one." : "Calls you've been asked to follow up on."}
+          </p>
+        </div>
+        <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{open.length} open</span>
+      </div>
+      {tasks.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">No follow-ups assigned yet.</p>
+      ) : (
+        <ul className="mt-2 divide-y divide-line">
+          {[...open, ...recentDone].map((t) => (
+            <TaskItem key={t.id} slug={slug} task={t} canManage={canManage} mine={t.assigneeId === currentUserId} />
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

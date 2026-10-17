@@ -50,6 +50,13 @@
       "when": 1792253443596,
       "tag": "0006_coaching_plays",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792263818066,
+      "tag": "0007_call_tasks",
+      "breakpoints": true
     }
   ]
 }

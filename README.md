@@ -145,8 +145,8 @@ the sidebar):
 1. Switch the AI provider to OpenAI (configuration only), then run every test
    call and tune prompts for accuracy, including speaker labels, against a
    small hand-checked answer key.
-2. Turn Leaks into assignable follow-up tasks, like Plays, and alert the
-   owner when one appears.
+2. Notify people when a follow-up is assigned to them (email or SMS), and
+   alert the owner when a new leak appears.
 3. Create leads from unbooked sales calls and show them in a pipeline.
 4. Link callers to customers in the PestLaunch CRM, and import calls
    automatically from the phone system instead of uploading them.
