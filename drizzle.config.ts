@@ -5,7 +5,8 @@ config({ path: ".env.local" });
 
 export default defineConfig({
   dialect: "postgresql",
-  schema: "./core/db/schema.ts",
+  // Core tables plus each module's own tables.
+  schema: ["./core/db/schema.ts", "./modules/*/server/schema.ts"],
   out: "./drizzle",
   casing: "snake_case",
   schemaFilter: ["public"],

@@ -38,12 +38,32 @@ Supabase projects on the default 543xx ports.
 | `npm run typecheck` | Generate route types and run tsc |
 | `npm run lint` | ESLint, including architecture import rules |
 | `npm run db:start` / `db:stop` | Start or stop the local Supabase stack |
-| `npm run db:generate` | Create a migration from changes to `core/db/schema.ts` |
+| `npm run db:generate` | Create a migration from changes to `core/db/schema.ts` or a module's `server/schema.ts` |
 | `npm run db:migrate` | Apply pending migrations |
 | `npm run db:reset` | Wipe the local database and re-apply all migrations |
 | `npm run db:studio` | Drizzle Studio |
+
+## Known limitations
+
+- Calls can't be processed yet: transcription, call analysis, scoring and
+  coaching are still placeholders.
+- Calls can be deleted through the API (`DELETE /api/[tenant]/calls/[id]`),
+  but there's no delete button in the UI yet.
+- Processing runs inside the upload request. Long recordings will hit
+  serverless time limits once deployed.
+- The Coaching page is a placeholder; per-employee trends aren't built.
+
+## Next steps
+
+1. Transcription with speaker labels.
+2. Call type and outcome, scorecard grading with evidence quotes, coaching.
+3. Process in the background and show progress in the UI.
+4. Run every test call and tune prompts for accuracy.
+5. Deploy.
 
 ## Call data
 
 The call recordings used to test this are real customer calls. They are never
 committed to this repository. Keep them outside the repo or in private storage.
+Uploaded recordings live only in the private `recordings` bucket, and deleting
+a call deletes its recording too.

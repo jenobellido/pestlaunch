@@ -17,10 +17,12 @@ export default async function Page({ params }: PageProps<"/[tenant]/calls/[callI
   ]);
   if (!call) notFound();
 
+  // Panels only make sense once every analysis step has run.
+  const ready = call.status === "ready";
   return (
     <CallDetail call={call}>
-      {enabled.has("scorecards") && <ScorecardPanel result={getScorecardResult(call.analyses)} />}
-      {enabled.has("coaching") && <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />}
+      {ready && enabled.has("scorecards") && <ScorecardPanel result={getScorecardResult(call.analyses)} />}
+      {ready && enabled.has("coaching") && <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />}
     </CallDetail>
   );
 }

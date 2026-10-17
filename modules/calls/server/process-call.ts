@@ -1,46 +1,39 @@
 import "server-only";
 import type { CallAnalysisStep } from "@/core/calls";
-import type { CallRecord } from "../model/types";
+import { downloadRecording } from "@/core/storage";
 import { analyzeCall } from "./analyze-call";
-import { saveCall } from "./call-repository";
+import { updateCall } from "./call-repository";
 import { transcribe } from "./transcribe";
 
 /**
- * Runs a recording through the pipeline:
+ * Runs an uploaded recording through the pipeline:
  * transcribe → classify + extract outcome → steps from other enabled modules.
  * `steps` is injected by the caller so this module never imports another module.
+ * Each stage is saved as it finishes, so a failure keeps what already worked.
  */
 export async function processCall(
-  tenant: string,
-  audio: File,
+  call: { id: string; tenant: string; fileName: string; recordingPath: string },
   steps: readonly CallAnalysisStep[],
-): Promise<CallRecord> {
-  const call: CallRecord = {
-    id: crypto.randomUUID(),
-    tenant,
-    fileName: audio.name,
-    employeeName: null,
-    status: "processing",
-    createdAt: new Date().toISOString(),
-    analyses: {},
-  };
-  await saveCall(call);
-
+): Promise<void> {
   try {
+    const blob = await downloadRecording(call.recordingPath);
+    const audio = new File([blob], call.fileName, { type: blob.type });
+
     const { durationSec, segments } = await transcribe(audio);
+    await updateCall(call.id, { durationSec: Math.round(durationSec), transcript: segments });
+
     const { callType, employeeName, outcome } = await analyzeCall(segments);
-    Object.assign(call, { durationSec, transcript: segments, callType, employeeName, outcome });
+    await updateCall(call.id, { callType, employeeName, outcome });
 
-    const input = { tenant, callId: call.id, callType, transcript: segments };
+    const input = { tenant: call.tenant, callId: call.id, callType, transcript: segments };
     const results = await Promise.all(steps.map((s) => s.run(input)));
-    steps.forEach((s, i) => (call.analyses[s.moduleId] = results[i]));
+    const analyses = Object.fromEntries(steps.map((s, i) => [s.moduleId, results[i]]));
 
-    call.status = "ready";
+    await updateCall(call.id, { analyses, status: "ready", error: null });
   } catch (err) {
-    call.status = "failed";
-    call.error = err instanceof Error ? err.message : "Processing failed";
+    await updateCall(call.id, {
+      status: "failed",
+      error: err instanceof Error ? err.message : "Processing failed",
+    });
   }
-
-  await saveCall(call);
-  return call;
 }
