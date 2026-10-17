@@ -48,8 +48,9 @@ Supabase projects on the default 543xx ports.
 
 ## Known limitations
 
-- Calls are transcribed, but call analysis, scoring and coaching are still
-  placeholders, so every call ends as "failed" after its transcript is saved.
+- Calls are transcribed and analyzed (call type, outcome, details), but
+  scoring and coaching are still placeholders, so a call ends as "failed"
+  after its transcript and outcome are saved.
 - Speaker labels come from a language model reading the transcript, not from
   the audio, so they're occasionally swapped, mostly where two people talk
   over each other. When a segment is split between speakers, the split's
@@ -66,7 +67,7 @@ Supabase projects on the default 543xx ports.
 
 ## Next steps
 
-1. Call type and outcome, scorecard grading with evidence quotes, coaching.
+1. Scorecard grading with evidence quotes, then coaching.
 2. Process in the background and show progress in the UI.
 3. Run every test call and tune prompts for accuracy, including speaker labels.
 4. Deploy.

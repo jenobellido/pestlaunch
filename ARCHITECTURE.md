@@ -130,7 +130,13 @@ error:
      words, so no text is invented.
    - Consecutive lines from the same speaker are joined into turns of up to
      about 30 seconds.
-2. **Analyze**: classify the call type and extract the outcome and key details.
+2. **Analyze** (`analyze-call.ts`): one `gpt-oss-120b` request with a strict
+   schema returns the call type, the employee's name, a short summary, the
+   resolution (booked, retained, cancelled, resolved, follow-up needed,
+   unresolved), key details and open follow-ups. The call type definitions
+   come from the call manuals and judge the caller's real purpose, not the
+   phone menu option. The prompt asks for facts said in the call only, with
+   dates as spoken and no invented follow-ups.
 3. **Module steps**: run the `CallAnalysisStep` of every enabled module
    (scorecards, coaching). Each result is stored under `analyses[moduleId]`.
 
@@ -197,7 +203,9 @@ the maths is deterministic.
 In place: auth, tenancy, module gating, database, scorecard data and grading
 maths, the UI for every page (Freehold design), and call storage: uploads go
 to the private bucket, calls are saved in Postgres, and calls can be deleted
-through the API. Transcription with speaker labels works.
+through the API. Transcription with speaker labels, and call type and
+outcome analysis work.
 
-Still placeholders that throw: `analyzeCall`, `scoringStep`, `coachingStep`.
-So every call currently ends as `failed` after its transcript is saved.
+Still placeholders that throw: `scoringStep`, `coachingStep`. So a call
+processed in the app currently ends as `failed` after its transcript and
+outcome are saved.
