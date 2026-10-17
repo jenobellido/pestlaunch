@@ -61,15 +61,17 @@ function Tile({
   value,
   valueClass,
   hint,
+  className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   value: string;
   valueClass?: string;
   hint: React.ReactNode;
+  className?: string;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-2 bg-card px-5 py-4">
+    <div className={cn("flex min-w-0 flex-col gap-2 bg-card px-5 py-4", className)}>
       <dt className="flex items-center gap-2 text-sm text-muted">
         <Icon className="size-4 shrink-0" aria-hidden />
         <span className="truncate">{label}</span>
@@ -118,6 +120,7 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
         <Tile
           icon={Star}
           label="Avg score"
+          className="col-span-2 lg:col-span-1"
           value={percent(quality.averageScore)}
           valueClass={rateTone(quality.averageScore, 90, 75)}
           hint={
@@ -146,7 +149,7 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
       )}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Card className="p-0 sm:p-0">
+        <Card className="min-w-0 p-0 sm:p-0">
           <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
             <div>
               <CardTitle>Leaks</CardTitle>
@@ -170,9 +173,9 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
                         <Icon className="size-4" aria-hidden />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="flex items-center gap-2 text-sm">
-                          <span className="font-medium">{label}</span>
-                          <span className="truncate text-muted">
+                        <span className="flex min-w-0 items-center gap-2 text-sm">
+                          <span className="shrink-0 font-medium whitespace-nowrap">{label}</span>
+                          <span className="min-w-0 truncate text-muted">
                             · {call.title}
                             {call.employeeName && ` · ${call.employeeName}`}
                           </span>
@@ -196,7 +199,7 @@ export function Overview({ insights, slug, mine }: { insights: Insights; slug: s
           )}
         </Card>
 
-        <div className="flex flex-col gap-6">
+        <div className="flex min-w-0 flex-col gap-6">
           {!mine && reps.length > 0 && (
             <Card>
               <div className="flex items-center justify-between gap-3">
