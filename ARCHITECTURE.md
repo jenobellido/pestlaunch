@@ -12,12 +12,14 @@ proxy.ts                 Refreshes the Supabase session; sends signed-out users 
 app/                     Routing only: thin pages, layouts, route handlers
   (auth)/                /login, /signup, /onboarding
   [tenant]/              UI, e.g. /noble-pest/calls
-    _components/         TenantNav (enabled modules + user menu), PageSkeleton
+    _components/         TenantNav (enabled modules, Settings, user menu), PageSkeleton
     _lib/                requireModule (auth + membership + module check)
     calls/               Call library + upload
     calls/[callId]/      Call detail; composes panels from other modules
     scorecards/          The scoring standards
     coaching/            Employee coaching
+    settings/            Appearance, profile, company name, module switches
+                         (server actions in actions.ts)
   api/[tenant]/          Backend API, e.g. /api/noble-pest/calls
     _lib/                withModule (auth + membership + module check)
     calls/route.ts       GET list · POST create a call for an uploaded recording + process
@@ -44,7 +46,10 @@ modules/                 Toggleable features
   scorecards/            Grades calls with the manual scorecards (needs calls)
   coaching/              Per-call feedback and per-employee view (needs calls)
 shared/                  Business-agnostic UI, helpers and config
-  ui/                    Card, Badge, EmptyState, PageHeader, buttons, logo
+  config/theme.ts        Theme cookie name and the boot script that applies it before first paint
+  lib/theme.ts           Read, save and apply the theme in the browser
+  ui/                    Card, Badge, EmptyState, PageHeader, buttons, logo,
+                         form fields, Segmented, Switch, ThemeSync
 ```
 
 Every module has the same shape:
@@ -146,9 +151,15 @@ off for a tenant removes both its UI and its processing step.
 
 ## UI and design
 
-The look follows the Freehold design system: dark by default, light when the
-device is set to light (`shared/config/theme.ts` sets `<html data-theme>`
-before first paint), the Outfit font, rounded cards and mint accent pills.
+The look follows the Freehold design system: the Outfit font, rounded cards
+and mint accent pills, in dark and light.
+
+- **Theme:** System, Light or Dark, picked on the Settings page and saved in
+  the `pestlaunch-theme` cookie (no server round trip). A boot script in
+  `shared/config/theme.ts` reads the cookie and sets `<html data-theme>` before
+  first paint, so there's no flash. System follows the device, and dark is
+  the default when the device can't be read. `ThemeSync` (root layout) keeps
+  System in step when the device switches while the page is open.
 
 - Colour tokens are CSS variables in `app/globals.css`, exposed to Tailwind
   as `bg-card`, `text-muted`, `text-accent`, etc. Use tokens, not raw colours,
@@ -186,7 +197,29 @@ the maths is deterministic.
    Don't rely on a layout for this: Next renders layouts and pages in
    parallel, so a layout check alone still lets a disabled page render and
    send its data.
-5. After changing a tenant's modules, call `revalidateTag(tenantCacheTag(slug))`.
+5. After changing a tenant's modules or name, expire its cache tag:
+   `updateTag(tenantCacheTag(slug))` in a server action (the user sees the
+   change at once), `revalidateTag` elsewhere.
+
+Owners switch modules on the Settings page (`app/[tenant]/settings`). It
+writes `tenant_modules` rows. The base module (`baseModuleId` in
+`registry.ts`, Calls) can't be turned off, and a module can't be turned on
+while a module it depends on is off.
+
+## Settings
+
+`/[tenant]/settings`, linked at the bottom of the sidebar and in the mobile
+bar. Every change is a server action with zod validation and a server-side
+role check.
+
+| Section | Who can change it | Saved in |
+| --- | --- | --- |
+| Appearance | Everyone | `pestlaunch-theme` cookie (browser only) |
+| Profile (display name) | Everyone, for themselves | Supabase Auth user metadata (`full_name`); the session is refreshed so the new name shows at once |
+| Company name | Owners | `tenants.name`; the URL slug never changes |
+| Modules | Owners | `tenant_modules` |
+
+Managers and reps see the company name and module switches read-only.
 
 ## Adding a module
 
@@ -201,7 +234,9 @@ the maths is deterministic.
 ## Status
 
 In place: auth, tenancy, module gating, database, scorecard data and grading
-maths, the UI for every page (Freehold design), and call storage: uploads go
+maths, the UI for every page (Freehold design), the Settings page (theme,
+profile, company name, module switches), a branded app icon and 404 page,
+and call storage: uploads go
 to the private bucket, calls are saved in Postgres, and calls can be deleted
 through the API. Transcription with speaker labels, and call type and
 outcome analysis work.

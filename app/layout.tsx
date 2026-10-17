@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import { siteConfig } from "@/shared/config/site";
 import { THEME_BOOT_SCRIPT } from "@/shared/config/theme";
 import { InlineScript } from "@/shared/ui/inline-script";
+import { ThemeSync } from "@/shared/ui/theme-sync";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${outfit.variable} h-full antialiased`} suppressHydrationWarning>
       <body className="flex min-h-full flex-col font-sans">
         <InlineScript html={THEME_BOOT_SCRIPT} />
+        <ThemeSync />
         {children}
       </body>
     </html>

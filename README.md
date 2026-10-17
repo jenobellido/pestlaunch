@@ -46,6 +46,17 @@ Supabase projects on the default 543xx ports.
 | `npm run db:reset` | Wipe the local database and re-apply all migrations |
 | `npm run db:studio` | Drizzle Studio |
 
+## Settings
+
+Each workspace has a Settings page (`/<company>/settings`, at the bottom of
+the sidebar):
+
+- **Appearance:** System, Light or Dark. Saved in a cookie on this browser.
+- **Profile:** your display name.
+- **Company:** the company name (owners only). The URL doesn't change.
+- **Modules:** turn Scorecards and Coaching on or off for the whole company
+  (owners only). Calls is the base module and is always on.
+
 ## Known limitations
 
 - Calls are transcribed and analyzed (call type, outcome, details), but
@@ -64,6 +75,10 @@ Supabase projects on the default 543xx ports.
 - Processing runs inside the upload request. Long recordings will hit
   serverless time limits once deployed.
 - The Coaching page is a placeholder; per-employee trends aren't built.
+- There's no way to invite teammates yet, so every workspace has one member,
+  its owner. The manager and rep views of Settings (read-only company name
+  and modules) are built but can't be reached without editing the database.
+- The theme is saved per browser, not per account.
 
 ## Next steps
 

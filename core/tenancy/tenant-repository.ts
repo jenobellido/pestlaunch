@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { cacheTag } from "next/cache";
 import { db, schema } from "@/core/db";
 import { slugify } from "./slug";
@@ -68,4 +68,22 @@ export async function createTenantForOwner(name: string, userId: string) {
     }
     throw new Error("Could not generate a unique company URL.");
   });
+}
+
+/** Renames a tenant. The slug (its URL) stays the same. Revalidate `tenantCacheTag(slug)` after. */
+export async function renameTenant(tenantId: string, name: string) {
+  await db.update(tenants).set({ name }).where(eq(tenants.id, tenantId));
+}
+
+/** Saves module overrides for a tenant. Revalidate `tenantCacheTag(slug)` after. */
+export async function setTenantModules(tenantId: string, settings: Record<string, boolean>) {
+  const rows = Object.entries(settings).map(([moduleId, enabled]) => ({ tenantId, moduleId, enabled }));
+  if (rows.length === 0) return;
+  await db
+    .insert(tenantModules)
+    .values(rows)
+    .onConflictDoUpdate({
+      target: [tenantModules.tenantId, tenantModules.moduleId],
+      set: { enabled: sql`excluded.enabled`, updatedAt: sql`now()` },
+    });
 }

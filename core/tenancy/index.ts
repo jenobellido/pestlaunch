@@ -5,5 +5,7 @@ export {
   createTenantForOwner,
   getTenantBySlug,
   listUserTenants,
+  renameTenant,
+  setTenantModules,
   tenantCacheTag,
 } from "./tenant-repository";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutGrid, LogOut } from "lucide-react";
+import { LayoutGrid, LogOut, Settings } from "lucide-react";
 import { signOut } from "@/core/auth/actions";
 import { requireTenantAccess } from "@/core/tenancy";
 import { LogoMark } from "@/shared/ui/logo";
@@ -28,6 +28,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
       exact: false,
     })),
   ];
+  const settings = { href: `/${slug}/settings`, label: "Settings", icon: <Settings aria-hidden /> };
 
   return (
     <>
@@ -45,6 +46,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
         </div>
 
         <div className="flex flex-col gap-2 rounded-[28px] bg-card p-1.5">
+          <NavLink {...settings} />
           <form action={signOut}>
             <button
               type="submit"
@@ -73,6 +75,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
         {items.map((item) => (
           <NavLink key={item.href} {...item} compact />
         ))}
+        <NavLink {...settings} compact />
         <form action={signOut}>
           <button
             type="submit"
@@ -103,6 +106,7 @@ export function TenantNavSkeleton() {
         </div>
       </div>
       <div className="flex flex-col gap-2 rounded-[28px] bg-card p-1.5">
+        <Bone className="h-11 rounded-full bg-card-2" />
         <Bone className="h-11 rounded-full bg-card-2" />
         <div className="flex items-center gap-3">
           <Bone className="size-11 shrink-0 rounded-full bg-card-2" />

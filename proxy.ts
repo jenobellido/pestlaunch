@@ -23,6 +23,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except static files and images.
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  // Everything except static files, images and the generated app icon.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|apple-icon|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };

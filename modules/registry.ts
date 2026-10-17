@@ -11,6 +11,9 @@ export const moduleRegistry = [callsModule, scorecardsModule, coachingModule] as
 export type AppModule = (typeof moduleRegistry)[number];
 export type ModuleId = AppModule["id"];
 
+/** The base module every other module builds on. It can't be turned off. */
+export const baseModuleId: ModuleId = "calls";
+
 export async function getEnabledModules(tenantSlug: string): Promise<AppModule[]> {
   const tenant = await getTenantBySlug(tenantSlug);
   if (!tenant) return [];
