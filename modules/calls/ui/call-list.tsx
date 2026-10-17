@@ -5,6 +5,7 @@ import { useDeferredValue, useState } from "react";
 import { AlertTriangle, AudioLines, ChevronRight, Phone, Search, SearchX, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Badge, EmptyState } from "@/shared/ui/card";
+import { CALL_TYPE_GROUP_LABELS, type CallTypeGroup } from "../config/call-types";
 import type { CallRecord, CallResolution } from "../model/types";
 import { CallResultBadge, type CallGroup } from "./call-status";
 
@@ -21,6 +22,12 @@ export interface CallListItem {
   duration: string | null;
   date: string;
   group: CallGroup;
+  /** PestLaunch's call type group (Sales, Service, ...), null until analyzed. */
+  typeGroup: CallTypeGroup | null;
+  /** Groups calls by rep for the Rep filter: the member id, or the heard name. */
+  repKey: string | null;
+  /** Upload time in ms, for the date filter. */
+  createdAtMs: number;
   /** Lower-case text the search box matches against. */
   search: string;
   score?: React.ReactNode;
@@ -59,9 +66,24 @@ function CallIcon({ status }: { status: CallRecord["status"] }) {
   );
 }
 
+const DATE_FILTERS = [
+  { id: "all", label: "Any time", days: null },
+  { id: "today", label: "Today", days: 1 },
+  { id: "7d", label: "Last 7 days", days: 7 },
+  { id: "30d", label: "Last 30 days", days: 30 },
+] as const;
+
+const filterSelect =
+  "h-9 rounded-full border border-line bg-card px-3 text-sm outline-none transition-colors hover:border-line-strong focus:border-accent focus:ring-4 focus:ring-accent/15";
+
 export function CallList({ items, showScore }: { items: CallListItem[]; showScore: boolean }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | CallGroup>("all");
+  const [typeFilter, setTypeFilter] = useState<"all" | CallTypeGroup>("all");
+  const [repFilter, setRepFilter] = useState("all");
+  const [dateFilter, setDateFilter] = useState<(typeof DATE_FILTERS)[number]["id"]>("all");
+  // Captured once per mount so "Today" doesn't drift during render.
+  const [now] = useState(() => Date.now());
   const deferredQuery = useDeferredValue(query.trim().toLowerCase());
 
   if (items.length === 0)
@@ -75,9 +97,21 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
   for (const item of items) counts[item.group]++;
   const filters = FILTERS.filter((f) => f.id === "all" || counts[f.id] > 0);
 
+  const typeCounts = new Map<CallTypeGroup, number>();
+  for (const item of items) if (item.typeGroup) typeCounts.set(item.typeGroup, (typeCounts.get(item.typeGroup) ?? 0) + 1);
+  const reps = [...new Map(items.filter((i) => i.repKey).map((i) => [i.repKey!, i.employee ?? "Unknown"]))].sort((a, b) =>
+    a[1].localeCompare(b[1]),
+  );
+  const days = DATE_FILTERS.find((d) => d.id === dateFilter)?.days;
+  const since = days ? now - days * 24 * 60 * 60 * 1000 : 0;
+
   const visible = items.filter(
     (item) =>
-      (filter === "all" || item.group === filter) && (!deferredQuery || item.search.includes(deferredQuery)),
+      (filter === "all" || item.group === filter) &&
+      (typeFilter === "all" || item.typeGroup === typeFilter) &&
+      (repFilter === "all" || item.repKey === repFilter) &&
+      item.createdAtMs >= since &&
+      (!deferredQuery || item.search.includes(deferredQuery)),
   );
   const columns = showScore
     ? "lg:grid-cols-[minmax(0,1fr)_150px_96px_150px_110px_16px]"
@@ -103,7 +137,56 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
             </button>
           ))}
         </div>
-        <label className="relative block sm:w-64">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="sr-only" htmlFor="call-log-type">
+            Call type
+          </label>
+          <select
+            id="call-log-type"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as "all" | CallTypeGroup)}
+            className={filterSelect}
+          >
+            <option value="all">All types</option>
+            {(Object.keys(CALL_TYPE_GROUP_LABELS) as CallTypeGroup[])
+              .filter((g) => typeCounts.has(g))
+              .map((g) => (
+                <option key={g} value={g}>
+                  {CALL_TYPE_GROUP_LABELS[g]} ({typeCounts.get(g)})
+                </option>
+              ))}
+          </select>
+          {reps.length > 1 && (
+            <>
+              <label className="sr-only" htmlFor="call-log-rep">
+                Rep
+              </label>
+              <select id="call-log-rep" value={repFilter} onChange={(e) => setRepFilter(e.target.value)} className={filterSelect}>
+                <option value="all">All reps</option>
+                {reps.map(([key, name]) => (
+                  <option key={key} value={key}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
+          <label className="sr-only" htmlFor="call-log-date">
+            Date
+          </label>
+          <select
+            id="call-log-date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value as (typeof DATE_FILTERS)[number]["id"])}
+            className={filterSelect}
+          >
+            {DATE_FILTERS.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.label}
+              </option>
+            ))}
+          </select>
+        <label className="relative block sm:w-56">
           <span className="sr-only">Search calls</span>
           <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted" aria-hidden />
           <input
@@ -124,6 +207,7 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
             </button>
           )}
         </label>
+        </div>
       </div>
 
       {visible.length === 0 ? (
@@ -136,6 +220,9 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
             onClick={() => {
               setQuery("");
               setFilter("all");
+              setTypeFilter("all");
+              setRepFilter("all");
+              setDateFilter("all");
             }}
             className="press mt-4 h-9 rounded-full border border-line px-4 text-sm hover:bg-card-2"
           >
@@ -146,9 +233,9 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
         <>
           <div className={cn("hidden gap-4 border-b border-line px-6 py-3 text-xs text-muted lg:grid", columns)}>
             <span>Call</span>
-            <span>Employee</span>
+            <span>Rep</span>
             {showScore && <span>Score</span>}
-            <span>Result</span>
+            <span>Outcome</span>
             <span>Uploaded</span>
             <span />
           </div>
@@ -203,7 +290,7 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
                   </span>
                   <span className="hidden text-sm text-muted tabular-nums lg:block">
                     <span className="block">{item.date}</span>
-                    {item.duration && <span className="block text-xs">{item.duration} long</span>}
+                    {item.duration && <span className="block text-xs">{item.duration} talk</span>}
                   </span>
                   <ChevronRight
                     className="hidden size-4 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-fg lg:block"

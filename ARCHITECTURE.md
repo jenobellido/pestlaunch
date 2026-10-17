@@ -253,7 +253,7 @@ and mint accent pills, in dark and light.
 
 | Page | What it does |
 | --- | --- |
-| Call library | Drag-and-drop upload, checked in the browser (type, 50 MB) before anything is sent. Progress shows the upload and processing steps with a timer, warns before leaving the page, and refreshes the list so the new call shows as processing. Four headline numbers (calls, win rate, open follow-ups, talk time). Filter by result and search by name, type, employee or summary, all in the browser. |
+| Call library | Drag-and-drop upload, checked in the browser (type, 50 MB) before anything is sent. Progress shows the upload and processing steps with a timer, warns before leaving the page, and refreshes the list so the new call shows as processing. Four headline numbers (calls, win rate, open follow-ups, talk time). Filters like PestLaunch's Call Log: outcome (won, follow-up, lost, processing, failed), type group (Sales, Service, Billing, Retention, Other), rep and date, plus search by name, type, rep or summary, all in the browser. Columns use PestLaunch's words: Rep, Score, Outcome, talk time. Managers see a "Whose call?" picker on upload. |
 | Call detail | Outcome first, then the scorecard and coaching panels (a sticky side column on wide screens), then the recording. The player sits on a speaker timeline (who talked when, and each side's share of talk time) and stays in view while the transcript scrolls. Clicking a line's time plays from there, the playing line is highlighted, and the transcript can be searched. Owners and managers can delete a call from here. A processing call refreshes itself. |
 
 The calls module never imports scorecards. The list's score column comes in

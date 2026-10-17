@@ -1,6 +1,6 @@
 import { Phone } from "lucide-react";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
-import { CALL_TYPE_LABELS } from "../config/call-types";
+import { CALL_TYPE_GROUP, CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
 import { listCalls, type CallScope } from "../server/call-repository";
 import { CallList, type CallListItem } from "./call-list";
@@ -48,6 +48,9 @@ export async function CallsPage({ tenantSlug, scope, canUpload, members, score }
       status: call.status,
       outcome: call.outcome ? { resolution: call.outcome.resolution } : undefined,
       group: callGroup(call),
+      typeGroup: call.callType ? CALL_TYPE_GROUP[call.callType] : null,
+      repKey: call.employeeId ?? (call.employeeName ? `heard:${call.employeeName.toLowerCase()}` : null),
+      createdAtMs: new Date(call.createdAt).getTime(),
       search: [call.fileName, type, call.employeeName, call.outcome?.summary].filter(Boolean).join(" ").toLowerCase(),
       score: score && call.status === "ready" ? score(call) : undefined,
     };
