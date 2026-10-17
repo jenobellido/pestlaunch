@@ -18,7 +18,7 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. |
 | See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. Per rep: average score, trend, most-missed steps, and **Plays** a manager can assign. |
 | (beyond the brief) Follow leads | **Pipeline**: every new-customer call becomes a lead (New, Contacted, Booked, Lost) with the customer, pest, price and next step. |
-| Review all calls and results | **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
+| Review all calls and results | **Search** inside every transcript ("termites") and **export** calls to CSV. **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
 
 Beyond the brief, it's ready for a real team:
 

@@ -225,6 +225,18 @@ the app without exposing real recordings. Scripts import server code through
 `scripts/allow-server-only.cjs`, which points the `server-only` guard at an
 empty module outside Next.
 
+## Search and export
+
+- **Transcript search** (`?q=` on `/[tenant]/calls`): finds calls where any
+  transcript line contains the words (case-insensitive, in Postgres over the
+  JSON transcript), and shows the matching line, who said it and when.
+  Scoped like the call list.
+- **CSV export** (`GET /api/[tenant]/calls/export`, the Export CSV button):
+  every call the member can see, with type, rep, outcome, cancel reason,
+  score, talk time, summary and follow-ups. Cells are quoted, and text a
+  spreadsheet would run as a formula is defused (`modules/calls/lib/csv.ts`,
+  unit tested).
+
 ## Pipeline
 
 `/[tenant]/pipeline` (a second nav item from the calls module) shows every

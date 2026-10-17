@@ -5,7 +5,7 @@ import { isModuleEnabled } from "@/modules/registry";
 import { requireModule } from "../_lib/require-module";
 import { ScoreBadge } from "./_components/score-badge";
 
-export default async function Page({ params }: PageProps<"/[tenant]/calls">) {
+export default async function Page({ params, searchParams }: PageProps<"/[tenant]/calls">) {
   const access = await requireModule(params, "calls");
   const { tenant, user, permissions } = access;
   const canAssign = can(access, "calls.assign");
@@ -21,6 +21,7 @@ export default async function Page({ params }: PageProps<"/[tenant]/calls">) {
       canUpload={can(access, "calls.upload")}
       members={members?.map((m) => ({ id: m.userId, name: m.displayName }))}
       score={scored ? (call) => <ScoreBadge analyses={call.analyses} /> : undefined}
+      transcriptQuery={typeof (await searchParams).q === "string" ? ((await searchParams).q as string) : undefined}
     />
   );
 }

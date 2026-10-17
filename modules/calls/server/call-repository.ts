@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, getTableColumns, lt, or } from "drizzle-orm";
+import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
 import { connection } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/core/db";
@@ -155,4 +155,37 @@ export async function setCallEmployee(tenant: string, id: string, employeeId: st
   if (!row) return false;
   await db.update(calls).set({ employeeId, updatedAt: new Date() }).where(eq(calls.id, row.id));
   return true;
+}
+
+export interface TranscriptMatch {
+  callId: string;
+  /** The first matching line, for showing in the results. */
+  speaker: string;
+  text: string;
+  start: number;
+}
+
+/** Calls whose transcript contains `query` (case-insensitive), with the first matching line. */
+export async function searchTranscripts(tenant: string, query: string, scope: CallScope = {}): Promise<TranscriptMatch[]> {
+  const q = query.trim();
+  if (q.length < 2) return [];
+  const pattern = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+  const rows = await db
+    .select({ id: calls.id, transcript: calls.transcript })
+    .from(calls)
+    .innerJoin(tenants, eq(tenants.id, calls.tenantId))
+    .where(
+      and(
+        eq(tenants.slug, tenant),
+        scoped(scope),
+        sql`exists (select 1 from jsonb_array_elements(${calls.transcript}) s where s->>'text' ilike ${pattern})`,
+      ),
+    )
+    .orderBy(desc(calls.createdAt))
+    .limit(100);
+  const needle = q.toLowerCase();
+  return rows.flatMap((r) => {
+    const hit = r.transcript?.find((s) => s.text.toLowerCase().includes(needle));
+    return hit ? [{ callId: r.id, speaker: hit.speaker, text: hit.text, start: hit.start }] : [];
+  });
 }
