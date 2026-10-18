@@ -73,14 +73,14 @@ export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, c
               members={assignableMembers}
             />
           ) : (
-            <Meta icon={UserRound}>{call.employeeName ?? "Unknown employee"}</Meta>
+            <Meta icon={UserRound}>{call.employeeName ?? "Unknown rep"}</Meta>
           )}
           {/* The name heard in the call is a hint; flag it when it doesn't match the assignment. */}
           {call.employeeId &&
             call.heardEmployeeName &&
             call.employeeName &&
             call.heardEmployeeName.split(/\s+/)[0].toLowerCase() !== call.employeeName.split(/\s+/)[0].toLowerCase() && (
-              <span className="text-xs text-orange">Employee in the call said &ldquo;{call.heardEmployeeName}&rdquo;</span>
+              <span className="text-xs text-orange">The rep in the call said &ldquo;{call.heardEmployeeName}&rdquo;</span>
             )}
           {call.durationSec != null && <Meta icon={Clock}>{formatDuration(call.durationSec)}</Meta>}
           <Meta icon={CalendarDays}>{formatDateTime(call.createdAt)}</Meta>

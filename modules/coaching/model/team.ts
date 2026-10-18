@@ -42,7 +42,7 @@ export interface EmployeeSummary {
   latestFocus: string | null;
 }
 
-const UNKNOWN = "Unknown employee";
+const UNKNOWN = "Unknown rep";
 
 const percent = (s: NonNullable<CoachingCall["score"]>) => (s.points / Math.max(s.maxPoints, 1)) * 100;
 const average = (values: number[]) =>

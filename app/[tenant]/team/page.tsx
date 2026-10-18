@@ -10,7 +10,7 @@ import { AssignPlayButton, PlaysCard } from "./_components/plays";
 
 // The app layer composes modules: calls supply the list, scorecards the scores (when the
 // module is on), and coaching turns them into per-employee summaries.
-export default async function Page({ params }: PageProps<"/[tenant]/coaching">) {
+export default async function Page({ params }: PageProps<"/[tenant]/team">) {
   const access = await requireModule(params, "coaching");
   const { tenant, user, permissions } = access;
   const canManage = can(access, "coaching.manage");

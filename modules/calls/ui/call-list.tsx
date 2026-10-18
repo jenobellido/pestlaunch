@@ -35,7 +35,7 @@ export interface CallListItem {
 
 const FILTERS: { id: "all" | CallGroup; label: string }[] = [
   { id: "all", label: "All" },
-  { id: "won", label: "Won" },
+  { id: "won", label: "Successful" },
   { id: "follow_up", label: "Follow-up" },
   { id: "lost", label: "Lost" },
   { id: "processing", label: "Processing" },

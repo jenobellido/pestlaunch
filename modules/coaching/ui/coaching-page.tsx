@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, MessageSquareText, Target, TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { ChevronRight, UsersRound, Target, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle, EmptyState } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
@@ -182,19 +182,19 @@ export function CoachingPage({
   return (
     <PageStack>
       <PageHeader
-        title="Coaching"
-        description="How each employee is doing on the call process, and what to work on next."
-        icon={MessageSquareText}
+        title="Team"
+        description="How each rep is doing on calls, and what to coach them on next."
+        icon={UsersRound}
       />
       {calls.length === 0 && plays}
       {calls.length === 0 ? (
-        <EmptyState icon={MessageSquareText} title="No reviewed calls yet" className="min-h-80">
-          Once calls are processed, each employee&apos;s scores, trends and coaching show up here.
+        <EmptyState icon={UsersRound} title="No reviewed calls yet" className="min-h-80">
+          Once calls are processed, each rep&apos;s scores, trends and coaching show up here.
         </EmptyState>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-            <Stat label="Employees" value={String(team.length)} />
+            <Stat label="Reps" value={String(team.length)} />
             <Stat label="Calls reviewed" value={String(calls.length)} hint={`${scored.length} scored`} />
             <Stat
               label="Team average"

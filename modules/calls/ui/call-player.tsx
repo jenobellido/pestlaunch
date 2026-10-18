@@ -227,12 +227,12 @@ export function CallPlayer({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-accent" aria-hidden />
-          {employeeName ?? "Employee"}
+          {employeeName ?? "Rep"}
           {share && <span className="tabular-nums">{share.employee}%</span>}
         </span>
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-sky" aria-hidden />
-          Customer
+          Caller
           {share && <span className="tabular-nums">{share.customer}%</span>}
         </span>
         {!player.available && <span className="ml-auto">The recording can&apos;t be played right now.</span>}

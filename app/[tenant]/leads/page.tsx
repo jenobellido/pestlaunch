@@ -44,14 +44,14 @@ function LeadCard({ slug, lead }: { slug: string; lead: Lead }) {
   );
 }
 
-async function Board({ params }: { params: PageProps<"/[tenant]/pipeline">["params"] }) {
+async function Board({ params }: { params: PageProps<"/[tenant]/leads">["params"] }) {
   const { tenant, user, permissions } = await requireModule(params, "calls");
   const leads = await listLeads(tenant.slug, callScope({ userId: user.id, permissions }));
 
   if (leads.length === 0) {
     return (
       <EmptyState icon={SquareKanban} title="No leads yet" className="min-h-80">
-        Every new-customer call becomes a lead here. Upload a sales call to start the pipeline.
+        Every new-customer call becomes a lead here, so nobody who asked about service gets forgotten.
       </EmptyState>
     );
   }
@@ -91,12 +91,12 @@ async function Board({ params }: { params: PageProps<"/[tenant]/pipeline">["para
   );
 }
 
-export default function PipelinePage({ params }: PageProps<"/[tenant]/pipeline">) {
+export default function LeadsPage({ params }: PageProps<"/[tenant]/leads">) {
   return (
     <PageStack>
       <PageHeader
-        title="Pipeline"
-        description="Every new-customer call as a lead. Move them along until they book."
+        title="Leads"
+        description="Everyone who called about new service. Follow up until they book."
         icon={SquareKanban}
       />
       <Suspense

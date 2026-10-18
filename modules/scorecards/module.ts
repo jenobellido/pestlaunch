@@ -7,5 +7,6 @@ export const scorecardsModule = defineModule({
   description: "Grades calls against the PestLaunch call process scorecards.",
   defaultEnabled: true,
   dependsOn: ["calls"],
-  nav: [{ label: "Scorecards", href: "/scorecards", icon: ClipboardCheck }],
+  // The rubric is reference material, linked from each call's score rather than the sidebar.
+  nav: [{ label: "Scorecards", href: "/scorecards", icon: ClipboardCheck, inSidebar: false }],
 });

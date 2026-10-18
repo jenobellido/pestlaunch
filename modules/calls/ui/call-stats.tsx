@@ -18,9 +18,9 @@ export function CallStats({ calls }: { calls: CallRecord[] }) {
   const stats = [
     { label: "Calls", value: String(calls.length), hint: `${analyzed} analyzed`, icon: Phone },
     {
-      label: "Won",
+      label: "Successful",
       value: analyzed > 0 ? `${Math.round((won / analyzed) * 100)}%` : "–",
-      hint: "Booked, retained or resolved",
+      hint: "Booked, saved or resolved",
       icon: CircleCheck,
     },
     { label: "Need follow-up", value: String(followUps), hint: "Unresolved or waiting on us", icon: Flag },

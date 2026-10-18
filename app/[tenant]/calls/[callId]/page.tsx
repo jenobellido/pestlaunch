@@ -33,7 +33,7 @@ export default async function Page({ params }: PageProps<"/[tenant]/calls/[callI
       canDelete={can(access, "calls.delete")}
       assignableMembers={members?.map((m) => ({ id: m.userId, name: m.displayName }))}
     >
-      {ready && enabled.has("scorecards") && <ScorecardPanel result={getScorecardResult(call.analyses)} />}
+      {ready && enabled.has("scorecards") && <ScorecardPanel result={getScorecardResult(call.analyses)} rubricHref={`/${tenant.slug}/scorecards`} />}
       {ready && enabled.has("coaching") && <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />}
     </CallDetail>
   );

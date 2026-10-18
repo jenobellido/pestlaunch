@@ -10,6 +10,8 @@ export interface ModuleNavItem {
   href: string;
   /** Shown in the sidebar and the mobile nav. */
   icon?: React.ComponentType<{ className?: string }>;
+  /** False for pages reached from elsewhere (e.g. reference pages), not the sidebar. */
+  inSidebar?: boolean;
 }
 
 export interface ModuleManifest<Id extends string = string> {

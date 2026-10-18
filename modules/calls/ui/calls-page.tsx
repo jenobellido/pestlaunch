@@ -42,7 +42,7 @@ export async function CallsPage({ tenantSlug, scope, canUpload, members, score, 
   const matchByCall = new Map(matches?.map((m) => [m.callId, m]));
   const calls = matches ? allCalls.filter((c) => matchByCall.has(c.id)) : allCalls;
   const speakerName = (c: CallRecord, speaker: string) =>
-    speaker === "employee" ? (c.employeeName ?? "Employee") : speaker === "customer" ? "Customer" : "Other";
+    speaker === "employee" ? (c.employeeName ?? "Rep") : speaker === "customer" ? "Caller" : "Other";
 
   // Everything the list shows is prepared here, so dates are formatted once, on the server.
   const items: CallListItem[] = calls.map((call) => {

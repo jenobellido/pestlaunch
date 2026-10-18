@@ -17,8 +17,9 @@ app/                     Routing only: thin pages, layouts, route handlers
     calls/               Call library + upload; adds the score column when scorecards is on
     calls/[callId]/      Call detail; composes panels from other modules, passes the
                          recording URL and whether the user may delete
-    scorecards/          The scoring standards
-    coaching/            Employee coaching
+    leads/               Leads board (new-customer calls by stage)
+    scorecards/          The scoring rubric; linked from each call's score, not the sidebar
+    team/                Reps: scores, trends, most-missed steps, plays (coaching module)
     settings/            Appearance, profile, company name, module switches
                          (server actions in actions.ts)
   api/[tenant]/          Backend API, e.g. /api/noble-pest/calls
@@ -237,9 +238,9 @@ empty module outside Next.
   spreadsheet would run as a formula is defused (`modules/calls/lib/csv.ts`,
   unit tested).
 
-## Pipeline
+## Leads
 
-`/[tenant]/pipeline` (a second nav item from the calls module) shows every
+`/[tenant]/leads` (a second nav item from the calls module) shows every
 new-customer call as a lead on a board: New, Contacted, Booked, Lost. The
 `leads` table is owned by the calls module, one row per sales call. Processing
 creates the lead once the call is analyzed (booked calls start as Booked,
@@ -270,6 +271,15 @@ scorecards modules. Call types are grouped the way PestLaunch's Call Log does
 - **Reps:** calls, close rate and average score per rep (hidden for members
   without `calls.view_all`, who see only their own numbers).
 - **Why customers cancel:** each reason with saved vs lost.
+
+## Navigation and wording
+
+The sidebar is Overview · Calls · Leads · Team, then Settings. The company's
+name sits at the top with "Powered by PestLaunch", as in PestLaunch OS. The
+scorecard rubric isn't in the sidebar; each call's score links to it
+("How calls are graded"), set with `inSidebar: false` on the module's nav
+item. Words follow PestLaunch OS: Rep and Caller (not Employee and Customer),
+Outcome, Talk, and Successful for calls that were booked, saved or resolved.
 
 ## UI and design
 
