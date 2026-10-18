@@ -9,6 +9,7 @@ or off per tenant (pest control company).
 
 ```
 proxy.ts                 Refreshes the Supabase session; sends signed-out users to /login
+instrumentation-client.ts  Runs in the browser before the app is interactive: guards view transitions
 app/                     Routing only: thin pages, layouts, route handlers
   page.tsx               Landing page (signed-in users go straight to their workspace)
   _landing/              Landing sections, the 3D hero scene and its invented demo call
@@ -401,6 +402,15 @@ animation says one thing:
   under `prefers-reduced-motion`.
 - Browsers without view transitions (older Safari and Firefox) simply don't
   animate; nothing else changes.
+- **Aborted transitions are expected, not errors.** The browser aborts a
+  transition when the window is resized mid-way, the tab is in the background,
+  or a newer navigation interrupts it. React chains `finished.finally()` and
+  never handles the rejection, so every abort showed as an "Uncaught (in
+  promise) InvalidStateError/TimeoutError". `guardViewTransitions`
+  (`shared/lib/view-transitions.ts`, installed by `instrumentation-client.ts`)
+  makes `finished` and `updateCallbackDone` settle quietly, and skips any
+  transition still running after 1 second, since React holds the next
+  navigation until the current transition ends.
 - Navigations are lateral (sidebar items are siblings), so there are no
   directional slides. Revalidations and form saves don't animate: every
   `<ViewTransition>` uses `default="none"`.
