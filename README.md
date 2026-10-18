@@ -66,10 +66,10 @@ every result was checked by hand against the transcript and the call
 manuals, three times: before the fixes below, after the first round, and
 after the second.
 
-Since then, speaker labels, coaching and sentiment moved to the cheaper
-`gpt-5.4-mini` after a side-by-side test on invented calls (see "AI models" in
-ARCHITECTURE.md). The 20 real calls weren't re-run on it; scoring and call
-type and outcome, the results checked above, still use `gpt-5.5`.
+Since then, coaching and sentiment moved to the cheaper `gpt-5.4-mini`
+after a side-by-side test on invented calls (see "AI models" in
+ARCHITECTURE.md). Everything the hand check measured (speaker labels,
+scoring, call type and outcome) still uses `gpt-5.5`.
 
 | What | First check | Final check |
 | --- | --- | --- |
@@ -124,8 +124,8 @@ npm run dev
 ```
 
 Put an OpenAI API key in `AI_API_KEY` in `.env.local`; transcription
-(`whisper-1`) and the AI steps use it. Scoring and call analysis use
-`gpt-5.5`; speaker labels, coaching and sentiment use the cheaper
+(`whisper-1`) and the AI steps use it. Speaker labels, scoring and call
+analysis use `gpt-5.5`; coaching and sentiment use the cheaper
 `gpt-5.4-mini`, which matched it in testing (see "AI models" in
 ARCHITECTURE.md). The AI client works with any OpenAI-compatible API: to use Groq
 instead, set `AI_BASE_URL`, the model names and a Groq key as shown in
