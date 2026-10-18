@@ -1,4 +1,4 @@
-import { Check, Columns3, ShieldCheck, UserCheck, X } from "lucide-react";
+import { Check, ListTodo, ShieldCheck, UserCheck, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Badge } from "@/shared/ui/card";
 import { Stagger, StaggerItem } from "@/shared/ui/motion";
@@ -109,9 +109,15 @@ export function Features() {
             "bg-[repeating-linear-gradient(135deg,var(--card)_0_14px,color-mix(in_oklab,var(--card)_92%,var(--fg))_14px_15px)]",
           )}
         >
-          <Columns3 className="size-6 text-accent" aria-hidden />
-          <h3 className="mt-auto pt-10 text-lg font-medium">Leads from your calls</h3>
-          <p className="mt-2 text-sm text-muted">New-customer calls land on a leads board by stage, with the quote and next step.</p>
+          <ListTodo className="size-6 text-accent" aria-hidden />
+          <h3 className="mt-auto pt-10 text-lg font-medium">Nothing falls through</h3>
+          <p className="mt-2 text-sm text-muted">
+            Unbooked sales calls and callbacks you owe show who called, what for, the price given and how long they&apos;ve
+            waited. Assign one in a click.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2" aria-hidden>
+            <Badge dot="bg-orange">Callback owed, 2 days</Badge>
+          </div>
         </StaggerItem>
 
         <StaggerItem className={cn(cell, "min-h-0 bg-card md:col-span-4 md:flex-row md:items-center md:gap-10")}>

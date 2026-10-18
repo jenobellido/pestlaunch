@@ -445,7 +445,7 @@ before it renders.
 | Product preview | A reviewed call: the app's own `ScorecardPanel` and `CoachingPanel`, rendered with an invented call (`demo.ts`). It tilts flat as it scrolls in. |
 | Questions | The owner questions from PestLaunch's walkthrough, and where the app answers each one |
 | How it works | Upload, Transcribe, Score, Coach, joined by a line that draws itself |
-| Features | A bento of five cells: scorecards, speaker timeline, manager review, leads, roles |
+| Features | A bento of five cells: scorecards, speaker timeline, manager review, follow-ups, roles |
 | Privacy | How recordings and company data are kept apart and deleted |
 
 - **3D:** three.js through `@react-three/fiber`, loaded only in the browser
