@@ -38,6 +38,10 @@
   --on-badge-danger: #ffaa9f;
   --badge-success: #1f3a31;
   --on-badge-success: #6ff0c7;
+  /* Sentiment chart: a diverging scale, validated for colour blindness against --card. */
+  --mood-positive: #2aab7c;
+  --mood-negative: #cf3f37;
+  --mood-neutral: #4a4a48;
   color-scheme: dark;
 }
 
@@ -70,6 +74,9 @@ html[data-theme="light"] {
   --on-badge-danger: #b42318;
   --badge-success: #d6f2e4;
   --on-badge-success: #05603a;
+  --mood-positive: #067a52;
+  --mood-negative: #c2331f;
+  --mood-neutral: #d5d9e0;
   color-scheme: light;
 }
 
@@ -100,6 +107,9 @@ html[data-theme="light"] {
   --color-on-badge-danger: var(--on-badge-danger);
   --color-badge-success: var(--badge-success);
   --color-on-badge-success: var(--on-badge-success);
+  --color-mood-positive: var(--mood-positive);
+  --color-mood-negative: var(--mood-negative);
+  --color-mood-neutral: var(--mood-neutral);
   --font-sans: var(--font-outfit);
 }
 
