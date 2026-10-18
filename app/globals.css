@@ -164,3 +164,73 @@ textarea {
   background: var(--accent);
   color: var(--accent-ink);
 }
+
+/*
+ * Navigation motion, with React's <ViewTransition> (see ARCHITECTURE.md, "Motion").
+ * The page itself stays live: only named pieces animate, so the sidebar never freezes
+ * behind a snapshot and stays clickable.
+ *   page-enter / page-exit  a page's content arriving or leaving (route change, data loaded)
+ *   nav-pill                the active pill gliding between menu items
+ * Every animation is transform and opacity only, and all of it is off with reduced motion.
+ */
+:root {
+  --motion-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-exit: 140ms;
+  --motion-enter: 260ms;
+  --motion-move: 380ms;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root) {
+  display: none;
+}
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Old content leaves fast so it never competes; new content rises 8px into place. */
+::view-transition-old(.page-exit) {
+  animation: var(--motion-exit) ease-in both motion-fade reverse;
+}
+::view-transition-new(.page-enter) {
+  animation:
+    var(--motion-enter) ease-out 60ms both motion-fade,
+    var(--motion-move) var(--motion-ease-out) both motion-rise;
+}
+
+/* The pill slides as one solid shape instead of cross-fading between two. */
+::view-transition-group(.nav-pill) {
+  animation-duration: 320ms;
+  animation-timing-function: var(--motion-ease-out);
+}
+::view-transition-old(.nav-pill),
+::view-transition-new(.nav-pill) {
+  animation: none;
+  height: 100%;
+}
+/* Menu labels are named so they stay above the moving pill; their colour cross-fades. */
+::view-transition-group(.nav-label) {
+  animation-duration: 200ms;
+}
+
+@keyframes motion-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes motion-rise {
+  from {
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}

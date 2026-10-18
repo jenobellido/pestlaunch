@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { cn } from "@/shared/lib/cn";
+import { NavPill, navLabelStyle } from "@/shared/ui/nav-pill";
 
 export interface SettingsNavItem {
   href: string;
@@ -41,12 +42,18 @@ export function SettingsNav({ items }: { items: SettingsNavItem[] }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex h-10 items-center gap-2.5 rounded-full px-4 text-sm whitespace-nowrap transition-colors duration-300 focus-visible:ring-4 focus-visible:ring-accent/25 focus-visible:outline-none lg:h-11 lg:pr-3 lg:pl-[13px] [&_svg]:hidden [&_svg]:size-[18px] [&_svg]:shrink-0 lg:[&_svg]:block",
-                  active ? "bg-accent font-medium text-accent-ink" : "text-muted hover:bg-card-2 hover:text-fg",
+                  "relative flex h-10 items-center rounded-full px-4 text-sm whitespace-nowrap transition-colors duration-300 focus-visible:ring-4 focus-visible:ring-accent/25 focus-visible:outline-none lg:h-11 lg:pr-3 lg:pl-[13px]",
+                  active ? "font-medium text-accent-ink" : "text-muted hover:bg-card-2 hover:text-fg",
                 )}
               >
-                {item.icon}
-                {item.label}
+                {active && <NavPill menu="settings-nav" />}
+                <span
+                  className="relative flex items-center gap-2.5 [&_svg]:hidden [&_svg]:size-[18px] [&_svg]:shrink-0 lg:[&_svg]:block"
+                  style={navLabelStyle("settings-nav", item.href)}
+                >
+                  {item.icon}
+                  {item.label}
+                </span>
               </Link>
             </li>
           );

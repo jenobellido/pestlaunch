@@ -1,5 +1,6 @@
 import { Settings } from "lucide-react";
-import { Bone, PageHeader } from "@/shared/ui/page-header";
+import { ViewTransition } from "react";
+import { Bone, PageExit, PageHeader } from "@/shared/ui/page-header";
 
 export function SettingsHeader() {
   return (
@@ -39,18 +40,24 @@ export function SettingsSection({
   );
 }
 
-/** One page's sections, 16px apart. */
+/** One page's sections, 16px apart. Fades in when you switch settings pages; the menu stays put. */
 export function SettingsPage({ children }: { children: React.ReactNode }) {
-  return <div className="space-y-4">{children}</div>;
+  return (
+    <ViewTransition enter="page-enter" exit="page-exit" default="none">
+      <div className="space-y-4">{children}</div>
+    </ViewTransition>
+  );
 }
 
 /** Shown in the content column while a settings page loads; the menu stays put. */
 export function SettingsBodySkeleton() {
   return (
-    <div className="space-y-4" aria-busy="true" aria-label="Loading">
-      {[220, 160].map((height, i) => (
-        <Bone key={i} className="rounded-[28px]" style={{ height }} />
-      ))}
-    </div>
+    <PageExit>
+      <div className="space-y-4" aria-busy="true" aria-label="Loading">
+        {[220, 160].map((height, i) => (
+          <Bone key={i} className="rounded-[28px]" style={{ height }} />
+        ))}
+      </div>
+    </PageExit>
   );
 }

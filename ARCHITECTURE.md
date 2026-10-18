@@ -303,6 +303,31 @@ and mint accent pills, in dark and light.
 - Module nav items carry an icon (`nav[].icon` in `module.ts`), shown in the
   sidebar and the mobile bottom bar.
 
+## Motion
+
+Navigation moves the way Freehold does, built on React's `<ViewTransition>`
+(no animation library; Next.js runs every navigation as a transition). Each
+animation says one thing:
+
+| What you see | Means | Where |
+| --- | --- | --- |
+| The old page fades out fast; the new one fades in and rises 8px | You went somewhere else | `PageStack` (every page's root) and `SettingsPage` |
+| A loading skeleton fades out as the real content fades in | The data arrived | `PageExit` around `PageSkeleton` and `SettingsBodySkeleton` |
+| The accent pill glides to the item you picked | Where you are now | `NavPill` (`shared/ui/nav-pill.tsx`) in the sidebar, mobile bar and settings menu |
+
+- The page stays live: the root snapshot isn't animated, so the sidebar never
+  freezes and clicks pass through. Only these named pieces animate.
+- Menu labels have their own transition names (`navLabelStyle`), so they draw
+  above the moving pill and their colour cross-fades.
+- Transform and opacity only, 140 to 380ms, one ease-out curve. All of it is
+  in `app/globals.css` (search for "Navigation motion") and is turned off
+  under `prefers-reduced-motion`.
+- Browsers without view transitions (older Safari and Firefox) simply don't
+  animate; nothing else changes.
+- Navigations are lateral (sidebar items are siblings), so there are no
+  directional slides. Revalidations and form saves don't animate: every
+  `<ViewTransition>` uses `default="none"`.
+
 ## Calls UI
 
 | Page | What it does |
