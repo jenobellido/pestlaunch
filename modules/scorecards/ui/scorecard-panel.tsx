@@ -34,7 +34,7 @@ export function ScorecardPanel({
   const grade = GRADE[result.grade];
   const sections = Map.groupBy(result.items, (i) => i.section);
   return (
-    <Card>
+    <Card className="@container">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <CardTitle>{SCORECARDS[result.scorecardId].name}</CardTitle>
@@ -58,7 +58,8 @@ export function ScorecardPanel({
           style={{ width: `${(result.points / Math.max(result.maxPoints, 1)) * 100}%` }}
         />
       </div>
-      <div className="mt-6 space-y-5">
+      {/* Two columns of sections once the panel itself is wide (e.g. leading the call page). */}
+      <div className="mt-6 grid gap-x-8 gap-y-5 @xl:grid-cols-2">
         {[...sections].map(([section, items]) => (
           <div key={section}>
             <p className="text-xs text-muted">{section}</p>

@@ -1,4 +1,3 @@
-import { Children } from "react";
 import Link from "next/link";
 import { AlertTriangle, ArrowLeft, AudioLines, BadgeCheck, CalendarDays, Check, Clock, Loader, UserRound } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
@@ -25,7 +24,9 @@ interface CallDetailProps {
   assignableMembers?: AssignableMember[];
   /** Reasons a person should check the AI's results (empty once reviewed). */
   reviewFlags?: string[];
-  /** Panels other modules contribute (scorecard, coaching); the app layer fills it. */
+  /** The panel to lead with, above the outcome (the scorecard); the app layer fills it. */
+  lead?: React.ReactNode;
+  /** Panels after the outcome (coaching, review); the app layer fills it. */
   children?: React.ReactNode;
 }
 
@@ -38,11 +39,17 @@ function Meta({ icon: Icon, children }: { icon: React.ComponentType<{ className?
   );
 }
 
-/** Call header, outcome, player and transcript, with other modules' panels beside them. */
-export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, reviewFlags = [], children }: CallDetailProps) {
+/** Call header, the lead panel, outcome and other modules' panels, with the recording and transcript beside them. */
+export function CallDetail({
+  call,
+  recordingUrl,
+  canDelete,
+  assignableMembers,
+  reviewFlags = [],
+  lead,
+  children,
+}: CallDetailProps) {
   const title = callTitle(call.fileName);
-  // Panels can be switched off or not ready yet; without any, the call uses the full width.
-  const hasPanels = Children.toArray(children).length > 0;
 
   return (
     <PageStack>
@@ -148,72 +155,69 @@ export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, r
       )}
 
       {/*
-        Below xl everything stacks: outcome, then the score and coaching panels, then the long
-        transcript. On xl the panels move to a sticky side column; the second row is 1fr so a
-        tall side column stretches the transcript row, not the outcome row.
+        What matters most comes first: the score (the lead panel), the outcome, then coaching and
+        review (other modules' panels, passed in by the app layer). The recording and transcript are reference material: on xl
+        they sit in a sticky side column that scrolls on its own, and below xl they come last in
+        a fixed-height box, so a long call never pushes the score off the page.
       */}
-      <div
-        className={cn(
-          "grid items-start gap-6",
-          hasPanels && "xl:grid-cols-[minmax(0,1fr)_24rem] xl:grid-rows-[auto_1fr]",
-        )}
-    >
-        {call.outcome && (
-          <Card className="min-w-0 xl:col-start-1">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle>Outcome</CardTitle>
-              {call.outcome.cancelReason && (
-                <span
-                  className={cn(
-                    "rounded-full px-2.5 py-0.5 text-xs font-medium",
-                    call.outcome.resolution === "retained"
-                      ? "bg-badge-success text-on-badge-success"
-                      : "bg-badge-danger text-on-badge-danger",
-                  )}
-                >
-                  {call.outcome.resolution === "retained" ? "Saved" : "Lost"} · {call.outcome.cancelReason}
-                </span>
-              )}
-            </div>
-            <p className="mt-2 leading-relaxed text-fg/90">{call.outcome.summary}</p>
-            {call.outcome.details.length > 0 && (
-              <dl className="mt-5 grid gap-3 sm:grid-cols-2">
-                {call.outcome.details.map((d) => (
-                  <div key={d.label} className="rounded-2xl bg-chip px-4 py-3">
-                    <dt className="text-xs text-muted">{d.label}</dt>
-                    <dd className="mt-0.5 text-sm font-medium">{d.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-            {call.outcome.followUps.length > 0 && (
-              <div className="mt-5 rounded-2xl border border-orange/30 bg-orange/10 px-4 py-3">
-                <p className="text-xs font-medium text-orange">Follow-ups</p>
-                <ul className="mt-2 space-y-1.5 text-sm">
-                  {call.outcome.followUps.map((f) => (
-                    <li key={f} className="flex gap-2.5">
-                      <span className="mt-2 size-1.5 shrink-0 rounded-full bg-orange" aria-hidden />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_26rem]">
+        <div className="flex min-w-0 flex-col gap-6">
+          {lead}
+          {call.outcome && (
+            <Card className="min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <CardTitle>Outcome</CardTitle>
+                {call.outcome.cancelReason && (
+                  <span
+                    className={cn(
+                      "rounded-full px-2.5 py-0.5 text-xs font-medium",
+                      call.outcome.resolution === "retained"
+                        ? "bg-badge-success text-on-badge-success"
+                        : "bg-badge-danger text-on-badge-danger",
+                    )}
+                  >
+                    {call.outcome.resolution === "retained" ? "Saved" : "Lost"} · {call.outcome.cancelReason}
+                  </span>
+                )}
               </div>
-            )}
-          </Card>
-        )}
-        {hasPanels && (
-          <aside className="flex min-w-0 flex-col gap-6 xl:sticky xl:top-6 xl:col-start-2 xl:row-span-2 xl:row-start-1">
-            {children}
-          </aside>
-        )}
+              <p className="mt-2 leading-relaxed text-fg/90">{call.outcome.summary}</p>
+              {call.outcome.details.length > 0 && (
+                <dl className="mt-5 grid gap-3 sm:grid-cols-2">
+                  {call.outcome.details.map((d) => (
+                    <div key={d.label} className="rounded-2xl bg-chip px-4 py-3">
+                      <dt className="text-xs text-muted">{d.label}</dt>
+                      <dd className="mt-0.5 text-sm font-medium">{d.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+              {call.outcome.followUps.length > 0 && (
+                <div className="mt-5 rounded-2xl border border-orange/30 bg-orange/10 px-4 py-3">
+                  <p className="text-xs font-medium text-orange">Follow-ups</p>
+                  <ul className="mt-2 space-y-1.5 text-sm">
+                    {call.outcome.followUps.map((f) => (
+                      <li key={f} className="flex gap-2.5">
+                        <span className="mt-2 size-1.5 shrink-0 rounded-full bg-orange" aria-hidden />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </Card>
+          )}
+          {children}
+        </div>
         {call.transcript && call.transcript.length > 0 && (
           <CallPlayerProvider src={recordingUrl} durationSec={call.durationSec}>
-            <section aria-label="Recording and transcript" className="min-w-0 rounded-[28px] bg-card xl:col-start-1">
-              {/* The player stays in view while reading the transcript below it. */}
-              <div className="sticky top-0 z-10 rounded-t-[28px] border-b border-line bg-card/95 p-5 backdrop-blur sm:p-6">
+            <section
+              aria-label="Recording and transcript"
+              className="flex max-h-[34rem] min-w-0 flex-col overflow-hidden rounded-[28px] bg-card xl:sticky xl:top-6 xl:max-h-[calc(100dvh-3rem)]"
+            >
+              <div className="shrink-0 border-b border-line p-5">
                 <CallPlayer segments={call.transcript} employeeName={call.employeeName} />
               </div>
-              <div className="p-5 sm:p-6">
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5">
                 <TranscriptView segments={call.transcript} employeeName={call.employeeName} />
               </div>
             </section>
