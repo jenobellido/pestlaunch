@@ -1,3 +1,4 @@
+import { ViewTransition } from "react";
 import { cn } from "@/shared/lib/cn";
 
 interface PageHeaderProps {
@@ -30,9 +31,26 @@ export function PageHeader({ title, description, icon: Icon, actions, className 
   );
 }
 
-/** Vertical rhythm for a workspace page: header, then content, always 24px apart. */
+/**
+ * Vertical rhythm for a workspace page: header, then content, always 24px apart.
+ * Every page's root, so it also carries the page's arrival: content fades and rises in when you
+ * navigate to it or when it replaces its loading skeleton (see PageExit and app/globals.css).
+ */
 export function PageStack({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("space-y-6", className)}>{children}</div>;
+  return (
+    <ViewTransition enter="page-enter" exit="page-exit" default="none">
+      <div className={cn("space-y-6", className)}>{children}</div>
+    </ViewTransition>
+  );
+}
+
+/** Wrap a loading skeleton so it fades out quickly as the real page fades in. */
+export function PageExit({ children }: { children: React.ReactNode }) {
+  return (
+    <ViewTransition exit="page-exit" default="none">
+      {children}
+    </ViewTransition>
+  );
 }
 
 /** A pulsing placeholder block, the building piece of every skeleton. */
