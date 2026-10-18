@@ -2,7 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { serverEnv } from "@/core/config/env";
 
-// Thin client for any OpenAI-compatible API: Groq by default, or OpenAI by setting AI_BASE_URL
+// Thin client for any OpenAI-compatible API: OpenAI by default, or Groq by setting AI_BASE_URL
 // and the model names (see .env.example). Plain fetch keeps it dependency-free. Neither Groq
 // nor OpenAI trains on API data by default, which the test brief requires for the recordings.
 
@@ -21,7 +21,7 @@ function samplingFor(model: string, reasoningEffort: "low" | "medium" | "high") 
     ...(reasoning ? { reasoning_effort: reasoningEffort } : {}),
   };
 }
-// The free tier allows 8,000 chat tokens a minute, so rate limits are waited out patiently.
+// Per-minute rate limits (tight on free tiers) are waited out patiently.
 const MAX_ATTEMPTS = 6;
 const MAX_WAIT_MS = 60_000;
 

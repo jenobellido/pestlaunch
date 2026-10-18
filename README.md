@@ -18,7 +18,7 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. |
 | See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. **Team** and each **rep's page**: average score, trend, the steps they miss most with what good sounds like (from the manual), and **Plays** a manager can assign. |
 | (beyond the brief) Follow leads | **Leads**: every new-customer call becomes a lead (New, Contacted, Booked, Lost) with the customer, pest, price and next step. |
-| Review all calls and results | **Search** inside every transcript ("termites") and **export** calls to CSV. **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
+| Review all calls and results | **⌘K quick search** from any page jumps to a call, customer, rep or page, matching what was said too. **Search** inside every transcript ("termites") and **export** calls to CSV. **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
 
 Every AI result can be **reviewed and corrected** by a manager (call type,
 outcome, any scorecard step, with a note). The grade recalculates, uncertain
@@ -27,6 +27,9 @@ them.
 
 Beyond the brief, it's ready for a real team:
 
+- A **Get set up** checklist on the Overview walks a new company through
+  its first call, inviting the team, checking a score and assigning a
+  follow-up. Steps tick off from what's actually in the workspace.
 - Invite people with a link.
 - Permission-based roles, with custom roles.
 - Calls belong to the rep who made them.
@@ -65,10 +68,11 @@ npm run db:migrate    # applies migrations in drizzle/
 npm run dev
 ```
 
-Put a Groq API key (https://console.groq.com) in `AI_API_KEY` in `.env.local`;
-transcription and call analysis use it. The AI client works with any
-OpenAI-compatible API: to use OpenAI, set `AI_BASE_URL`, the model names and an
-OpenAI key as shown in `.env.example`. No code changes are needed.
+Put an OpenAI API key in `AI_API_KEY` in `.env.local`; transcription
+(`whisper-1`) and call analysis (`gpt-5.5`, falling back to `gpt-5.4-mini`)
+use it. The AI client works with any OpenAI-compatible API: to use Groq
+instead, set `AI_BASE_URL`, the model names and a Groq key as shown in
+`.env.example`. No code changes are needed.
 
 Open http://localhost:3000 and create an account. Locally, email confirmation
 is off and confirmation emails are caught by Mailpit at http://127.0.0.1:56424.
@@ -124,15 +128,12 @@ sidebar), split into pages with a settings menu:
   the audio, so they're occasionally swapped, mostly where two people talk
   over each other. When a segment is split between speakers, the split's
   timestamps are estimated from text length.
-- Groq's free tier allows 8,000 chat tokens a minute and 200,000 a day on
-  `gpt-oss-120b`. A 20-minute call takes about 4 minutes, mostly waiting out
-  the per-minute limit, and the daily limit covers only a handful of long
-  calls. When it's used up, the app switches to `gpt-oss-20b`, which has its
-  own daily allowance; it gave the same type, outcome and score on a test
-  call but is a smaller model, so results may be less precise. When both are
-  used up, calls fail with a message saying when to retry. The paid Dev tier
-  removes these limits. The free tier also caps audio files
-  at 25 MB (the app accepts up to 50 MB).
+- OpenAI's transcription API caps audio files at 25 MB, but the app accepts
+  up to 50 MB, so a very long WAV fails at transcription. MP3s of normal
+  calls are far smaller (a 20-minute call is about 10 MB). Splitting long
+  files would remove the limit.
+- Processing a call takes about 20 seconds to 4 minutes on OpenAI; all 20
+  test calls ran in about 5 minutes, 5 at a time.
 - Processing runs in the background with Next's `after()`, not a durable job
   queue. If the server stops mid-way, the call shows as failed after 10
   minutes and can be retried. A queue (e.g. Inngest or a database-backed

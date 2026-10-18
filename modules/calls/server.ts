@@ -16,3 +16,5 @@ export {
 export { createTask, deleteTask, findTask, listTasks, setTaskStatus, type CallTask } from "./server/task-repository";
 export { LEAD_STAGES, listLeads, setLeadStage, upsertLeadForCall, type Lead, type LeadStage } from "./server/lead-repository";
 export { toCsv } from "./lib/csv";
+export { searchCallsAndLeads, type LeadSearchHit } from "./server/search";
+export type { CallSearchHit } from "./lib/search";
