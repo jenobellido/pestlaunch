@@ -53,7 +53,7 @@ export function NavLink({
       {!!badge && (
         <span
           className={cn(
-            "rounded-full bg-orange px-1.5 text-[11px] leading-[18px] font-medium text-white tabular-nums",
+            "rounded-full bg-orange px-1.5 text-[11px] leading-[18px] font-medium text-on-orange tabular-nums",
             compact ? "absolute -top-0.5 -right-0.5 min-w-[18px] text-center" : "relative ml-auto",
           )}
           title={badgeLabel}
