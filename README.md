@@ -20,6 +20,11 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | (beyond the brief) Follow leads | **Leads**: every new-customer call becomes a lead (New, Contacted, Booked, Lost) with the customer, pest, price and next step. |
 | Review all calls and results | **Search** inside every transcript ("termites") and **export** calls to CSV. **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action, reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
 
+Every AI result can be **reviewed and corrected** by a manager (call type,
+outcome, any scorecard step, with a note). The grade recalculates, uncertain
+calls are flagged **Needs review**, and corrected calls show who reviewed
+them.
+
 Beyond the brief, it's ready for a real team:
 
 - Invite people with a link.

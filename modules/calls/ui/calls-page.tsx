@@ -9,6 +9,7 @@ import { CallStats } from "./call-stats";
 import { AutoRefresh } from "./auto-refresh";
 import { callGroup, callTitle, formatDateTime, formatDuration, processingLabel } from "./call-status";
 import { UploadCallForm, type AssignableMember } from "./upload-call-form";
+import { callReviewFlags } from "../lib/review";
 
 interface CallsPageProps {
   tenantSlug: string;
@@ -25,6 +26,8 @@ interface CallsPageProps {
   score?: (call: CallRecord) => React.ReactNode;
   /** Search inside transcripts (?q=); only matching calls are listed, with the matching line. */
   transcriptQuery?: string;
+  /** Extra review reasons from other modules (e.g. a borderline grade), for the Needs review flag. */
+  extraReviewFlags?: (call: CallRecord) => (string | null)[];
 }
 
 function subtitleOf(call: CallRecord) {
@@ -33,7 +36,15 @@ function subtitleOf(call: CallRecord) {
   return call.outcome?.summary ?? "";
 }
 
-export async function CallsPage({ tenantSlug, scope, canUpload, members, score, transcriptQuery }: CallsPageProps) {
+export async function CallsPage({
+  tenantSlug,
+  scope,
+  canUpload,
+  members,
+  score,
+  transcriptQuery,
+  extraReviewFlags,
+}: CallsPageProps) {
   const query = transcriptQuery?.trim() ?? "";
   const [allCalls, matches] = await Promise.all([
     listCalls(tenantSlug, scope),
@@ -66,6 +77,12 @@ export async function CallsPage({ tenantSlug, scope, canUpload, members, score, 
       createdAtMs: new Date(call.createdAt).getTime(),
       search: [call.fileName, type, call.employeeName, call.outcome?.summary].filter(Boolean).join(" ").toLowerCase(),
       score: score && call.status === "ready" ? score(call) : undefined,
+      reviewed: !!call.review,
+      // The list has no transcripts, so speaker checks only run on the call page.
+      needsReview:
+        call.status === "ready" &&
+        !call.review &&
+        [...callReviewFlags(call), ...(extraReviewFlags?.(call) ?? [])].some(Boolean),
     };
   });
 

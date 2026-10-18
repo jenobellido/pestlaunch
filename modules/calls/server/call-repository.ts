@@ -52,6 +52,7 @@ function toRecord(
     transcript: row.transcript ?? undefined,
     outcome: row.outcome ?? undefined,
     analyses: row.analyses,
+    review: row.review ?? null,
   };
 }
 
@@ -109,7 +110,7 @@ export async function insertCall(values: {
 export type CallUpdate = Partial<
   Pick<
     CallRow,
-    "status" | "stage" | "error" | "employeeId" | "employeeName" | "durationSec" | "callType" | "transcript" | "outcome" | "analyses"
+    "status" | "stage" | "error" | "employeeId" | "employeeName" | "review" | "durationSec" | "callType" | "transcript" | "outcome" | "analyses"
   >
 >;
 
@@ -188,4 +189,12 @@ export async function searchTranscripts(tenant: string, query: string, scope: Ca
     const hit = r.transcript?.find((s) => s.text.toLowerCase().includes(needle));
     return hit ? [{ callId: r.id, speaker: hit.speaker, text: hit.text, start: hit.start }] : [];
   });
+}
+
+/** Applies a reviewer's corrections to a call in the tenant; false when it doesn't exist. */
+export async function applyCallReview(tenant: string, id: string, values: CallUpdate): Promise<boolean> {
+  const row = await findCallRow(tenant, id);
+  if (!row) return false;
+  await updateCall(row.id, values);
+  return true;
 }

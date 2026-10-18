@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CALL_TYPES } from "@/core/calls";
 import { SCORECARDS } from "../config/scorecards";
-import { gradeFor, maxPoints, scorecardFor } from "./grade";
+import { borderlineReason, gradeFor, maxPoints, scorecardFor } from "./grade";
 import type { Scorecard } from "./types";
 
 const card: Scorecard = {
@@ -70,5 +70,18 @@ describe("scorecardFor", () => {
 
   it("covers every call type", () => {
     for (const type of CALL_TYPES) expect(scorecardFor(type)).not.toBeUndefined();
+  });
+});
+
+describe("borderlineReason", () => {
+  it("flags scores one point either side of a boundary", () => {
+    expect(borderlineReason(SCORECARDS.sales, 16)).toMatch(/short of Gold/);
+    expect(borderlineReason(SCORECARDS.sales, 13)).toMatch(/short of Green/);
+    expect(borderlineReason(SCORECARDS.sales, 14)).toMatch(/just made Green/);
+  });
+
+  it("leaves clear scores alone", () => {
+    expect(borderlineReason(SCORECARDS.sales, 17)).toBeNull();
+    expect(borderlineReason(SCORECARDS.sales, 5)).toBeNull();
   });
 });

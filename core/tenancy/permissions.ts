@@ -7,6 +7,7 @@ export const PERMISSIONS = {
   "calls.view_all": "See every call and the whole team's coaching (otherwise only their own)",
   "calls.assign": "Choose or change which team member a call belongs to",
   "calls.delete": "Delete calls and their recordings",
+  "calls.review": "Correct the AI's results (call type, outcome, scorecard steps) and mark calls reviewed",
   "coaching.manage": "Assign coaching plays to team members",
   "team.manage": "Invite people, change members' roles and remove members",
   "roles.manage": "Create and edit roles and their permissions",
@@ -27,7 +28,15 @@ export const DEFAULT_ROLES: { key: "owner" | "manager" | "rep"; name: string; pe
   {
     key: "manager",
     name: "Manager",
-    permissions: ["calls.upload", "calls.view_all", "calls.assign", "calls.delete", "coaching.manage", "team.manage"],
+    permissions: [
+      "calls.upload",
+      "calls.view_all",
+      "calls.assign",
+      "calls.delete",
+      "calls.review",
+      "coaching.manage",
+      "team.manage",
+    ],
   },
   { key: "rep", name: "Rep", permissions: ["calls.upload"] },
 ];

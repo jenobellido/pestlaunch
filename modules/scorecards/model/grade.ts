@@ -26,3 +26,12 @@ export function scorecardFor(callType: CallType): ScorecardId | null {
       return null;
   }
 }
+
+/** Why a score should be double-checked: it's one point either side of a grade boundary. */
+export function borderlineReason(card: Scorecard, points: number): string | null {
+  const { gold, green } = card.thresholds;
+  if (points === gold - 1) return "One point short of Gold; worth a second look.";
+  if (points === green - 1) return "One point short of Green; worth a second look.";
+  if (points === green && green !== gold) return "Only just made Green; worth a second look.";
+  return null;
+}

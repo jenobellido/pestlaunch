@@ -36,6 +36,8 @@ export interface ScorecardItemResult {
   reason: string;
   /** Given automatically, e.g. objection handling on a sales call with no objections. */
   autoAwarded?: boolean;
+  /** Changed by a reviewer, overriding the AI's judgement. */
+  corrected?: boolean;
 }
 
 export interface ScorecardResult {

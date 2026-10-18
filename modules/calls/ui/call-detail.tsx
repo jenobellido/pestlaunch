@@ -1,6 +1,6 @@
 import { Children } from "react";
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, AudioLines, CalendarDays, Check, Clock, Loader, UserRound } from "lucide-react";
+import { AlertTriangle, ArrowLeft, AudioLines, BadgeCheck, CalendarDays, Check, Clock, Loader, UserRound } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Badge, Card, CardTitle } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
@@ -23,6 +23,8 @@ interface CallDetailProps {
   canDelete: boolean;
   /** Team members to reassign the call to; only for viewers with "calls.assign". */
   assignableMembers?: AssignableMember[];
+  /** Reasons a person should check the AI's results (empty once reviewed). */
+  reviewFlags?: string[];
   /** Panels other modules contribute (scorecard, coaching); the app layer fills it. */
   children?: React.ReactNode;
 }
@@ -37,7 +39,7 @@ function Meta({ icon: Icon, children }: { icon: React.ComponentType<{ className?
 }
 
 /** Call header, outcome, player and transcript, with other modules' panels beside them. */
-export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, children }: CallDetailProps) {
+export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, reviewFlags = [], children }: CallDetailProps) {
   const title = callTitle(call.fileName);
   // Panels can be switched off or not ready yet; without any, the call uses the full width.
   const hasPanels = Children.toArray(children).length > 0;
@@ -58,6 +60,22 @@ export function CallDetail({ call, recordingUrl, canDelete, assignableMembers, c
           icon={AudioLines}
           actions={
             <div className="flex items-center gap-2">
+              {call.review ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-badge-success px-2.5 py-0.5 text-xs font-medium text-on-badge-success">
+                  <BadgeCheck className="size-3.5" aria-hidden />
+                  Reviewed
+                </span>
+              ) : (
+                reviewFlags.length > 0 && (
+                  <span
+                    title={reviewFlags.join(" ")}
+                    className="inline-flex items-center gap-1 rounded-full bg-orange/15 px-2.5 py-0.5 text-xs font-medium text-orange"
+                  >
+                    <AlertTriangle className="size-3.5" aria-hidden />
+                    Needs review
+                  </span>
+                )
+              )}
               <CallResultBadge call={call} />
               {canDelete && <DeleteCallButton tenantSlug={call.tenant} callId={call.id} title={title} />}
             </div>
