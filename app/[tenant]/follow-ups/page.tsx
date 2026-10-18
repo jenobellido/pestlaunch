@@ -122,20 +122,20 @@ async function FollowUpsBody({ params, searchParams }: PageProps<"/[tenant]/foll
         </Card>
 
         {canAssign && (
-          <Card className="min-w-0 p-0 sm:p-0">
-            <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
+          <Card className="min-w-0">
+            <div className="flex items-start justify-between gap-3">
               <div>
                 <CardTitle>Needs an owner</CardTitle>
-                <p className="text-sm text-muted">Leaks nobody is following up on yet. Assign one to a teammate.</p>
+                <p className="mt-0.5 text-sm text-muted">Leaks nobody is following up on yet. Assign one to a teammate.</p>
               </div>
               <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{unowned.length}</span>
             </div>
             {unowned.length === 0 ? (
-              <p className="px-6 py-8 text-center text-sm text-muted">Every leak has an owner. Nice work.</p>
+              <p className="mt-3 text-sm text-muted">Every leak has an owner. Nice work.</p>
             ) : (
-              <ul className="mt-3">
+              <ul className="mt-2 divide-y divide-line">
                 {unowned.map((leak) => (
-                  <LeakRow key={leak.call.id} slug={slug} leak={leak} members={assignees} />
+                  <LeakRow key={leak.call.id} slug={slug} leak={leak} members={assignees} inset />
                 ))}
               </ul>
             )}

@@ -1,7 +1,11 @@
 import { cn } from "@/shared/lib/cn";
 
-export function Card({ className, ...props }: React.ComponentProps<"section">) {
-  return <section className={cn("rounded-[28px] bg-card p-5 sm:p-6", className)} {...props} />;
+/**
+ * A rounded panel. `flush` drops the padding for edge-to-edge lists (cn() doesn't merge
+ * classes, so overriding the padding with a className would fight the default).
+ */
+export function Card({ className, flush = false, ...props }: React.ComponentProps<"section"> & { flush?: boolean }) {
+  return <section className={cn("rounded-[28px] bg-card", !flush && "p-5 sm:p-6", className)} {...props} />;
 }
 
 export function CardTitle({ className, ...props }: React.ComponentProps<"h2">) {
