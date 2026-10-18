@@ -16,8 +16,8 @@ const schema = z.object({
   /** Used when the main chat model's usage limit is reached. Empty turns it off. */
   AI_CHAT_FALLBACK_MODEL: z.string().default("gpt-5.4-mini"),
   /**
-   * For simpler, high-volume jobs (speaker labels, coaching, sentiment); scoring and call
-   * analysis always use AI_CHAT_MODEL. Empty means AI_CHAT_MODEL for everything.
+   * For simpler jobs (coaching, sentiment); scoring, call analysis and speaker labels always
+   * use AI_CHAT_MODEL. Empty means AI_CHAT_MODEL for everything.
    */
   AI_CHAT_FAST_MODEL: z.string().default("gpt-5.4-mini"),
 });

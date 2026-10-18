@@ -210,7 +210,7 @@ error:
      within 20 seconds, that are little more than digit groups); and in any
      13–19 digit run. Prices, percentages, dates, times and phone numbers
      are kept, and the cue words are specific ("credit card", not "credit").
-   - Whisper doesn't say who is talking, so the best chat model (`gpt-5.5`, see "AI models") labels each
+   - Whisper doesn't say who is talking, so the chat model (`gpt-5.5`) labels each
      segment employee, customer or unknown (phone menus, hold messages). It
      works in chunks of 40 lines, each shown the call's opening lines and the
      lines just before it. When one segment holds two speakers, the model can
@@ -636,7 +636,7 @@ Each AI job uses the cheapest model that matched the best one in testing. Jobs a
 | --- | --- | --- | --- |
 | Scoring | best | `gpt-5.5` (`AI_CHAT_MODEL`) | The core result. The smaller model differed on 9% of scorecard steps. |
 | Call type and outcome | best | `gpt-5.5` | Outcomes drive Leaks and follow-ups. The smaller model called a "wants to think" quote unresolved instead of follow-up needed. |
-| Speaker labels | best | `gpt-5.5` | Every later step depends on them, and swapped speakers on real calls caused wrong details in the hand check. `gpt-5.4-mini` matched on clean two-voice test audio (99 to 100% of words) but that has no crosstalk or merged turns, so it isn't evidence for real calls. The biggest possible saving (one request per 40 lines), worth testing on real calls next. |
+| Speaker labels | best | `gpt-5.5` | They feed every later step. Re-labelling 3 real calls' saved text, `gpt-5.5` matched its stored labels on 100% of words and `gpt-5.4-mini` on 99.2% (97.9% on the longest), on text easier than raw Whisper output. |
 | Coaching | fast | `gpt-5.4-mini` (`AI_CHAT_FAST_MODEL`) | Feedback as specific as `gpt-5.5`'s (quotes from the call, lines to say), usually two improvements instead of three, at about a third of the cost. |
 | Sentiment | fast | `gpt-5.4-mini` | Agreed with `gpt-5.5` on 94% of lines and never read a line as the opposite tone. |
 | Call type drafts (Settings) | best | `gpt-5.5` | Rare, so cost doesn't matter. |
@@ -644,13 +644,16 @@ Each AI job uses the cheapest model that matched the best one in testing. Jobs a
 How it was decided: four invented demo calls were voiced with two different
 text-to-speech voices (so every line's speaker is known) and run through the
 real pipeline on `gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini` and `gpt-5.4-nano`.
-`gpt-5.4` saved little (it writes more, so coaching cost more), and
-`gpt-5.4-nano` agreed on only 74% of sentiment lines. `gpt-5.5` itself varies by
-about a point between runs on the same call, so differences of a point are noise.
+`gpt-5.4` saved little (it writes more, so its coaching cost more than
+`gpt-5.5`'s), and `gpt-5.4-nano` agreed on only 74% of sentiment lines. `gpt-5.5`
+itself varies by about a point between runs on the same call, so differences
+of a point are noise. Speaker labels looked equal on that clean audio, so they
+were also checked on 3 real calls (text only, no re-transcribing), where the
+smaller model fell short; they stay on `gpt-5.5`.
 
-Measured cost per short demo call with labels on the fast model: about $0.07,
-down from $0.085 with `gpt-5.5` for everything (17%). With labels kept on
-`gpt-5.5` the saving is smaller (coaching and sentiment only). Prices used: `gpt-5.5` $5 / $30 and `gpt-5.4-mini` $0.75 / $4.50 per
+Measured cost per short demo call: about $0.079, down from $0.085 with
+`gpt-5.5` for everything; coaching costs about a third and sentiment about a
+third of before. Prices used: `gpt-5.5` $5 / $30 and `gpt-5.4-mini` $0.75 / $4.50 per
 million input / output tokens. The fast tier falls back to `AI_CHAT_MODEL`
 when its model is unavailable or limited, so it never fails a call; a provider
 without `gpt-5.4-mini` (e.g. Groq) also falls back, or set
