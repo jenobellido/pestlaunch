@@ -43,3 +43,36 @@ export function guardViewTransitions(doc: Pick<Document, "startViewTransition">)
   guarded[GUARDED] = true;
   doc.startViewTransition = guarded;
 }
+
+/**
+ * Whether a rejection is the browser aborting or skipping a view transition (Chrome:
+ * "Transition was aborted because of invalid state", "... timeout in DOM update", "Transition
+ * was skipped"). Those mean only that an animation didn't run; nothing else failed.
+ */
+export function isAbortedViewTransition(reason: unknown) {
+  if (typeof reason !== "object" || reason === null) return false;
+  const { name, message } = reason as { name?: unknown; message?: unknown };
+  return (
+    (name === "AbortError" || name === "InvalidStateError" || name === "TimeoutError") &&
+    typeof message === "string" &&
+    /^Transition was (aborted|skipped)/.test(message)
+  );
+}
+
+/**
+ * The second layer behind guardViewTransitions: any aborted view transition that still ends
+ * up unhandled (one started outside React, or on a page loaded before the guard) is dropped
+ * quietly. It listens in the capture phase so it runs before Next's dev overlay, which counts
+ * every unhandled rejection as an issue. Every other rejection is left alone.
+ */
+export function ignoreAbortedViewTransitions(target: Pick<EventTarget, "addEventListener">) {
+  target.addEventListener(
+    "unhandledrejection",
+    (event) => {
+      if (!isAbortedViewTransition((event as PromiseRejectionEvent).reason)) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    },
+    { capture: true },
+  );
+}

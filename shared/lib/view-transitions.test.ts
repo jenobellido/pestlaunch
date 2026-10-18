@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { guardViewTransitions, MAX_TRANSITION_MS } from "./view-transitions";
+import { guardViewTransitions, ignoreAbortedViewTransitions, isAbortedViewTransition, MAX_TRANSITION_MS } from "./view-transitions";
 
 /** A stand-in for a ViewTransition the browser aborted: finished and updateCallbackDone reject. */
 function abortedTransition() {
@@ -122,3 +122,53 @@ describe("guardViewTransitions", () => {
     expect(real.skipTransition).not.toHaveBeenCalled();
   });
 });
+
+/** A DOMException-like reason, as the browser rejects with. */
+const domError = (name: string, message: string) => Object.assign(new Error(message), { name });
+
+describe("isAbortedViewTransition", () => {
+  it.each([
+    ["InvalidStateError", "Transition was aborted because of invalid state"],
+    ["TimeoutError", "Transition was aborted because of timeout in DOM update"],
+    ["AbortError", "Transition was skipped"],
+  ])("recognises %s from an aborted transition", (name, message) => {
+    expect(isAbortedViewTransition(domError(name, message))).toBe(true);
+  });
+
+  it("leaves every other rejection alone", () => {
+    expect(isAbortedViewTransition(domError("InvalidStateError", "The object is in an invalid state."))).toBe(false);
+    expect(isAbortedViewTransition(domError("AbortError", "The user aborted a request."))).toBe(false);
+    expect(isAbortedViewTransition(new Error("Transition was aborted"))).toBe(false);
+    expect(isAbortedViewTransition("Transition was aborted")).toBe(false);
+    expect(isAbortedViewTransition(null)).toBe(false);
+  });
+});
+
+describe("ignoreAbortedViewTransitions", () => {
+  function rejection(reason: unknown) {
+    return Object.assign(new Event("unhandledrejection", { cancelable: true }), { reason });
+  }
+
+  it("silences aborted transitions before later listeners (like Next's overlay) see them", () => {
+    const target = new EventTarget();
+    ignoreAbortedViewTransitions(target);
+    const later = vi.fn();
+    target.addEventListener("unhandledrejection", later);
+    const event = rejection(domError("InvalidStateError", "Transition was aborted because of invalid state"));
+    target.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    expect(later).not.toHaveBeenCalled();
+  });
+
+  it("passes every other rejection through", () => {
+    const target = new EventTarget();
+    ignoreAbortedViewTransitions(target);
+    const later = vi.fn();
+    target.addEventListener("unhandledrejection", later);
+    const event = rejection(new Error("Database is down"));
+    target.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+    expect(later).toHaveBeenCalledOnce();
+  });
+});
+

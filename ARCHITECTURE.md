@@ -430,7 +430,12 @@ animation says one thing:
   (`shared/lib/view-transitions.ts`, installed by `instrumentation-client.ts`)
   makes `finished` and `updateCallbackDone` settle quietly, and skips any
   transition still running after 1 second, since React holds the next
-  navigation until the current transition ends.
+  navigation until the current transition ends. As a second layer,
+  `ignoreAbortedViewTransitions` drops any aborted transition that still ends
+  up unhandled (one started outside React, or on a page loaded before the
+  guard). It listens in the capture phase so Next's dev overlay never counts
+  it, and only matches the browser's own "Transition was aborted/skipped"
+  errors; every other rejection passes through.
 - Navigations are lateral (sidebar items are siblings), so there are no
   directional slides. Revalidations and form saves don't animate: every
   `<ViewTransition>` uses `default="none"`.
