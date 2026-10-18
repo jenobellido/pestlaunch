@@ -205,7 +205,8 @@ error:
      become `[redacted]` within a minute either side of a line mentioning a
      card, its expiry, code or brand; in a read-back (neighbouring lines,
      within 20 seconds, that are little more than digit groups); and in any
-     13–19 digit run. Prices, percentages and phone numbers are kept.
+     13–19 digit run. Prices, percentages, dates, times and phone numbers
+     are kept, and the cue words are specific ("credit card", not "credit").
    - Whisper doesn't say who is talking, so the chat model (`gpt-5.5`) labels each
      segment employee, customer or unknown (phone menus, hold messages). It
      works in chunks of 40 lines, each shown the call's opening lines and the
@@ -445,7 +446,7 @@ before it renders.
 | Page | What it does |
 | --- | --- |
 | Call library | Drag-and-drop upload of one or several recordings, each checked in the browser (type, 50 MB) before anything is sent; a queue uploads them one at a time ("2 of 5") and each then processes in the background. Progress shows the upload and processing steps with a timer, warns before leaving the page, and refreshes the list so the new call shows as processing. Four headline numbers (calls, win rate, open follow-ups, talk time). Filters like PestLaunch's Call Log: outcome (won, follow-up, lost, processing, failed), type group (Sales, Service, Billing, Retention, Other), rep and date, plus search by name, type, rep or summary, all in the browser. Columns use PestLaunch's words: Rep, Score, Outcome, talk time. Managers see a "Whose call?" picker on upload. |
-| Call detail | Outcome first, then the scorecard and coaching panels (a sticky side column on wide screens), then the recording. The player sits on a speaker timeline (who talked when, and each side's share of talk time) and stays in view while the transcript scrolls. Clicking a line's time plays from there, the playing line is highlighted, and the transcript can be searched. Owners and managers can delete a call from here. A processing call refreshes itself. |
+| Call detail | The scorecard leads (the `lead` slot, sections in two columns when the panel is wide, via a container query), then the outcome, coaching and the review card. The recording and transcript are reference: a sticky right column on wide screens that scrolls on its own, and a fixed-height box at the end on smaller ones, so a long call never pushes the score down. The player sits on a speaker timeline (who talked when, and each side's share of talk time) above the transcript. Clicking a line's time plays from there, the playing line is highlighted, and the transcript can be searched. Owners and managers can delete a call from here. A processing call refreshes itself. |
 
 The calls module never imports scorecards. The list's score column comes in
 through `CallsPage`'s `score` prop, which the app page fills with its own
@@ -466,7 +467,8 @@ From the call manuals in `../docs/call-manuals/`:
 
 Sections follow the manuals' four steps (Validate, Understand, Solve,
 Verify), plus Pricing and Objections on sales calls. On sales calls with no
-objections, the 4 objection points are awarded automatically.
+objections, the 4 objection points are awarded automatically. A clash over
+appointment times or a question about paying isn't an objection.
 
 The scorecards are data in `modules/scorecards/config/scorecards.ts`. Each
 item carries its criteria, paraphrased from the manual's definition of that
@@ -478,10 +480,15 @@ request gets pass/fail, an evidence quote and a one-line reason per item,
 plus whether the customer raised objections. A quote is kept only if its
 words really appear in the transcript, so every quote shown can be trusted.
 Points and grade are computed in code from the scorecard, never by the
-model. The prompt stops one quote from earning two different items unless it
-clearly does both (a confidence line isn't validation), and short
-scheduling and billing calls are graded on the manual's lighter version of
-the steps.
+model. One line earns one step: the model kept double counting despite the
+prompt, so `scoreCall` enforces it. When two passing steps quote the same
+line, the later step in scorecard order keeps it (a reused line is nearly
+always the call moving forward, e.g. a confirm line is the Close, not the
+earlier Confidence) and the earlier one fails with the reason, except for
+natural pairs (Consensus and Close, Present Solution and Close,
+Close and Provide a Conclusion). Short scheduling and billing calls are
+graded on the manual's lighter version of the steps, but a greeting is
+never Investigate and offering a slot is never a Summary.
 
 ## Module toggling
 

@@ -44,7 +44,10 @@ export function dropRepeats<T extends { text: string }>(segments: readonly T[]):
 }
 
 /** Words that mean card details are about to be read out. */
-const PAYMENT_CUE = /\b(card|credit|debit|expir\w*|security code|cvv|cvc|visa|mastercard|amex|american express|discover)\b/i;
+// Specific on purpose: "credit" and "discover" alone come up in sales talk ("a credit on your
+// account", "we'll discover entry points").
+const PAYMENT_CUE =
+  /\b(card|credit card|debit card|card number|expir\w*|security code|cvv|cvc|visa|mastercard|amex|american express|discover card)\b/i;
 /** How long after the last cue or masked number digits are still treated as card details. */
 const PAYMENT_WINDOW_SEC = 60;
 /** Any run of digits, possibly in groups ("4111 1111", "08/27", "1-2-3"). */
@@ -64,7 +67,8 @@ function isDigitGroupLine(text: string) {
  * Masks payment card details before the transcript is stored or sent to a language model.
  * Customers read card numbers out four digits at a time over several lines (often after a
  * pause to find the card), then the expiry and security code, so a long-number check alone
- * misses them. Digits are masked, except prices, percentages and phone numbers, when they're:
+ * misses them. Digits are masked, except prices, percentages, dates, times and phone numbers,
+ * when they're:
  * - within a minute either side of a line mentioning a card, its expiry, code or brand;
  * - part of a read-back: neighbouring lines, within 20 seconds, each little more than a digit group;
  * - a run of 13 to 19 digits, anywhere.
@@ -87,7 +91,11 @@ export function redactPaymentDetails<T extends { start: number; end: number; tex
     let masked = false;
     const text = s.text.replace(DIGITS, (run, at: number) => {
       const digits = run.replace(/\D/g, "").length;
-      const price = (at > 0 && s.text[at - 1] === "$") || s.text[at + run.length] === "%";
+      const after = s.text.slice(at + run.length);
+      const price = (at > 0 && s.text[at - 1] === "$") || after.startsWith("%");
+      // Dates and times near a payment ("the 25th", "10 to 12", "2 pm") aren't card details.
+      const dateOrTime = /^(st|nd|rd|th)\b|^\s*(am|pm|a\.m|p\.m|o'clock)\b|^\s*(to|and|-)\s*\d/i.test(after) || /\b(between|from|at|to|and)\s*$/i.test(s.text.slice(0, at));
+      if (dateOrTime && !(digits >= 13 && digits <= 19)) return run;
       const cardLength = digits >= 13 && digits <= 19;
       if (!cardLength && (!inWindow || price || PHONE.test(run.trim()) || digits < 2)) return run;
       masked = true;

@@ -13,6 +13,7 @@ export const maxDuration = 300;
 
 // The app layer composes modules: the call detail comes from `calls`, and
 // panels from other modules are added only when the tenant has them enabled.
+// The score leads, above the outcome; coaching follows and corrections come last.
 export default async function Page({ params }: PageProps<"/[tenant]/calls/[callId]">) {
   const access = await requireModule(params, "calls");
   const { tenant, user, permissions } = access;
@@ -44,7 +45,23 @@ export default async function Page({ params }: PageProps<"/[tenant]/calls/[callI
       canDelete={can(access, "calls.delete")}
       assignableMembers={members?.map((m) => ({ id: m.userId, name: m.displayName }))}
       reviewFlags={ready ? reviewFlags : []}
+      lead={
+        ready && enabled.has("scorecards") ? (
+          <ScorecardPanel
+            result={score}
+            rubricHref={`/${tenant.slug}/scorecards`}
+            renderMark={
+              canReview
+                ? (index, item) => (
+                    <ScoreItemToggle slug={tenant.slug} callId={call.id} index={index} passed={item.passed} name={item.item} />
+                  )
+                : undefined
+            }
+          />
+        ) : null
+      }
     >
+      {ready && enabled.has("coaching") && <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />}
       {canReview && (
         <ReviewPanel
           slug={tenant.slug}
@@ -55,20 +72,6 @@ export default async function Page({ params }: PageProps<"/[tenant]/calls/[callI
           review={call.review ?? null}
         />
       )}
-      {ready && enabled.has("scorecards") && (
-        <ScorecardPanel
-          result={score}
-          rubricHref={`/${tenant.slug}/scorecards`}
-          renderMark={
-            canReview
-              ? (index, item) => (
-                  <ScoreItemToggle slug={tenant.slug} callId={call.id} index={index} passed={item.passed} name={item.item} />
-                )
-              : undefined
-          }
-        />
-      )}
-      {ready && enabled.has("coaching") && <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />}
     </CallDetail>
   );
 }

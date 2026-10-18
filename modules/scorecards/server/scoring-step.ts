@@ -13,7 +13,9 @@ import type { Scorecard, ScorecardResult } from "../model/types";
 const gradingSchema = z.object({
   objectionsRaised: z
     .boolean()
-    .describe("True if the customer raised any objection or hesitation about buying (price, timing, spouse, other companies)"),
+    .describe(
+      "True if the customer pushed back on buying: price, needing to ask a spouse, comparing other companies, or doubting they need it. A clash over appointment times or a question about how to pay isn't an objection",
+    ),
   items: z.array(
     z.object({
       item: z.number().int().describe("The item number in brackets"),
@@ -40,7 +42,7 @@ How to grade:
 - The speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
 
 // The office manual's lighter version of the steps for short scheduling and billing calls.
-const LIGHT_CALL_NOTE = `This is a short scheduling or billing call, and the manual's lighter version of the steps applies: stating the change made or the new appointment is Present Solution; "let me check the schedule" is an Expectation Statement; a short confirm-back ("so after 12 works?") is a Summary Statement; the Understand steps may be brief.`;
+const LIGHT_CALL_NOTE = `This is a short scheduling or billing call, and the manual's lighter version of the steps applies: stating the change made or the new appointment is Present Solution; "let me check the schedule" is an Expectation Statement; a short confirm-back ("so after 12 works?") is a Summary Statement; the Understand steps may be brief. Investigate still needs a question about the customer's situation or need: not the greeting ("How can I help?") and not offering a time slot. A Summary Statement repeats back something the customer said (their availability, request or concern); offering our slot is Present Solution, not a Summary.`;
 
 function transcriptText(segments: readonly TranscriptSegment[]) {
   const name = { employee: "Employee", customer: "Customer", unknown: "Other" } as const;

@@ -41,7 +41,7 @@ export async function processCall(
     }
 
     await updateCall(call.id, { stage: "analyzing" });
-    const { callType, employeeName, outcome } = await analyzeCall(segments);
+    const { callType, employeeName, outcome } = await analyzeCall(segments, { teamNames: team.map((m) => m.displayName) });
     // Unassigned calls (uploaded with "work it out from the call") get the team member whose
     // name the employee gave, when exactly one member matches.
     const employeeId = call.employeeId ?? matchEmployee(team, employeeName);

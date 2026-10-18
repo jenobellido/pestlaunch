@@ -44,7 +44,9 @@ Rules:
 - Pick the improvements that would most change the outcome or the customer's experience.
 - Quotes must be copied exactly from the transcript: the full phrase or sentence (5 to 25 words), not a fragment. Use null when the improvement is about something the employee never said.
 - Suggestions are lines the employee could actually say on the phone, in a warm and natural tone, following the call process.
-- Never use placeholders such as "$X" or "[price]", and never invent prices, discounts or programs: only use figures said in the call. Don't suggest something the employee already did.
+- Never use placeholders such as "$X" or "[price]", and never invent prices, discounts or programs: only use figures said in the call. If the call gave no figure, write the line without a number ("it's normally more, but this week...") or pick a different improvement. Don't suggest something the employee already did.
+- A suggestion is always words the employee could say, never instructions about what to do.
+- Never name the company or a person as spelled in the transcript, which often mishears names; say "our company" or "we".
 - Don't credit a step the employee skipped: "we can help with that" is a confidence statement, not empathy.
 - Keep it short and encouraging. No more than 3 strengths and 3 improvements.
 - The speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
