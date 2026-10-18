@@ -1,4 +1,3 @@
-import { CALL_TYPE_LABELS } from "@/modules/calls";
 import { callScope, listCalls, toCsv } from "@/modules/calls/server";
 import { getScorecardResult } from "@/modules/scorecards";
 import { withModule } from "../../_lib/with-module";
@@ -13,7 +12,7 @@ export const GET = withModule("calls", async (_req, { tenant, userId, permission
       return [
         c.createdAt.slice(0, 10),
         c.fileName,
-        c.callType ? CALL_TYPE_LABELS[c.callType] : null,
+        c.callTypeName ?? null,
         c.employeeName,
         c.status,
         c.outcome?.resolution.replace(/_/g, " ") ?? null,

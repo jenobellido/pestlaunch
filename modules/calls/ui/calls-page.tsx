@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Download, Phone, Search, X } from "lucide-react";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
-import { CALL_TYPE_GROUP, CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
 import { listCalls, searchTranscripts, type CallScope } from "../server/call-repository";
 import { CallList, type CallListItem } from "./call-list";
@@ -17,6 +16,8 @@ interface CallsPageProps {
   scope: CallScope;
   /** Whether this member may upload calls. */
   canUpload: boolean;
+  /** The call types to pick from on upload, when the company asks uploaders to pick ("Ask on upload"). */
+  uploadCallTypes?: { key: string; name: string }[];
   /** Team members to choose from on upload; only for members who may assign calls. */
   members?: AssignableMember[];
   /**
@@ -40,6 +41,7 @@ export async function CallsPage({
   tenantSlug,
   scope,
   canUpload,
+  uploadCallTypes,
   members,
   score,
   transcriptQuery,
@@ -57,7 +59,7 @@ export async function CallsPage({
 
   // Everything the list shows is prepared here, so dates are formatted once, on the server.
   const items: CallListItem[] = calls.map((call) => {
-    const type = call.callType ? CALL_TYPE_LABELS[call.callType] : null;
+    const type = call.callTypeName ?? null;
     return {
       id: call.id,
       href: `/${tenantSlug}/calls/${call.id}`,
@@ -72,7 +74,7 @@ export async function CallsPage({
       status: call.status,
       outcome: call.outcome ? { resolution: call.outcome.resolution } : undefined,
       group: callGroup(call),
-      typeGroup: call.callType ? CALL_TYPE_GROUP[call.callType] : null,
+      typeGroup: call.callTypeGroup ?? null,
       repKey: call.employeeId ?? (call.employeeName ? `heard:${call.employeeName.toLowerCase()}` : null),
       createdAtMs: new Date(call.createdAt).getTime(),
       search: [call.fileName, type, call.employeeName, call.outcome?.summary].filter(Boolean).join(" ").toLowerCase(),
@@ -106,7 +108,7 @@ export async function CallsPage({
           )
         }
       />
-      {canUpload && <UploadCallForm tenantSlug={tenantSlug} members={members} />}
+      {canUpload && <UploadCallForm tenantSlug={tenantSlug} members={members} callTypes={uploadCallTypes} />}
       {allCalls.length > 0 && <CallStats calls={allCalls} />}
       {allCalls.length > 0 && (
         <form role="search" action={`/${tenantSlug}/calls`} className="flex flex-wrap items-center gap-3">

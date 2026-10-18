@@ -13,6 +13,7 @@ export const PERMISSIONS = {
   "roles.manage": "Create and edit roles and their permissions",
   "company.manage": "Rename the company",
   "modules.manage": "Turn modules on or off for the company",
+  "calltypes.manage": "Set up call types and their scorecards, and whether the AI or the uploader picks a call's type",
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;

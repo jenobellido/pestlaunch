@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { generateObject } from "@/core/ai";
-import { CALL_TYPES, type CallType, type TranscriptSegment } from "@/core/calls";
+import type { CallType, CallTypeDefinition, TranscriptSegment } from "@/core/calls";
 import { formatTimestamp } from "../lib/format";
 import { CANCEL_REASONS, type CallOutcome, type CallResolution } from "../model/types";
 
@@ -20,8 +20,7 @@ const RESOLUTIONS = [
   "unresolved",
 ] as const satisfies readonly CallResolution[];
 
-const analysisSchema = z.object({
-  callType: z.enum(CALL_TYPES),
+const baseSchema = z.object({
   employeeName: z.string().nullable().describe("The employee's first name as said in the call, or null"),
   summary: z
     .string()
@@ -34,19 +33,11 @@ const analysisSchema = z.object({
   cancelReason: z
     .enum(CANCEL_REASONS)
     .nullable()
-    .describe("Retention calls only: the main reason the customer wanted to cancel; null for other calls"),
+    .describe("Cancel or retention calls only: the main reason the customer wanted to cancel; null for other calls"),
 });
 
 // Call types and outcomes follow the PestLaunch office and sales call manuals.
-const SYSTEM = `You review recorded phone calls for a pest control company and report what happened, for the owner and office manager.
-
-Call types (pick the caller's real purpose, not the phone menu option they chose):
-- new_customer: someone who isn't a customer yet asks about service: a quote, inspection or signing up. Inbound sales.
-- scheduling: setting, moving or asking about a service appointment (including whether a visit's work was finished or when the technician comes back), or special needs for an upcoming visit. Includes a new customer whose sale was already agreed (e.g. by email or a web form) when the call only arranges the timing or payment.
-- billing: invoices, payments, charges, balances, declined cards, updating the card on file.
-- reservice: an existing customer still has pests after a treatment and needs a technician to come back.
-- retention: the customer wants to cancel or stop service, including when the company calls back about a cancel request.
-- other: anything else, e.g. changing service address, technician feedback, vendors, wrong numbers, or a voicemail.
+const SYSTEM_BASE = `You review recorded phone calls for a pest control company and report what happened, for the owner and office manager.
 
 Resolution (how the call ended):
 - booked: a new customer agreed to service, or a new visit (initial, re-service, inspection) was put on the schedule.
@@ -76,23 +67,46 @@ function transcriptText(segments: readonly TranscriptSegment[]) {
 }
 
 /** Classifies the call and extracts the outcome and key details. */
+/** The company's call types, as the AI sees them: each key with how to recognise it. */
+function callTypeGuide(types: readonly CallTypeDefinition[]) {
+  return `Call types (pick the caller's real purpose, not the phone menu option they chose):\n${types
+    .map((t) => `- ${t.key} (${t.name}): ${t.description}`)
+    .join("\n")}\n\n`;
+}
+
+/**
+ * Classifies the call into one of the company's call types and extracts the outcome and key
+ * details. When the uploader already chose the type (`fixedType`), it isn't asked again.
+ */
 export async function analyzeCall(
   transcript: readonly TranscriptSegment[],
-  options: { teamNames?: readonly string[] } = {},
+  options: {
+    teamNames?: readonly string[];
+    /** The company's enabled call types to choose from. */
+    callTypes: readonly CallTypeDefinition[];
+    fixedType?: CallTypeDefinition;
+  },
 ): Promise<CallAnalysis> {
+  const keys = options.callTypes.map((t) => t.key) as [string, ...string[]];
+  const schema = options.fixedType ? baseSchema : baseSchema.extend({ callType: z.enum(keys) });
+  const system = options.fixedType
+    ? `${SYSTEM_BASE}\n\nThis call's type was set by whoever uploaded it: ${options.fixedType.name} (${options.fixedType.description}).`
+    : `${SYSTEM_BASE.replace("Resolution (how the call ended):", `${callTypeGuide(options.callTypes)}Resolution (how the call ended):`)}`;
   // The transcript often mishears names; the team list gives the right spelling.
   const team = options.teamNames?.length
     ? `The company's team, for spelling the employee's name: ${options.teamNames.join(", ")}. Use one of these only if it clearly matches the name said.\n\n`
     : "";
-  const result = await generateObject({
+  const result = (await generateObject({
     name: "call_analysis",
-    schema: analysisSchema,
-    system: SYSTEM,
+    schema,
+    system,
     prompt: `${team}Analyze this call.\n\n${transcriptText(transcript)}`,
-  });
+  })) as z.infer<typeof baseSchema> & { callType?: string };
+  const callType = options.fixedType?.key ?? result.callType ?? "other";
+  const group = options.callTypes.find((t) => t.key === callType)?.group ?? options.fixedType?.group;
 
   return {
-    callType: result.callType,
+    callType,
     employeeName: result.employeeName?.trim() || null,
     outcome: {
       summary: result.summary.trim(),
@@ -100,7 +114,7 @@ export async function analyzeCall(
       // Models sometimes fill a label with "Not provided"; a missing fact is just left out.
       details: result.details.filter((d) => d.label.trim() && d.value.trim() && !EMPTY_VALUE.test(d.value.trim())).slice(0, 8),
       followUps: result.followUps.map((f) => f.trim()).filter(Boolean),
-      cancelReason: result.callType === "retention" ? result.cancelReason : null,
+      cancelReason: group === "retention" ? result.cancelReason : null,
     },
   };
 }

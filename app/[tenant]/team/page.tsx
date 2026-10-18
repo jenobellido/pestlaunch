@@ -1,5 +1,4 @@
 import { can } from "@/core/tenancy";
-import { CALL_TYPE_LABELS } from "@/modules/calls";
 import { callScope, listCalls } from "@/modules/calls/server";
 import { CoachingPage, getCoachingFeedback, type CoachingCall } from "@/modules/coaching";
 import { listPlays } from "@/modules/coaching/server";
@@ -31,7 +30,7 @@ export default async function Page({ params }: PageProps<"/[tenant]/team">) {
         id: c.id,
         href: `/${tenant.slug}/calls/${c.id}`,
         title: c.fileName.replace(/\.[^.]+$/, ""),
-        callType: c.callType ? CALL_TYPE_LABELS[c.callType] : null,
+        callType: c.callTypeName ?? null,
         employeeId: c.employeeId,
         employeeName: c.employeeName,
         createdAt: c.createdAt,

@@ -109,5 +109,15 @@ export function scoreCall(
   }
 
   const points = items.filter((i) => i.passed).length;
-  return { scorecardId: card.id, points, maxPoints: maxPoints(card), grade: gradeFor(card, points), items };
+  // Each step's criteria travel with the result, so it still reads right if the scorecard changes.
+  const criteria = new Map(card.sections.flatMap((s) => s.items.map((i) => [`${s.title}\u0000${i.name}`, i.criteria] as const)));
+  return {
+    scorecardId: card.id,
+    scorecardName: card.name,
+    thresholds: card.thresholds,
+    points,
+    maxPoints: maxPoints(card),
+    grade: gradeFor(card, points),
+    items: items.map((i) => ({ ...i, criteria: criteria.get(`${i.section}\u0000${i.item}`) })),
+  };
 }

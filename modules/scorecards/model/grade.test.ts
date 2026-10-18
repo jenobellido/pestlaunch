@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CALL_TYPES } from "@/core/calls";
+import { BUILT_IN_CALL_TYPES } from "@/core/calls";
 import { SCORECARDS } from "../config/scorecards";
 import { borderlineReason, gradeFor, maxPoints, scorecardFor } from "./grade";
 import type { Scorecard } from "./types";
@@ -69,7 +69,7 @@ describe("scorecardFor", () => {
   });
 
   it("covers every call type", () => {
-    for (const type of CALL_TYPES) expect(scorecardFor(type)).not.toBeUndefined();
+    for (const type of BUILT_IN_CALL_TYPES) expect(scorecardFor(type)).not.toBeUndefined();
   });
 });
 

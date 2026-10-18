@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Building2, Palette, ShieldCheck, UserRound, Users } from "lucide-react";
+import { Building2, ClipboardList, Palette, ShieldCheck, UserRound, Users } from "lucide-react";
 import { Bone, PageStack } from "@/shared/ui/page-header";
 import { SettingsHeader } from "./_components/settings-frame";
 import { SettingsNav } from "./_components/settings-nav";
@@ -16,6 +16,7 @@ async function Menu({ params }: { params: Promise<{ tenant: string }> }) {
         { href: `${base}/company`, label: "Company", icon: <Building2 aria-hidden /> },
         { href: `${base}/members`, label: "Members", icon: <Users aria-hidden /> },
         { href: `${base}/roles`, label: "Roles", icon: <ShieldCheck aria-hidden /> },
+        { href: `${base}/call-types`, label: "Call types", icon: <ClipboardList aria-hidden /> },
       ]}
     />
   );
@@ -24,7 +25,7 @@ async function Menu({ params }: { params: Promise<{ tenant: string }> }) {
 function MenuSkeleton() {
   return (
     <div className="flex gap-1.5 rounded-full bg-card p-1.5 lg:flex-col lg:gap-2 lg:rounded-[28px]" aria-hidden>
-      {Array.from({ length: 5 }, (_, i) => (
+      {Array.from({ length: 6 }, (_, i) => (
         <Bone key={i} className="h-10 w-24 shrink-0 rounded-full bg-card-2 lg:h-11 lg:w-full" />
       ))}
     </div>

@@ -33,7 +33,9 @@ app/                     Routing only: thin pages, layouts, route handlers
     calls/uploads/       POST: a private storage path + one-time upload token
     calls/[callId]/      GET one call · DELETE call and recording (owner/manager)
 core/                    Platform code every tenant gets. Not toggleable.
-  calls/                 Shared call contract: CallType, TranscriptSegment,
+  calls/                 Shared call contract (CallType, TranscriptSegment, steps), the
+                         default call types and scorecards, and each company's catalog
+                         of call types (catalog.ts, catalog-repository.ts);
                          CallAnalysisStep (how modules plug into processing)
   auth/                  Supabase Auth: server client, session, sign in/up/out actions
   config/                Validated server environment variables
@@ -107,7 +109,7 @@ modules/<name>/
 - **Permissions, not roles:** the app only ever checks permissions
   (`can(access, "calls.delete")`), listed in `core/tenancy/permissions.ts`:
   `calls.upload`, `calls.view_all`, `calls.assign`, `calls.delete`,
-  `coaching.manage`, `team.manage`, `roles.manage`, `company.manage`, `modules.manage`. A role is
+  `coaching.manage`, `team.manage`, `roles.manage`, `company.manage`, `modules.manage`, `calltypes.manage`. A role is
   a per-tenant row holding a list of them, so a tenant can add custom roles
   in Settings without code changes. Every tenant starts with Owner (every
   permission, locked), Manager (calls and team) and Rep (upload only).
@@ -474,7 +476,9 @@ short-lived signed URL (`getCallRecordingUrl`), so the bucket stays private.
 
 ## Call types and scorecards
 
-From the call manuals in `../docs/call-manuals/`:
+Every company starts with these call types and scorecards, from the call
+manuals in `../docs/call-manuals/` (the two office manuals are the same
+manual for two companies, with identical scorecards):
 
 | Call type | Scorecard | Max | Gold | Green |
 | --- | --- | --- | --- | --- |
@@ -488,10 +492,46 @@ Verify), plus Pricing and Objections on sales calls. On sales calls with no
 objections, the 4 objection points are awarded automatically. A clash over
 appointment times or a question about paying isn't an objection.
 
-The scorecards are data in `modules/scorecards/config/scorecards.ts`. Each
-item carries its criteria, paraphrased from the manual's definition of that
-step; the grader and the Scorecards page both show them, so managers and the
-AI judge by the same rule.
+The defaults are data in `core/calls/defaults.ts` and
+`core/calls/default-scorecards.ts`. Each item carries its criteria,
+paraphrased from the manual's definition of that step; the grader and the
+Scorecards page both show them, so managers and the AI judge by the same
+rule.
+
+### Per-company call types
+
+Call types are configurable per company (`core/calls/catalog.ts`, unit
+tested). A company's catalog is the defaults with its changes laid over them,
+then the types it created ("custom-…" keys). Built-ins only get a row in
+`tenant_call_types` once edited, so "Reset to default" just deletes the row;
+own types always have one. Each type has a name, a description (how to
+recognise it; the AI classifies calls by these), a dashboard group (Sales,
+Service, Billing, Retention, Other, so the Overview, Leads and filters work
+for any type), an optional scorecard, and an on/off switch. "Other" is
+always on, as the catch-all.
+
+- **Classifying:** `analyzeCall` gets the company's enabled types and builds
+  the call-type enum and guide from them. Any sales-group call becomes a lead.
+- **Grading:** the scoring step uses the call's type definition's
+  scorecard. Results save the scorecard's name, Gold/Green lines and each
+  step's criteria, so an old call still reads right after its company edits
+  or deletes the scorecard. An edited scorecard is keyed by its call type,
+  so it never mixes with a shared default.
+- **Detection mode** (`tenants.call_type_mode`): Automatic (the AI picks) or
+  Ask on upload (the upload form gets a Call type picker, "Let the AI
+  decide" by default). A picked type, or one a reviewer corrects, sets
+  `calls.type_locked`, and the AI never changes it, even on a retry.
+- **Pages read names from the catalog:** calls are read with their
+  `callTypeName` and `callTypeGroup` resolved, so every page shows a
+  company's own names. A deleted type on an old call reads "Removed type".
+- **Settings → Call types** (needs `calltypes.manage`; owners have it):
+  the detection switch, the list with on/off switches and call counts, and
+  an editor (name, description, group, scorecard sections and steps,
+  Gold/Green). Own types can be deleted only if no call uses them.
+- **Create with AI:** describe the calls or paste part of a manual, and one
+  structured-output request drafts the name, description, group and a
+  scorecard in the company's four-step style. It only fills the editor;
+  nothing is saved until the person reviews it.
 
 Grading (`modules/scorecards/server/scoring-step.ts`): one structured-output
 request gets pass/fail, an evidence quote and a one-line reason per item,
@@ -545,6 +585,7 @@ a server-side permission check.
 | Appearance | Theme: preview cards for System, Light, Dark | Everyone | `pestlaunch-theme` cookie (browser only) |
 | Company | Company name | `company.manage` | `tenants.name`; the URL slug never changes |
 | Company | Modules | `modules.manage` | `tenant_modules` |
+| Call types | Detection mode, call types and scorecards | `calltypes.manage` | `tenants.call_type_mode`, `tenant_call_types` |
 | Members | Members, invites, member roles, remove | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
 | Roles | Custom roles and permissions | `roles.manage`; everyone sees the roles | `tenant_roles` |
 

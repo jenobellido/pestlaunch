@@ -1,4 +1,4 @@
-import type { CallType, TranscriptSegment } from "@/core/calls";
+import type { CallType, CallTypeGroup, TranscriptSegment } from "@/core/calls";
 
 export type CallStatus = "processing" | "ready" | "failed";
 
@@ -62,6 +62,9 @@ export interface CallRecord {
   createdAt: string;
   durationSec?: number;
   callType?: CallType;
+  /** The type's name and group in the company's call types (resolved when the call is read). */
+  callTypeName?: string;
+  callTypeGroup?: CallTypeGroup;
   transcript?: TranscriptSegment[];
   outcome?: CallOutcome;
   /** Results from module analysis steps, keyed by module id. */

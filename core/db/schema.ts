@@ -1,4 +1,4 @@
-import { boolean, index, pgTable, primaryKey, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgTable, primaryKey, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 import { authUsers } from "drizzle-orm/supabase";
 
 // RLS is enabled on every table with no policies, so Supabase's public Data
@@ -11,6 +11,8 @@ export const tenants = pgTable("tenants", {
   id: uuid().primaryKey().defaultRandom(),
   slug: text().notNull().unique(),
   name: text().notNull(),
+  /** How a call's type is decided: "auto" (the AI) or "ask" (whoever uploads picks it). */
+  callTypeMode: text().notNull().default("auto"),
   createdAt: createdAt(),
 }).enableRLS();
 
@@ -88,4 +90,28 @@ export const tenantModules = pgTable(
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.tenantId, t.moduleId] })],
+).enableRLS();
+
+/**
+ * A company's call types (core/calls/catalog.ts). Built-in types only get a row once the
+ * company edits them (deleting the row resets to the default); the company's own types
+ * ("custom-…") always have one. `scorecard` is the full scorecard, or null for unscored types.
+ */
+export const tenantCallTypes = pgTable(
+  "tenant_call_types",
+  {
+    tenantId: uuid()
+      .notNull()
+      .references(() => tenants.id, { onDelete: "cascade" }),
+    key: text().notNull(),
+    name: text().notNull(),
+    description: text().notNull(),
+    group: text().notNull(),
+    scorecard: jsonb(),
+    enabled: boolean().notNull().default(true),
+    position: integer().notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.tenantId, t.key] })],
 ).enableRLS();

@@ -3,7 +3,6 @@ import { AlertTriangle, ArrowLeft, AudioLines, BadgeCheck, CalendarDays, Check, 
 import { cn } from "@/shared/lib/cn";
 import { Badge, Card, CardTitle } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
-import { CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
 import { AssignCall } from "./assign-call";
 import { AutoRefresh } from "./auto-refresh";
@@ -89,7 +88,7 @@ export function CallDetail({
           }
         />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted sm:pl-16">
-          {call.callType && <Badge>{CALL_TYPE_LABELS[call.callType]}</Badge>}
+          {call.callTypeName && <Badge>{call.callTypeName}</Badge>}
           {assignableMembers ? (
             <AssignCall
               tenantSlug={call.tenant}

@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { generateObject } from "@/core/ai";
-import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
+import type { CallAnalysisStep, CallTypeDefinition, TranscriptSegment } from "@/core/calls";
 import { unquote } from "../model/text";
 import type { CoachingFeedback } from "../model/types";
 
@@ -29,7 +29,7 @@ const CALL_PROCESS = `The company's call process has four steps:
 3. Solve: present a solution tailored to them (what will be done, how, and why it matters for them); check for agreement ("Does that work for you?"); close (book it or confirm the change).
 4. Verify: confirm details and next steps (date, time, notes for the technician); invite them to call for any other pest needs; genuinely thank them.`;
 
-const CALL_TYPE_NOTES: Partial<Record<CallType, string>> = {
+const CALL_TYPE_NOTES: Partial<Record<string, string>> = {
   new_customer: `Sales calls add: present the regular price first, then the sale price with the discount, then move straight to a close ("Which works better, Tuesday or Wednesday?"). Handle objections in four steps: agree with their point of view, restate the objection and suggest a reason, resolve it by building value, then re-close. Mention the referral program at the end.`,
   retention: `Retention calls differ: never agree up front to cancel; validate and say you'll take care of them, then look into the account (how long they've been a customer, contract, recent services). Ask just enough open-ended questions to find the real reason. Offer a solution matched to it (free re-service, back-to-back services, a set technician or time, a short pause, a waived payment, or a price drop only when price is the real issue) and ask how it sounds. If declined, ask more and offer another. Bring up a contract fee only after solutions fail, and stay on their side. If they still cancel, leave a teaser such as a free initial service if they come back. The customer having a great experience matters more than saving the account.`,
   reservice: `Re-service calls: validate the frustration of still seeing pests, find out where and what they're seeing, then explain what the technician will do on the return visit and why. With no cost involved, agreeing on the visit is the close.`,
@@ -60,14 +60,19 @@ function transcriptText(segments: readonly TranscriptSegment[]) {
   return segments.map((s) => `${name[s.speaker]}: ${s.text}`).join("\n");
 }
 
-export async function coachCall(callType: CallType, transcript: readonly TranscriptSegment[]): Promise<CoachingFeedback> {
-  const notes = CALL_TYPE_NOTES[callType];
+export async function coachCall(callType: CallTypeDefinition, transcript: readonly TranscriptSegment[]): Promise<CoachingFeedback> {
+  // Built-in types have notes from the manuals; a company's own type is described in its words,
+  // with its scorecard's steps as what good looks like.
+  const steps = callType.scorecard?.sections.flatMap((s) => s.items.map((i) => `${i.name}: ${i.criteria}`));
+  const notes = callType.builtIn
+    ? CALL_TYPE_NOTES[callType.key]
+    : [callType.description, steps?.length && `The company grades these calls on: ${steps.join("; ")}`].filter(Boolean).join(" ");
   const result = await generateObject({
     name: "call_coaching",
     schema: coachingSchema,
     system: SYSTEM,
     prompt: [
-      `Call type: ${callType.replace("_", " ")}`,
+      `Call type: ${callType.name}`,
       notes && `For this call type: ${notes}`,
       `Transcript:\n${transcriptText(transcript)}`,
     ]
@@ -96,6 +101,6 @@ export async function coachCall(callType: CallType, transcript: readonly Transcr
 export const coachingStep: CallAnalysisStep<CoachingFeedback | null> = {
   moduleId: "coaching",
   // Nothing to coach when the employee never speaks (a voicemail, a dropped call).
-  run: ({ callType, transcript }) =>
-    transcript.some((s) => s.speaker === "employee") ? coachCall(callType, transcript) : Promise.resolve(null),
+  run: ({ callTypeDef, transcript }) =>
+    transcript.some((s) => s.speaker === "employee") ? coachCall(callTypeDef, transcript) : Promise.resolve(null),
 };

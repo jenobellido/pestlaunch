@@ -1,4 +1,4 @@
-import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import type { CallType, TranscriptSegment } from "@/core/calls";
 import { authUsers } from "drizzle-orm/supabase";
 import { tenants } from "@/core/db/schema";
@@ -29,6 +29,8 @@ export const calls = pgTable(
     employeeName: text(),
     durationSec: integer(),
     callType: text().$type<CallType>(),
+    /** The type was chosen by a person (on upload or in review), so the AI never changes it. */
+    typeLocked: boolean().notNull().default(false),
     transcript: jsonb().$type<TranscriptSegment[]>(),
     outcome: jsonb().$type<CallOutcome>(),
     /** Results from module analysis steps, keyed by module id. */

@@ -81,8 +81,19 @@ export interface AssignableMember {
  * `members` is passed only to people allowed to assign calls: they choose whose call it is.
  * Everyone else's uploads are theirs, decided on the server.
  */
-export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; members?: AssignableMember[] }) {
+export function UploadCallForm({
+  tenantSlug,
+  members,
+  callTypes,
+}: {
+  tenantSlug: string;
+  members?: AssignableMember[];
+  /** Passed when the company asks uploaders to pick the call type ("Ask on upload"). */
+  callTypes?: { key: string; name: string }[];
+}) {
   const [employeeId, setEmployeeId] = useState("");
+  const [callType, setCallType] = useState("");
+  const typeSelectId = useId();
   const employeeSelectId = useId();
   const router = useRouter();
   const inputId = useId();
@@ -160,6 +171,7 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
       path: upload.path,
       fileName: next.name,
       ...(members ? { employeeId: employeeId || null } : {}),
+      ...(callTypes ? { callType: callType || null } : {}),
     });
     return call;
   }
@@ -307,6 +319,24 @@ export function UploadCallForm({ tenantSlug, members }: { tenantSlug: string; me
                 {members.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          {callTypes && (
+            <label htmlFor={typeSelectId} className="flex flex-col justify-center gap-1 sm:w-56">
+              <span className="text-xs text-muted">Call type</span>
+              <select
+                id={typeSelectId}
+                value={callType}
+                onChange={(e) => setCallType(e.target.value)}
+                className="h-10 w-full rounded-xl border border-line bg-card px-3 text-sm outline-none transition-colors hover:border-line-strong focus:border-accent focus:ring-4 focus:ring-accent/15"
+              >
+                <option value="">Let the AI decide</option>
+                {callTypes.map((t) => (
+                  <option key={t.key} value={t.key}>
+                    {t.name}
                   </option>
                 ))}
               </select>

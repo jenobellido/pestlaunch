@@ -6,15 +6,6 @@ import { cn } from "@/shared/lib/cn";
 import { primaryButton, secondaryButton, Spinner } from "@/shared/ui/button";
 import { correctScoreItem, reviewCall, type ReviewResult } from "../review-actions";
 
-const CALL_TYPES = [
-  ["new_customer", "New customer"],
-  ["scheduling", "Scheduling"],
-  ["billing", "Billing"],
-  ["reservice", "Re-service"],
-  ["retention", "Retention"],
-  ["other", "Other"],
-] as const;
-
 const OUTCOMES = [
   ["booked", "Booked"],
   ["retained", "Saved"],
@@ -46,10 +37,13 @@ export function ReviewPanel({
   resolution,
   flags,
   review,
+  callTypes,
 }: {
   slug: string;
   callId: string;
   callType: string | null;
+  /** The company's call types to choose from, [key, name]. */
+  callTypes: [string, string][];
   resolution: string | null;
   flags: string[];
   review: ReviewInfo | null;
@@ -127,7 +121,7 @@ export function ReviewPanel({
             <label htmlFor={typeId} className="space-y-1.5">
               <span className="text-xs text-muted">Call type</span>
               <select id={typeId} value={type} onChange={(e) => setType(e.target.value)} className={field}>
-                {CALL_TYPES.map(([id, label]) => (
+                {callTypes.map(([id, label]) => (
                   <option key={id} value={id}>
                     {label}
                   </option>

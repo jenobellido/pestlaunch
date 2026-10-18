@@ -37,7 +37,7 @@ export function ScorecardPanel({
     <Card className="@container">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <CardTitle>{SCORECARDS[result.scorecardId].name}</CardTitle>
+          <CardTitle>{result.scorecardName ?? SCORECARDS[result.scorecardId]?.name ?? "Scorecard"}</CardTitle>
           {rubricHref && (
             <a href={rubricHref} className="text-xs text-muted hover:text-fg hover:underline">
               How calls are graded

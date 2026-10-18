@@ -1,0 +1,1 @@
+ALTER TABLE "calls" ADD COLUMN "type_locked" boolean DEFAULT false NOT NULL;

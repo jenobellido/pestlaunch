@@ -21,6 +21,7 @@ function call(id: string, overrides: Partial<CallRecord> = {}): CallRecord {
 const booked = call("tuesday-quote", {
   employeeName: "Sam",
   callType: "new_customer",
+  callTypeName: "New customer",
   createdAt: "2026-01-03T10:00:00.000Z",
   outcome: {
     summary: "A homeowner asked about wasps and booked an initial visit.",
@@ -36,6 +37,7 @@ const booked = call("tuesday-quote", {
 const cancel = call("friday-cancel", {
   employeeName: "Alex",
   callType: "retention",
+  callTypeName: "Retention",
   createdAt: "2026-01-02T10:00:00.000Z",
   outcome: {
     summary: "The customer is moving and cancelled; Pat on the team was mentioned.",

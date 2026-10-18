@@ -1,4 +1,6 @@
 import "server-only";
+import { findCallType, type CallTypeDefinition } from "@/core/calls";
+import { getCallTypes } from "@/core/calls/server";
 import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
 import { connection } from "next/server";
 import { z } from "zod";
@@ -34,8 +36,11 @@ function toRecord(
   row: Omit<CallRow, "transcript"> & { transcript?: CallRow["transcript"] },
   tenant: string,
   memberName: string | null,
+  catalog: readonly CallTypeDefinition[],
 ): CallRecord {
   const stalled = isStalled(row);
+  // Names and groups come from the company's call types, so its own types read right too.
+  const type = row.callType ? findCallType(catalog, row.callType) : null;
   return {
     id: row.id,
     tenant,
@@ -49,6 +54,8 @@ function toRecord(
     createdAt: row.createdAt.toISOString(),
     durationSec: row.durationSec ?? undefined,
     callType: row.callType ?? undefined,
+    callTypeName: type?.name,
+    callTypeGroup: type?.group,
     transcript: row.transcript ?? undefined,
     outcome: row.outcome ?? undefined,
     analyses: row.analyses,
@@ -69,7 +76,8 @@ export async function listCalls(tenant: string, scope: CallScope = {}): Promise<
     .leftJoin(tenantMembers, memberJoin)
     .where(and(eq(tenants.slug, tenant), scoped(scope)))
     .orderBy(desc(calls.createdAt));
-  return rows.map((r) => toRecord(r.call, tenant, r.memberName));
+  const catalog = rows.length ? await getCallTypes(rows[0].call.tenantId) : [];
+  return rows.map((r) => toRecord(r.call, tenant, r.memberName, catalog));
 }
 
 export async function getCall(tenant: string, id: string, scope: CallScope = {}): Promise<CallRecord | null> {
@@ -82,7 +90,7 @@ export async function getCall(tenant: string, id: string, scope: CallScope = {})
     .leftJoin(tenantMembers, memberJoin)
     .where(and(eq(tenants.slug, tenant), eq(calls.id, id), scoped(scope)))
     .limit(1);
-  return r ? toRecord(r.call, tenant, r.memberName) : null;
+  return r ? toRecord(r.call, tenant, r.memberName, await getCallTypes(r.call.tenantId)) : null;
 }
 
 /** The raw row, including the recording path, for server-side use. */
@@ -102,15 +110,32 @@ export async function insertCall(values: {
   fileName: string;
   recordingPath: string;
   employeeId: string | null;
+  /** Picked by the uploader; such a type is locked so the AI keeps it. */
+  callType?: string | null;
 }) {
-  const [row] = await db.insert(calls).values(values).returning();
+  const { callType, ...rest } = values;
+  const [row] = await db
+    .insert(calls)
+    .values({ ...rest, ...(callType ? { callType, typeLocked: true } : {}) })
+    .returning();
   return row;
 }
 
 export type CallUpdate = Partial<
   Pick<
     CallRow,
-    "status" | "stage" | "error" | "employeeId" | "employeeName" | "review" | "durationSec" | "callType" | "transcript" | "outcome" | "analyses"
+    | "status"
+    | "stage"
+    | "error"
+    | "employeeId"
+    | "employeeName"
+    | "review"
+    | "durationSec"
+    | "callType"
+    | "typeLocked"
+    | "transcript"
+    | "outcome"
+    | "analyses"
   >
 >;
 

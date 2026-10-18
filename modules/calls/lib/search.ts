@@ -1,4 +1,3 @@
-import { CALL_TYPE_LABELS } from "../config/call-types";
 import type { CallRecord } from "../model/types";
 
 /** A call found by the quick search (⌘K), ready to show. */
@@ -30,7 +29,7 @@ export function titleOf(fileName: string) {
 const words = (query: string) => query.toLowerCase().split(/\s+/).filter(Boolean);
 
 function metaOf(call: CallRecord) {
-  return [call.callType && CALL_TYPE_LABELS[call.callType], call.employeeName].filter(Boolean).join(" · ");
+  return [call.callTypeName, call.employeeName].filter(Boolean).join(" · ");
 }
 
 /**
@@ -50,7 +49,7 @@ export function matchCall(call: CallRecord, query: string): { score: number; sni
       weight: d.label === "Customer name" ? 4 : 2,
       snippet: `${d.label}: ${d.value}`,
     })),
-    { text: call.callType ? CALL_TYPE_LABELS[call.callType] : "", weight: 2 },
+    { text: call.callTypeName ?? "", weight: 2 },
     { text: call.outcome ? RESOLUTION_WORDS[call.outcome.resolution] : "", weight: 2 },
     { text: call.outcome?.summary ?? "", weight: 1 },
   ];

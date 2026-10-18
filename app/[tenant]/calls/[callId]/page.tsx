@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import { activeCallTypes, findCallType } from "@/core/calls";
+import { getCallTypes } from "@/core/calls/server";
 import { can, listMembers } from "@/core/tenancy";
 import { CallDetail, callReviewFlags } from "@/modules/calls";
 import {
@@ -39,12 +41,17 @@ export default async function Page({
   );
   if (!call) notFound();
 
-  const [enabled, recordingUrl, members, tasks] = await Promise.all([
+  const [enabled, recordingUrl, members, tasks, catalog] = await Promise.all([
     getEnabledModuleIds(tenant.slug),
     getCallRecordingUrl(tenant.slug, callId),
     canAssign ? listMembers(tenant.id) : Promise.resolve(null),
     listTasks(tenant.id, { callId }),
+    getCallTypes(tenant.id),
   ]);
+  // A reviewer picks from the company's enabled types, plus the call's current one.
+  const reviewTypes = activeCallTypes(catalog)
+    .concat(call.callType && !activeCallTypes(catalog).some((t) => t.key === call.callType) ? [findCallType(catalog, call.callType)] : [])
+    .map((t): [string, string] => [t.key, t.name]);
 
   // Panels only make sense once every analysis step has run.
   const ready = call.status === "ready";
@@ -109,6 +116,7 @@ export default async function Page({
           slug={tenant.slug}
           callId={call.id}
           callType={call.callType ?? null}
+          callTypes={reviewTypes}
           resolution={call.outcome?.resolution ?? null}
           flags={reviewFlags}
           review={call.review ?? null}

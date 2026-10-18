@@ -1,5 +1,6 @@
 import "server-only";
-import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
+import { activeCallTypes, findCallType, type CallAnalysisStep, type CallType, type TranscriptSegment } from "@/core/calls";
+import { getCallTypes } from "@/core/calls/server";
 import { downloadRecording } from "@/core/storage";
 import { listMembers, type Member } from "@/core/tenancy";
 import { db, schema } from "@/core/db";
@@ -24,12 +25,18 @@ export async function processCall(
     fileName: string;
     recordingPath: string;
     employeeId: string | null;
+    /** A type chosen by a person (on upload or in review); the AI keeps it. */
+    lockedType?: CallType | null;
   },
   steps: readonly CallAnalysisStep[],
   options: { transcript?: TranscriptSegment[] } = {},
 ): Promise<void> {
   try {
-    const [team, companyName] = await Promise.all([listMembers(call.tenantId), tenantName(call.tenantId)]);
+    const [team, companyName, catalog] = await Promise.all([
+      listMembers(call.tenantId),
+      tenantName(call.tenantId),
+      getCallTypes(call.tenantId),
+    ]);
     let segments = options.transcript;
     if (!segments?.length) {
       await updateCall(call.id, { stage: "transcribing" });
@@ -41,15 +48,20 @@ export async function processCall(
     }
 
     await updateCall(call.id, { stage: "analyzing" });
-    const { callType, employeeName, outcome } = await analyzeCall(segments, { teamNames: team.map((m) => m.displayName) });
+    const { callType, employeeName, outcome } = await analyzeCall(segments, {
+      teamNames: team.map((m) => m.displayName),
+      callTypes: activeCallTypes(catalog),
+      fixedType: call.lockedType ? findCallType(catalog, call.lockedType) : undefined,
+    });
+    const callTypeDef = findCallType(catalog, callType);
     // Unassigned calls (uploaded with "work it out from the call") get the team member whose
     // name the employee gave, when exactly one member matches.
     const employeeId = call.employeeId ?? matchEmployee(team, employeeName);
     await updateCall(call.id, { callType, employeeName, employeeId, outcome, stage: "reviewing" });
-    // Every new-customer call is a sales opportunity on the pipeline.
-    if (callType === "new_customer") await upsertLeadForCall({ id: call.id, tenantId: call.tenantId }, outcome);
+    // Every sales call (new customer, or a company's own sales type) is a lead.
+    if (callTypeDef.group === "sales") await upsertLeadForCall({ id: call.id, tenantId: call.tenantId }, outcome);
 
-    const input = { tenant: call.tenant, callId: call.id, callType, transcript: segments };
+    const input = { tenant: call.tenant, callId: call.id, callType, callTypeDef, transcript: segments };
     const results = await Promise.all(steps.map((s) => s.run(input)));
     const analyses = Object.fromEntries(steps.map((s, i) => [s.moduleId, results[i]]));
 
@@ -70,12 +82,13 @@ export async function processCall(
  * scorecard without re-analysing (which could undo the correction).
  */
 export async function rescoreCall(
-  call: { id: string; tenant: string; callType: CallType; transcript: TranscriptSegment[] },
+  call: { id: string; tenant: string; tenantId: string; callType: CallType; transcript: TranscriptSegment[] },
   steps: readonly CallAnalysisStep[],
 ): Promise<void> {
   try {
     await updateCall(call.id, { status: "processing", stage: "reviewing", error: null });
-    const input = { tenant: call.tenant, callId: call.id, callType: call.callType, transcript: call.transcript };
+    const callTypeDef = findCallType(await getCallTypes(call.tenantId), call.callType);
+    const input = { tenant: call.tenant, callId: call.id, callType: call.callType, callTypeDef, transcript: call.transcript };
     const results = await Promise.all(steps.map((s) => s.run(input)));
     const analyses = Object.fromEntries(steps.map((s, i) => [s.moduleId, results[i]]));
     await updateCall(call.id, { analyses, status: "ready", stage: null });

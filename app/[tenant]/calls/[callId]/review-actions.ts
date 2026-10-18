@@ -3,9 +3,10 @@
 import { refresh } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
-import { CALL_TYPES } from "@/core/calls";
-import { can, checkTenantAccess, getTenantBySlug } from "@/core/tenancy";
-import { CALL_TYPE_LABELS, type CallReview } from "@/modules/calls";
+import { activeCallTypes, findCallType } from "@/core/calls";
+import { getCallTypes } from "@/core/calls/server";
+import { can, checkTenantAccess } from "@/core/tenancy";
+import type { CallReview } from "@/modules/calls";
 import { applyCallReview, getCall, rescoreCall, upsertLeadForCall } from "@/modules/calls/server";
 import { getAnalysisSteps } from "@/modules/registry.server";
 import { getScorecardResult, overrideScorecardItem } from "@/modules/scorecards";
@@ -23,7 +24,7 @@ const RESOLUTION_LABEL: Record<(typeof RESOLUTIONS)[number], string> = {
 };
 
 const reviewInput = z.object({
-  callType: z.enum(CALL_TYPES),
+  callType: z.string().trim().min(1).max(64),
   resolution: z.enum(RESOLUTIONS).nullable(),
   note: z.string().trim().max(500),
 });
@@ -36,8 +37,8 @@ async function forReview(slug: string, callId: string) {
   const call = z.uuid().safeParse(callId).success ? await getCall(slug, callId) : null;
   if (!call) return { error: "That call doesn't exist." } as const;
   if (call.status !== "ready") return { error: "Wait until the call has finished processing." } as const;
-  const { user } = result.access;
-  return { call, reviewer: { id: user.id, name: user.name ?? user.email } } as const;
+  const { user, tenant } = result.access;
+  return { call, tenantId: tenant.id, reviewer: { id: user.id, name: user.name ?? user.email } } as const;
 }
 
 function reviewWith(previous: CallReview | null | undefined, reviewer: { id: string; name: string }, note: string | null, changes: string[]): CallReview {
@@ -61,13 +62,19 @@ export async function reviewCall(
   if (!parsed.success) return { ok: false, error: "Choose a call type and outcome." };
   const loaded = await forReview(slug, callId);
   if ("error" in loaded) return { ok: false, error: loaded.error! };
-  const { call, reviewer } = loaded;
+  const { call, reviewer, tenantId } = loaded;
   const { callType, resolution, note } = parsed.data;
+  const catalog = await getCallTypes(tenantId);
+  // A reviewer can pick any of the company's enabled types, or keep the one the call has.
+  if (callType !== call.callType && !activeCallTypes(catalog).some((t) => t.key === callType)) {
+    return { ok: false, error: "That call type isn't available." };
+  }
 
   const changes: string[] = [];
   const typeChanged = call.callType !== callType;
   if (typeChanged) {
-    changes.push(`Call type: ${call.callType ? CALL_TYPE_LABELS[call.callType] : "none"} → ${CALL_TYPE_LABELS[callType]}`);
+    const from = call.callType ? findCallType(catalog, call.callType).name : "none";
+    changes.push(`Call type: ${from} → ${findCallType(catalog, callType).name}`);
   }
   const outcome = call.outcome && resolution && resolution !== call.outcome.resolution
     ? { ...call.outcome, resolution }
@@ -78,19 +85,20 @@ export async function reviewCall(
 
   await applyCallReview(slug, callId, {
     callType,
+    // A person chose it, so a retry never lets the AI change it back.
+    typeLocked: typeChanged ? true : undefined,
     outcome: outcome ?? null,
     review: reviewWith(call.review, reviewer, note || null, changes),
   });
 
-  // A new-customer call belongs on the leads board, with its corrected outcome.
-  if (callType === "new_customer" && outcome) {
-    const tenant = await getTenantBySlug(slug);
-    if (tenant) await upsertLeadForCall({ id: call.id, tenantId: tenant.id }, outcome);
+  // A sales call belongs on the leads board, with its corrected outcome.
+  if (findCallType(catalog, callType).group === "sales" && outcome) {
+    await upsertLeadForCall({ id: call.id, tenantId }, outcome);
   }
   // A different call type means a different scorecard: re-grade in the background.
   if (typeChanged && call.transcript?.length) {
     const steps = await getAnalysisSteps(slug);
-    after(() => rescoreCall({ id: call.id, tenant: slug, callType, transcript: call.transcript! }, steps));
+    after(() => rescoreCall({ id: call.id, tenant: slug, tenantId, callType, transcript: call.transcript! }, steps));
   }
   refresh();
   return {

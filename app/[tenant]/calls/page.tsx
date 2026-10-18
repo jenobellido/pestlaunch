@@ -1,3 +1,5 @@
+import { activeCallTypes } from "@/core/calls";
+import { getCallTypeMode, getCallTypes } from "@/core/calls/server";
 import { can, listMembers } from "@/core/tenancy";
 import { CallsPage } from "@/modules/calls";
 import { callScope } from "@/modules/calls/server";
@@ -11,15 +13,18 @@ export default async function Page({ params, searchParams }: PageProps<"/[tenant
   const { tenant, user, permissions } = access;
   const canAssign = can(access, "calls.assign");
   // The list shows each call's score only when the scorecards module is on.
-  const [scored, members] = await Promise.all([
+  const [scored, members, mode, catalog] = await Promise.all([
     isModuleEnabled(tenant.slug, "scorecards"),
     canAssign ? listMembers(tenant.id) : Promise.resolve(null),
+    getCallTypeMode(tenant.id),
+    getCallTypes(tenant.id),
   ]);
   return (
     <CallsPage
       tenantSlug={tenant.slug}
       scope={callScope({ userId: user.id, permissions })}
       canUpload={can(access, "calls.upload")}
+      uploadCallTypes={mode === "ask" ? activeCallTypes(catalog).map((t) => ({ key: t.key, name: t.name })) : undefined}
       members={members?.map((m) => ({ id: m.userId, name: m.displayName }))}
       score={scored ? (call) => <ScoreBadge analyses={call.analyses} /> : undefined}
       extraReviewFlags={

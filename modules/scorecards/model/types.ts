@@ -1,30 +1,13 @@
-export type ScorecardId = "all_calls" | "retention" | "sales";
+import type { ScorecardDefinition } from "@/core/calls";
+
+export type { ScorecardItem, ScorecardSection } from "@/core/calls";
+
+/** A scorecard's id: one of the manuals' ("all_calls", "retention", "sales") or a company's own call type key. */
+export type ScorecardId = string;
 
 export type Grade = "gold" | "green" | "below";
 
-export interface ScorecardItem {
-  name: string;
-  /** What the employee must do to earn the point, from the call manuals. Shown to managers and to the grader. */
-  criteria: string;
-}
-
-export interface ScorecardSection {
-  title: string;
-  items: readonly ScorecardItem[];
-  /**
-   * Sales objection handling: when the customer raises no objections the rep
-   * is awarded every point in the section automatically.
-   */
-  autoAwardWhenNotApplicable?: boolean;
-}
-
-export interface Scorecard {
-  id: ScorecardId;
-  name: string;
-  sections: readonly ScorecardSection[];
-  /** Minimum points for each grade. Anything lower is "below". */
-  thresholds: { gold: number; green: number };
-}
+export type Scorecard = ScorecardDefinition;
 
 export interface ScorecardItemResult {
   section: string;
@@ -38,10 +21,15 @@ export interface ScorecardItemResult {
   autoAwarded?: boolean;
   /** Changed by a reviewer, overriding the AI's judgement. */
   corrected?: boolean;
+  /** What the step asks for, kept with the result so it reads right after the scorecard changes. */
+  criteria?: string;
 }
 
 export interface ScorecardResult {
   scorecardId: ScorecardId;
+  /** Kept with the result so a call still reads right after its company edits or removes the scorecard. Older results don't have them. */
+  scorecardName?: string;
+  thresholds?: { gold: number; green: number };
   points: number;
   maxPoints: number;
   grade: Grade;

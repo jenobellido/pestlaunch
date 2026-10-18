@@ -1,7 +1,8 @@
 import "server-only";
 import { after } from "next/server";
 import { z } from "zod";
-import type { CallAnalysisStep } from "@/core/calls";
+import { activeCallTypes, type CallAnalysisStep } from "@/core/calls";
+import { getCallTypes } from "@/core/calls/server";
 import type { ModuleRouteHandler } from "@/core/modules";
 import {
   createRecordingUpload,
@@ -46,6 +47,8 @@ const createRequest = z.object({
   path: z.string().min(1).max(512),
   /** Who the call belongs to. Only people allowed to assign calls can set it; null = work it out from the call. */
   employeeId: z.uuid().nullable().optional(),
+  /** The call type, when the uploader picked one; null or missing = the AI decides. */
+  callType: z.string().trim().min(1).max(64).nullable().optional(),
 });
 
 const assignRequest = z.object({ employeeId: z.uuid().nullable() });
@@ -123,10 +126,18 @@ export async function createCallHandler(
     if (employeeId && !(await isMember(id, employeeId))) return fail("That person isn't on the team.", 400);
   }
 
-  const row = await insertCall({ tenantId: id, fileName, recordingPath: path, employeeId });
+  // A type picked on upload must be one of the company's enabled types; it's then locked.
+  const callType = body.data.callType ?? null;
+  if (callType && !activeCallTypes(await getCallTypes(id)).some((t) => t.key === callType)) {
+    return fail("That call type isn't available. Pick another or let the AI decide.", 400);
+  }
+
+  const row = await insertCall({ tenantId: id, fileName, recordingPath: path, employeeId, callType });
   // Processing takes from seconds to minutes, so it runs after the response. The UI shows
   // the call as processing and refreshes until it's ready.
-  after(() => processCall({ id: row.id, tenant, tenantId: id, fileName, recordingPath: path, employeeId }, steps));
+  after(() =>
+    processCall({ id: row.id, tenant, tenantId: id, fileName, recordingPath: path, employeeId, lockedType: row.callType }, steps),
+  );
 
   return Response.json({ data: await getCall(tenant, row.id) }, { status: 202 });
 }
@@ -155,6 +166,7 @@ export async function retryCallHandler(
         fileName: row.fileName,
         recordingPath: row.recordingPath,
         employeeId: row.employeeId,
+        lockedType: row.typeLocked ? row.callType : null,
       },
       steps,
       { transcript },

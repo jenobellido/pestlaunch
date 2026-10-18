@@ -4,7 +4,6 @@ import { Suspense } from "react";
 import { ArrowLeft, ChevronRight, Lightbulb, Target, UserRound } from "lucide-react";
 import { z } from "zod";
 import { can, listMembers } from "@/core/tenancy";
-import { CALL_TYPE_LABELS } from "@/modules/calls";
 import { listCalls, listTasks } from "@/modules/calls/server";
 import { getCoachingFeedback } from "@/modules/coaching";
 import { listPlays } from "@/modules/coaching/server";
@@ -70,8 +69,8 @@ async function RepBody({ params }: { params: PageProps<"/[tenant]/team/[repId]">
         )
       : null;
 
-  const sales = ready.filter((c) => c.callType === "new_customer");
-  const retention = ready.filter((c) => c.callType === "retention");
+  const sales = ready.filter((c) => c.callTypeGroup === "sales");
+  const retention = ready.filter((c) => c.callTypeGroup === "retention");
   const closeRate = pct(sales.filter((c) => c.outcome?.resolution === "booked").length, sales.length);
   const saveRate = pct(retention.filter((c) => c.outcome?.resolution === "retained").length, retention.length);
 
@@ -254,7 +253,7 @@ async function RepBody({ params }: { params: PageProps<"/[tenant]/team/[repId]">
                           <span className="min-w-0 flex-1 text-sm">
                             <span className="block truncate">{c.fileName.replace(/\.[^.]+$/, "")}</span>
                             <span className="block text-xs text-muted">
-                              {[c.callType && CALL_TYPE_LABELS[c.callType], formatDate(c.createdAt)].filter(Boolean).join(" · ")}
+                              {[c.callTypeName, formatDate(c.createdAt)].filter(Boolean).join(" · ")}
                             </span>
                           </span>
                           {score && (

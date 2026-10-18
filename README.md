@@ -15,7 +15,7 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | View the transcript | **Call page**: speaker-labelled transcript, synced to an audio player (click a line to jump), with search. |
 | See what type of call it was | New customer, Scheduling, Billing, Re-service, Retention or Other, defined from the call manuals; grouped like PestLaunch's Call Log (Sales, Service, Billing, Retention, Other). |
 | See the important outcome and details | Summary, resolution (booked, saved, cancelled, resolved, follow-up needed, unresolved), key facts (pest, price quoted, appointment…), open follow-ups and, for cancel calls, the reason. |
-| See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. |
+| See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. Each company can edit these, add its own call types and scorecards, or have uploaders pick the type (Settings → Call types). |
 | See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. **Team** and each **rep's page**: average score, trend, the steps they miss most with what good sounds like (from the manual), and **Plays** a manager can assign. |
 | (beyond the brief) Follow up | **Follow-ups**: everything you've been asked to follow up on (Mine / Team, Open / Done), with a count in the sidebar, and leaks that still need an owner, assigned in one click. |
 | (beyond the brief) Follow leads | **Leads**: every new-customer call becomes a lead (New, Contacted, Booked, Lost) with the customer, pest, price and next step. |
@@ -171,6 +171,12 @@ sidebar), split into pages with a settings menu:
   email and role, and copy the link to send them (needs `team.manage`).
 - **Roles:** what each role can do, with custom roles (needs `roles.manage`).
   Every company starts with Owner, Manager and Rep.
+- **Call types:** how calls get their type (Automatic, or Ask on upload)
+  and each kind of call with its scorecard (needs `calltypes.manage`). The
+  manuals' types and scorecards are the defaults: edit them, turn them off,
+  reset them, or add your own. **Create with AI** drafts a new type and its
+  scorecard from a description or a pasted part of your manual, for you to
+  review before saving.
 
 ## Known limitations
 

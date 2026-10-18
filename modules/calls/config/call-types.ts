@@ -1,30 +1,16 @@
-import type { CallType } from "@/core/calls";
+import { CALL_TYPE_GROUP_LABELS, DEFAULT_CALL_TYPES, type BuiltInCallType, type CallTypeGroup } from "@/core/calls";
 
-export const CALL_TYPE_LABELS: Record<CallType, string> = {
-  new_customer: "New customer",
-  scheduling: "Scheduling",
-  billing: "Billing",
-  reservice: "Re-service",
-  retention: "Retention",
-  other: "Other",
-};
+// The built-in call types' names and groups. A company can rename them and add its own, so
+// pages use the call's resolved `callTypeName` / `callTypeGroup` (from its catalog) instead.
 
-/** How PestLaunch groups calls in its Call Log and dashboards. */
-export type CallTypeGroup = "sales" | "service" | "billing" | "retention" | "other";
+export const CALL_TYPE_LABELS = Object.fromEntries(
+  Object.entries(DEFAULT_CALL_TYPES).map(([key, t]) => [key, t.name]),
+) as Record<BuiltInCallType, string>;
 
-export const CALL_TYPE_GROUP: Record<CallType, CallTypeGroup> = {
-  new_customer: "sales",
-  scheduling: "service",
-  reservice: "service",
-  billing: "billing",
-  retention: "retention",
-  other: "other",
-};
+export type { CallTypeGroup };
 
-export const CALL_TYPE_GROUP_LABELS: Record<CallTypeGroup, string> = {
-  sales: "Sales",
-  service: "Service",
-  billing: "Billing",
-  retention: "Retention",
-  other: "Other",
-};
+export const CALL_TYPE_GROUP = Object.fromEntries(
+  Object.entries(DEFAULT_CALL_TYPES).map(([key, t]) => [key, t.group]),
+) as Record<BuiltInCallType, CallTypeGroup>;
+
+export { CALL_TYPE_GROUP_LABELS };

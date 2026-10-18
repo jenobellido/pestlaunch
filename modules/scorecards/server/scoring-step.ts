@@ -1,9 +1,8 @@
 import "server-only";
 import { z } from "zod";
 import { generateObject } from "@/core/ai";
-import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
-import { SCORECARDS } from "../config/scorecards";
-import { maxPoints, scorecardFor } from "../model/grade";
+import type { CallAnalysisStep, TranscriptSegment } from "@/core/calls";
+import { maxPoints } from "../model/grade";
 import { scoreCall } from "../model/score-call";
 import type { Scorecard, ScorecardResult } from "../model/types";
 
@@ -59,7 +58,8 @@ function itemList(card: Scorecard) {
 export async function gradeCall(
   card: Scorecard,
   transcript: readonly TranscriptSegment[],
-  callType?: CallType,
+  /** Short scheduling or billing calls: the manual's lighter version of the steps applies. */
+  light = false,
 ): Promise<ScorecardResult> {
   const itemCount = maxPoints(card);
   const graded = await generateObject({
@@ -74,7 +74,7 @@ export async function gradeCall(
     },
     prompt: [
       `Scorecard: ${card.name}\n${itemList(card)}`,
-      (callType === "scheduling" || callType === "billing") && LIGHT_CALL_NOTE,
+      light && LIGHT_CALL_NOTE,
       `Transcript:\n${transcriptText(transcript)}`,
     ]
       .filter(Boolean)
@@ -86,8 +86,10 @@ export async function gradeCall(
 
 export const scoringStep: CallAnalysisStep<ScorecardResult | null> = {
   moduleId: "scorecards",
-  async run({ callType, transcript }) {
-    const id = scorecardFor(callType);
-    return id ? gradeCall(SCORECARDS[id], transcript, callType) : null;
+  async run({ callType, callTypeDef, transcript }) {
+    // Graded with the company's own scorecard for this type; unscored types have none.
+    const card = callTypeDef.scorecard;
+    const light = callType === "scheduling" || callTypeDef.group === "billing";
+    return card ? gradeCall(card, transcript, light) : null;
   },
 };
