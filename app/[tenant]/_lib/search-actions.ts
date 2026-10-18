@@ -1,7 +1,7 @@
 "use server";
 
 import { can, checkTenantAccess, listMembers } from "@/core/tenancy";
-import { callScope, searchCallsAndLeads, type CallSearchHit, type LeadSearchHit } from "@/modules/calls/server";
+import { callScope, searchCalls, type CallSearchHit } from "@/modules/calls/server";
 import { getEnabledModuleIds } from "@/modules/registry";
 
 export interface RepSearchHit {
@@ -12,15 +12,14 @@ export interface RepSearchHit {
 
 export interface SearchResults {
   calls: CallSearchHit[];
-  leads: LeadSearchHit[];
   reps: RepSearchHit[];
 }
 
-const EMPTY: SearchResults = { calls: [], leads: [], reps: [] };
+const EMPTY: SearchResults = { calls: [], reps: [] };
 
 /**
- * The quick search (⌘K). Only searches what the viewer could open anyway: their own calls and
- * leads unless they may see every call, and reps only for people who can view others' pages.
+ * The quick search (⌘K). Only searches what the viewer could open anyway: their own calls
+ * unless they may see every call, and reps only for people who can view others' pages.
  */
 export async function searchWorkspace(slug: string, query: string): Promise<SearchResults> {
   const result = await checkTenantAccess(slug);
@@ -31,7 +30,7 @@ export async function searchWorkspace(slug: string, query: string): Promise<Sear
   const seesEveryone = can(access, "calls.view_all");
 
   const [found, members] = await Promise.all([
-    searchCallsAndLeads(slug, q, callScope({ userId: access.user.id, permissions: access.permissions })),
+    searchCalls(slug, q, callScope({ userId: access.user.id, permissions: access.permissions })),
     enabled.has("coaching") && seesEveryone && q.trim() ? listMembers(access.tenant.id) : Promise.resolve([]),
   ]);
   const terms = q.toLowerCase().split(/\s+/).filter(Boolean);
@@ -39,5 +38,5 @@ export async function searchWorkspace(slug: string, query: string): Promise<Sear
     .filter((m) => terms.every((t) => `${m.displayName} ${m.email}`.toLowerCase().includes(t)))
     .slice(0, 5)
     .map((m) => ({ id: m.userId, name: m.displayName, role: m.role.name }));
-  return { calls: found.calls, leads: found.leads, reps };
+  return { calls: found, reps };
 }

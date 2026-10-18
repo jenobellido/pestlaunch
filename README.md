@@ -18,7 +18,6 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. Each company can edit these, add its own call types and scorecards, or have uploaders pick the type (Settings → Call types). |
 | See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. **Team** and each **rep's page**: average score, trend, the steps they miss most with what good sounds like (from the manual), and **Plays** a manager can assign. |
 | (beyond the brief) Follow up | **Follow-ups**: everything you've been asked to follow up on (Mine / Team, Open / Done), with a count in the sidebar, and leaks that still need an owner, assigned in one click. |
-| (beyond the brief) Follow leads | **Leads**: every new-customer call becomes a lead (New, Contacted, Booked, Lost) with the customer, pest, price and next step. |
 | Review all calls and results | **⌘K quick search** from any page jumps to a call, customer, rep or page, matching what was said too. **Search** inside every transcript ("termites") and **export** calls to CSV. **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action (assign one to a teammate and it shows on their Overview, as a badge in the sidebar, and on the call), reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
 
 Every AI result can be **reviewed and corrected** by a manager (call type,
@@ -214,7 +213,8 @@ sidebar), split into pages with a settings menu:
    every prompt change against it, then finish the second accuracy pass.
 2. Notify people when a follow-up is assigned to them (email or SMS), and
    alert the owner when a new leak appears.
-3. Link callers to customers in the PestLaunch CRM, and import calls
+3. Send sales calls to the PestLaunch CRM as leads (there's deliberately no
+   second pipeline here), link callers to customers there, and import calls
    automatically from the phone system instead of uploading them.
 4. A durable job queue for processing, and paging on the server for large
    call libraries.

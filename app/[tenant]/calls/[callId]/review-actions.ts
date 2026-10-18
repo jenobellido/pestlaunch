@@ -7,7 +7,7 @@ import { activeCallTypes, findCallType } from "@/core/calls";
 import { getCallTypes } from "@/core/calls/server";
 import { can, checkTenantAccess } from "@/core/tenancy";
 import type { CallReview } from "@/modules/calls";
-import { applyCallReview, getCall, rescoreCall, upsertLeadForCall } from "@/modules/calls/server";
+import { applyCallReview, getCall, rescoreCall } from "@/modules/calls/server";
 import { getAnalysisSteps } from "@/modules/registry.server";
 import { getScorecardResult, overrideScorecardItem } from "@/modules/scorecards";
 
@@ -91,10 +91,6 @@ export async function reviewCall(
     review: reviewWith(call.review, reviewer, note || null, changes),
   });
 
-  // A sales call belongs on the leads board, with its corrected outcome.
-  if (findCallType(catalog, callType).group === "sales" && outcome) {
-    await upsertLeadForCall({ id: call.id, tenantId }, outcome);
-  }
   // A different call type means a different scorecard: re-grade in the background.
   if (typeChanged && call.transcript?.length) {
     const steps = await getAnalysisSteps(slug);

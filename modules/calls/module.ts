@@ -1,4 +1,4 @@
-import { ListTodo, Phone, SquareKanban } from "lucide-react";
+import { ListTodo, Phone } from "lucide-react";
 import { defineModule } from "@/core/modules";
 
 export const callsModule = defineModule({
@@ -8,7 +8,6 @@ export const callsModule = defineModule({
   defaultEnabled: true,
   nav: [
     { label: "Calls", href: "/calls", icon: Phone },
-    { label: "Leads", href: "/leads", icon: SquareKanban },
     { label: "Follow-ups", href: "/follow-ups", icon: ListTodo },
   ],
 });

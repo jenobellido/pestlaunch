@@ -46,7 +46,7 @@ export const calls = pgTable(
 export const taskStatus = pgEnum("call_task_status", ["open", "done"]);
 
 /**
- * A follow-up someone owes on a call (call the lead back, send the agreement, try to win back
+ * A follow-up someone owes on a call (call a prospect back, send the agreement, try to win back
  * a cancellation). Created from a Leak or a call's follow-ups and assigned to a team member.
  */
 export const callTasks = pgTable(
@@ -71,30 +71,3 @@ export const callTasks = pgTable(
   (t) => [index().on(t.tenantId, t.assigneeId), index().on(t.callId)],
 ).enableRLS();
 
-export const leadStage = pgEnum("lead_stage", ["new", "contacted", "booked", "lost"]);
-
-/**
- * A sales opportunity from a new-customer call. Created when the call is analyzed (booked
- * calls start as "booked", the rest as "new") and moved along the pipeline by the team.
- */
-export const leads = pgTable(
-  "leads",
-  {
-    id: uuid().primaryKey().defaultRandom(),
-    tenantId: uuid()
-      .notNull()
-      .references(() => tenants.id, { onDelete: "cascade" }),
-    callId: uuid()
-      .notNull()
-      .unique()
-      .references(() => calls.id, { onDelete: "cascade" }),
-    stage: leadStage().notNull().default("new"),
-    customerName: text(),
-    /** What they need, e.g. "Ants in the kitchen". */
-    need: text(),
-    priceQuoted: text(),
-    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
-  },
-  (t) => [index().on(t.tenantId, t.stage)],
-).enableRLS();

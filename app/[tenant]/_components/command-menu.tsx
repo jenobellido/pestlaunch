@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import { CornerDownLeft, FileAudio, Search, SquareKanban, UserRound } from "lucide-react";
+import { CornerDownLeft, FileAudio, Search, UserRound } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Spinner } from "@/shared/ui/button";
 import { searchWorkspace, type SearchResults } from "../_lib/search-actions";
@@ -79,7 +79,7 @@ function when(iso: string) {
 }
 
 /**
- * Quick search (⌘K, Ctrl K or "/"): jump to a page, call, lead or rep. Rendered once per
+ * Quick search (⌘K, Ctrl K or "/"): jump to a page, call or rep. Rendered once per
  * workspace; buttons open it with openCommandMenu().
  */
 export function CommandMenu({ slug, pages }: { slug: string; pages: CommandPage[] }) {
@@ -167,13 +167,6 @@ export function CommandMenu({ slug, pages }: { slug: string; pages: CommandPage[
       detail: c.snippet,
       meta: [c.meta, when(c.createdAt)].filter(Boolean).join(" · "),
     }));
-    const leads: Item[] = (results?.leads ?? []).map((l) => ({
-      id: `lead:${l.id}`,
-      href: `/${slug}/calls/${l.callId}`,
-      icon: <SquareKanban aria-hidden />,
-      title: l.name,
-      meta: l.meta,
-    }));
     const reps: Item[] = (results?.reps ?? []).map((r) => ({
       id: `rep:${r.id}`,
       href: `/${slug}/team/${r.id}`,
@@ -184,7 +177,6 @@ export function CommandMenu({ slug, pages }: { slug: string; pages: CommandPage[
     return [
       { label: query ? "Pages" : "Go to", items: pageItems },
       { label: query ? "Calls" : "Recent calls", items: calls },
-      { label: "Leads", items: leads },
       { label: "Reps", items: reps },
     ].filter((g) => g.items.length > 0);
   }, [pages, results, query, slug]);

@@ -22,10 +22,16 @@ const LEAK_STYLE: Record<LeakKind, { icon: React.ComponentType<{ className?: str
   below_standard: { icon: AlertTriangle, tone: "bg-danger/10 text-danger" },
 };
 
+/** How long a leak has been open: "today", "yesterday", "3 days". */
+function waiting(iso: string, now = Date.now()) {
+  const days = Math.floor((now - new Date(iso).getTime()) / 86_400_000);
+  return days <= 0 ? "today" : days === 1 ? "yesterday" : `${days} days`;
+}
+
 /** One leak: what went wrong on which call, and who owns it (or an Assign control for assigners). */
 export function LeakRow({
   slug,
-  leak: { call, kind, label, detail },
+  leak: { call, kind, label, detail, next },
   owner,
   members,
 }: {
@@ -47,9 +53,11 @@ export function LeakRow({
             <span className="min-w-0 truncate text-muted">
               · {call.title}
               {call.employeeName && ` · ${call.employeeName}`}
+              {` · ${waiting(call.createdAt)}`}
             </span>
           </span>
           <span className="block truncate text-sm text-muted">{detail}</span>
+          {next && <span className="block truncate text-xs text-muted">Next: {next}</span>}
         </span>
         <ChevronRight className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" aria-hidden />
       </Link>
@@ -58,7 +66,15 @@ export function LeakRow({
           {owner.split(/\s+/)[0]}
         </span>
       ) : (
-        members && <AssignTask slug={slug} callId={call.id} title={`${label}: ${detail}`.slice(0, 200)} members={members} />
+        members && (
+          <AssignTask
+            slug={slug}
+            callId={call.id}
+            // The task says who and what, plus the next step when the call left one.
+            title={[`${label}: ${detail}`, next].filter(Boolean).join(". Next: ").slice(0, 200)}
+            members={members}
+          />
+        )
       )}
     </li>
   );
@@ -234,10 +250,9 @@ export function Overview({
             <p className="px-6 py-10 text-center text-sm text-muted">No leaks in this period. Nice work.</p>
           ) : (
             <ul className="mt-3">
-              {leaks.slice(0, 8).map(({ call, kind, label, detail }) => {
-                const owner = ownerByCall.get(call.id);
-                return <LeakRow key={call.id} slug={slug} leak={{ call, kind, label, detail }} owner={owner} members={members} />;
-              })}
+              {leaks.slice(0, 8).map((leak) => (
+                <LeakRow key={leak.call.id} slug={slug} leak={leak} owner={ownerByCall.get(leak.call.id)} members={members} />
+              ))}
             </ul>
           )}
           {leaks.length > 8 && (

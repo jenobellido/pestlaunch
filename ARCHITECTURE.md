@@ -20,7 +20,7 @@ app/                     Routing only: thin pages, layouts, route handlers
     calls/               Call library + upload; adds the score column when scorecards is on
     calls/[callId]/      Call detail; composes panels from other modules, passes the
                          recording URL and whether the user may delete
-    leads/               Leads board (new-customer calls by stage)
+    follow-ups/          Follow-ups: your and the team's, and leaks that need an owner
     scorecards/          The scoring rubric; linked from each call's score, not the sidebar
     team/                Reps: scores, trends, most-missed steps, plays (coaching module)
     settings/            Profile (page.tsx), appearance/, company/ (name + modules),
@@ -274,8 +274,7 @@ default) can check and correct them on the call page:
 - **Review card:** change the call type or outcome, add a note, or just mark
   the call reviewed. A new call type re-scores the call in the background
   against the right scorecard (`rescoreCall` reruns only the module steps, so
-  the correction isn't undone), and a call corrected to New customer joins
-  the leads board.
+  the correction isn't undone).
 - **Scorecard steps:** each pass or fail mark becomes a button. Flipping one
   recomputes points and grade (`overrideScorecardItem`, unit tested) and tags
   the step "Corrected by <name>".
@@ -291,13 +290,13 @@ default) can check and correct them on the call page:
 ## Search and export
 
 - **Quick search** (⌘K, Ctrl K or "/" anywhere, or Search in the sidebar):
-  one box for pages, calls, leads and reps. Before you type it lists the main
+  one box for pages, calls and reps. Before you type it lists the main
   pages and the latest calls. `searchWorkspace` (a server action in
   `app/[tenant]/_lib/search-actions.ts`) asks the calls module's
-  `searchCallsAndLeads`, which ranks calls by their details (title, rep,
+  `searchCalls`, which ranks calls by their details (title, rep,
   customer, pest, type, outcome; `modules/calls/lib/search.ts`, unit tested)
   and adds calls that only match in the transcript, with the line. Results
-  only include what the viewer could open: their own calls and leads without
+  only include what the viewer could open: their own calls without
   `calls.view_all`, and reps only for people who can see others' pages.
   Arrow keys move, Enter opens, Esc closes, and late answers to older
   queries are dropped.
@@ -311,16 +310,15 @@ default) can check and correct them on the call page:
   spreadsheet would run as a formula is defused (`modules/calls/lib/csv.ts`,
   unit tested).
 
-## Leads
+## No separate leads
 
-`/[tenant]/leads` (a second nav item from the calls module) shows every
-new-customer call as a lead on a board: New, Contacted, Booked, Lost. The
-`leads` table is owned by the calls module, one row per sales call. Processing
-creates the lead once the call is analyzed (booked calls start as Booked,
-the rest as New) with the customer name, pest and price from the call's
-details; a migration backfilled existing calls. Each card links to its call
-and shows the next follow-up; a stage control moves it. Members without
-`calls.view_all` see and move only leads from their own calls.
+There's no Leads page. PestLaunch OS is the CRM, so Call Intelligence feeds
+it rather than keeping a second pipeline: an unbooked sales call is a **Sale
+not closed** leak (Overview, and Needs an owner on Follow-ups) that shows who
+called, what for and the price given, how long it's been waiting and the next
+step, and assigning it makes a follow-up with an owner. Close rate comes from
+the calls themselves. A `leads` table existed earlier and was dropped
+(`drizzle/0012_drop_leads.sql`).
 
 ## Overview dashboard
 
@@ -373,7 +371,7 @@ top, and quick search has "My follow-ups".
 
 ## Navigation and wording
 
-The sidebar is Overview · Calls · Leads · Follow-ups · Team, then Settings. The company's
+The sidebar is Overview · Calls · Follow-ups · Team, then Settings. The company's
 name sits at the top with "Powered by PestLaunch", as in PestLaunch OS, with
 the Search box (quick search, ⌘K) under it. The
 scorecard rubric isn't in the sidebar; each call's score links to it
@@ -506,12 +504,13 @@ then the types it created ("custom-…" keys). Built-ins only get a row in
 `tenant_call_types` once edited, so "Reset to default" just deletes the row;
 own types always have one. Each type has a name, a description (how to
 recognise it; the AI classifies calls by these), a dashboard group (Sales,
-Service, Billing, Retention, Other, so the Overview, Leads and filters work
+Service, Billing, Retention, Other, so the Overview, Follow-ups and filters work
 for any type), an optional scorecard, and an on/off switch. "Other" is
 always on, as the catch-all.
 
 - **Classifying:** `analyzeCall` gets the company's enabled types and builds
-  the call-type enum and guide from them. Any sales-group call becomes a lead.
+  the call-type enum and guide from them. An unbooked sales-group call is a
+  Sale not closed leak.
 - **Grading:** the scoring step uses the call's type definition's
   scorecard. Results save the scorecard's name, Gold/Green lines and each
   step's criteria, so an old call still reads right after its company edits

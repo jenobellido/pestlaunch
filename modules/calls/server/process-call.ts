@@ -7,7 +7,6 @@ import { db, schema } from "@/core/db";
 import { eq } from "drizzle-orm";
 import { analyzeCall } from "./analyze-call";
 import { updateCall } from "./call-repository";
-import { upsertLeadForCall } from "./lead-repository";
 import { transcribe } from "./transcribe";
 
 /**
@@ -58,8 +57,6 @@ export async function processCall(
     // name the employee gave, when exactly one member matches.
     const employeeId = call.employeeId ?? matchEmployee(team, employeeName);
     await updateCall(call.id, { callType, employeeName, employeeId, outcome, stage: "reviewing" });
-    // Every sales call (new customer, or a company's own sales type) is a lead.
-    if (callTypeDef.group === "sales") await upsertLeadForCall({ id: call.id, tenantId: call.tenantId }, outcome);
 
     const input = { tenant: call.tenant, callId: call.id, callType, callTypeDef, transcript: segments };
     const results = await Promise.all(steps.map((s) => s.run(input)));

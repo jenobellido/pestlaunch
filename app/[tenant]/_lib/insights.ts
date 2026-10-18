@@ -30,6 +30,10 @@ export interface DashboardCall {
   /** Why the customer wanted to cancel, for retention calls (e.g. "Price"). */
   cancelReason: string | null;
   score: { points: number; maxPoints: number; grade: "gold" | "green" | "below" } | null;
+  /** From the call's details, for sales calls that didn't book: who, what for, and the price given. */
+  customer?: string | null;
+  need?: string | null;
+  priceQuoted?: string | null;
 }
 
 export type LeakKind = "sale_not_closed" | "cancelled" | "follow_up" | "below_standard";
@@ -41,6 +45,18 @@ export interface Leak {
   kind: LeakKind;
   label: string;
   detail: string;
+  /** The next step, when the call left one (e.g. "Call back Monday about the quote"). */
+  next?: string;
+}
+
+/**
+ * The headline part of a detail, short enough for one line: "$149 initial; $49/month; …" →
+ * "$149 initial", "Ants in the kitchen; wasps last summer" → "Ants in the kitchen".
+ */
+export function shortPrice(price: string | null | undefined) {
+  const first = price?.split(/;|\(/)[0]?.trim();
+  if (!first) return null;
+  return first.length > 40 ? `${first.slice(0, 39)}…` : first;
 }
 
 export interface RepStats {
@@ -66,11 +82,14 @@ export function inRange(calls: DashboardCall[], range: Range, now = Date.now()) 
 function leakFor(call: DashboardCall): Leak | null {
   if (call.status !== "ready") return null;
   if (call.group === "sales" && call.resolution !== "booked") {
+    // Who called, what for, and the price given, in one line, so it can be followed up from here.
+    const who = [call.customer, shortPrice(call.need), shortPrice(call.priceQuoted)].filter(Boolean).join(" · ");
     return {
       call,
       kind: "sale_not_closed",
       label: "Sale not closed",
-      detail: call.followUps[0] ?? "The caller didn't book. Worth a call back.",
+      detail: who || "The caller didn't book. Worth a call back.",
+      next: call.followUps[0],
     };
   }
   if (call.group === "retention" && call.resolution === "cancelled") {
