@@ -173,7 +173,7 @@ export function Overview({
       )}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Card className="min-w-0 p-0 sm:p-0">
+        <Card id="leaks" className="min-w-0 scroll-mt-6 p-0 sm:p-0">
           <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
             <div>
               <CardTitle>Leaks</CardTitle>

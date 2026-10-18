@@ -1,10 +1,22 @@
 import Link from "next/link";
-import { LayoutGrid, LogOut, Settings } from "lucide-react";
+import {
+  Building2,
+  ClipboardCheck,
+  LayoutGrid,
+  LogOut,
+  Palette,
+  Settings,
+  ShieldCheck,
+  Upload,
+  UserRound,
+  Users,
+} from "lucide-react";
 import { signOut } from "@/core/auth/actions";
-import { requireTenantAccess } from "@/core/tenancy";
+import { can, requireTenantAccess } from "@/core/tenancy";
 import { LogoMark } from "@/shared/ui/logo";
 import { Bone } from "@/shared/ui/page-header";
 import { getEnabledModules } from "@/modules/registry";
+import { CommandMenu, SearchButton, type CommandPage } from "./command-menu";
 import { NavLink } from "./nav-link";
 
 function initialsOf(name: string) {
@@ -14,8 +26,11 @@ function initialsOf(name: string) {
 
 export async function TenantNav({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
-  const { tenant, user, role } = await requireTenantAccess(slug);
-  const modules = (await getEnabledModules(slug)).flatMap((m) => m.nav ?? []).filter((n) => n.inSidebar !== false);
+  const access = await requireTenantAccess(slug);
+  const { tenant, user, role } = access;
+  const enabled = await getEnabledModules(slug);
+  const enabledIds = new Set<string>(enabled.map((m) => m.id));
+  const modules = enabled.flatMap((m) => m.nav ?? []).filter((n) => n.inSidebar !== false);
   const displayName = user.name ?? user.email;
 
   // Icons are rendered here, on the server, so the client links get elements, not components.
@@ -30,6 +45,33 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
   ];
   const settings = { href: `/${slug}/settings`, label: "Settings", icon: <Settings aria-hidden /> };
 
+  // Everything the quick search can jump to without typing a name.
+  const pages: CommandPage[] = [
+    ...items.map(({ href, label, icon }) => ({ href, label, icon })),
+    ...(can(access, "calls.upload")
+      ? [{ href: `/${slug}/calls`, label: "Upload a call", icon: <Upload aria-hidden />, keywords: "recording new add" }]
+      : []),
+    ...(enabledIds.has("coaching")
+      ? [{ href: `/${slug}/team/${user.id}`, label: "My page", icon: <UserRound aria-hidden />, keywords: "me my scores coaching" }]
+      : []),
+    ...(enabledIds.has("scorecards")
+      ? [
+          {
+            href: `/${slug}/scorecards`,
+            label: "How calls are graded",
+            icon: <ClipboardCheck aria-hidden />,
+            keywords: "scorecards rubric grading manual steps",
+            searchOnly: true,
+          },
+        ]
+      : []),
+    { href: `/${slug}/settings`, label: "Profile settings", icon: <UserRound aria-hidden />, keywords: "name account", searchOnly: true },
+    { href: `/${slug}/settings/appearance`, label: "Appearance", icon: <Palette aria-hidden />, keywords: "theme dark light", searchOnly: true },
+    { href: `/${slug}/settings/company`, label: "Company settings", icon: <Building2 aria-hidden />, keywords: "modules features", searchOnly: true },
+    { href: `/${slug}/settings/members`, label: "Members", icon: <Users aria-hidden />, keywords: "invite people team roles", searchOnly: true },
+    { href: `/${slug}/settings/roles`, label: "Roles and permissions", icon: <ShieldCheck aria-hidden />, keywords: "access", searchOnly: true },
+  ];
+
   return (
     <>
       <aside className="sticky top-6 hidden h-[calc(100dvh-3rem)] w-56 shrink-0 flex-col justify-between md:flex">
@@ -41,6 +83,9 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
               <span className="block text-xs text-muted">Powered by PestLaunch</span>
             </span>
           </Link>
+          <div className="-mt-4">
+            <SearchButton />
+          </div>
           <nav aria-label="Modules" className="flex flex-col gap-2 rounded-[28px] bg-card p-1.5">
             {items.map((item) => (
               <NavLink key={item.href} {...item} />
@@ -78,6 +123,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
         {items.map((item) => (
           <NavLink key={item.href} {...item} compact />
         ))}
+        <SearchButton compact />
         <NavLink {...settings} compact />
         <form action={signOut}>
           <button
@@ -89,6 +135,8 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
           </button>
         </form>
       </nav>
+
+      <CommandMenu slug={slug} pages={pages} />
     </>
   );
 }
