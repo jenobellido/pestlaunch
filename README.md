@@ -81,9 +81,9 @@ Scorecard steps agreed 95% in the first check, but the misses were mostly
 lenient: one quoted line earning two steps. Enforcing "one line, one step"
 in code first went too far (91%, mostly harsh), because it kept the credit
 on the earlier step; it now gives it to the later one, and scheduling clashes
-no longer count as sales objections. On 4 calls re-scored with that fix,
-scores match the hand check within a point. A full re-score of all 20 was
-skipped to save AI credit.
+no longer count as sales objections. Re-scored with that fix, 18 of the 19
+scored calls match the hand-checked score exactly (11) or within a point
+(7); the other is 2 points under.
 
 Fixed along the way:
 
