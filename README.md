@@ -31,6 +31,7 @@ Beyond the brief, it's ready for a real team:
 - Permission-based roles, with custom roles.
 - Calls belong to the rep who made them.
 - Reps only see their own calls.
+- A landing page at `/` with a 3D hero (react-three-fiber), in both themes.
 
 ## How it works
 

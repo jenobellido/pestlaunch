@@ -10,6 +10,8 @@ or off per tenant (pest control company).
 ```
 proxy.ts                 Refreshes the Supabase session; sends signed-out users to /login
 app/                     Routing only: thin pages, layouts, route handlers
+  page.tsx               Landing page (signed-in users go straight to their workspace)
+  _landing/              Landing sections, the 3D hero scene and its invented demo call
   (auth)/                /login, /signup, /onboarding
   [tenant]/              UI, e.g. /noble-pest/calls
     _components/         TenantNav (enabled modules, Settings, user menu), PageSkeleton
@@ -359,6 +361,32 @@ animation says one thing:
 - Navigations are lateral (sidebar items are siblings), so there are no
   directional slides. Revalidations and form saves don't animate: every
   `<ViewTransition>` uses `default="none"`.
+
+## Landing page
+
+`/` is the marketing page, in `app/_landing/`, in the same design system as
+the app and in both themes. Signed-in users are redirected to their workspace
+before it renders.
+
+| Section | What it shows |
+| --- | --- |
+| Hero | Headline and calls to action beside a 3D scene (`hero-scene.tsx`, react-three-fiber): a ring of sound bars coloured by speaker, like the call timeline, with particles spiralling into a glowing core. Calls turning into insight. |
+| Product preview | A reviewed call: the app's own `ScorecardPanel` and `CoachingPanel`, rendered with an invented call (`demo.ts`). It tilts flat as it scrolls in. |
+| Questions | The owner questions from PestLaunch's walkthrough, and where the app answers each one |
+| How it works | Upload, Transcribe, Score, Coach, joined by a line that draws itself |
+| Features | A bento of five cells: scorecards, speaker timeline, manager review, leads, roles |
+| Privacy | How recordings and company data are kept apart and deleted |
+
+- **3D:** three.js through `@react-three/fiber`, loaded only in the browser
+  after the text has painted (`next/dynamic`, `ssr: false`). Colours come from
+  the theme tokens and follow the theme switch. The camera backs off to fit
+  the canvas, so the ring fits at any width. It stops drawing when scrolled
+  out of view, draws one still frame under reduced motion, and if WebGL isn't
+  available the hero keeps its CSS glow. Fewer bars and particles on phones.
+- **Motion:** `motion/react` for entrances, staggered reveals and the scroll
+  tilt (`shared/ui/motion.tsx`, ported from Freehold; `MotionProvider`
+  honours reduced motion). Decorative CSS loops (`landing-bar`,
+  `landing-ring`) stop under reduced motion too.
 
 ## Calls UI
 
