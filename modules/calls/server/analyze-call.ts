@@ -62,7 +62,7 @@ Direction: decide who placed the call. Inbound calls usually open with the emplo
 
 Details: only facts actually said in the call, never guesses. Each fact once; don't repeat the summary, the appointment in other words, or describe the employee's manner (no "Apology" or "Confirmation" entries). Use these labels when they apply: Pest, Service plan, Price quoted, Appointment, Technician, Notes for technician, Cancellation reason, Retention offer, Payment, Customer name, Service address. Use a label only for that kind of fact: a street address goes under Service address, a person under Customer name, and access, location or on-site requests (gate codes, pets, where to park, what to bring) under Notes for technician. Never use a label twice; combine the values. Price quoted only for a price the employee actually stated. When a name is spelled out letter by letter, use that spelling. Never write card numbers, expiry dates or security codes; "[redacted]" in the transcript marks card details that were removed. Keep each value short. Write dates and times the way they were said (e.g. "Tuesday the 22nd, 1-3 pm"); never add a year, weekday or date that wasn't said.
 
-Follow-ups: every action the employee promised or that clearly remains open, even when an appointment was booked: anything they said they'd send, call back about, tell the technician, or have collected at the visit (e.g. "send the service agreement", "call back after manager approval", "note the gate code for the technician", "call if an earlier slot opens", "technician to collect payment at the visit", "follow up Monday on the quote"). Don't invent routine tasks. Leave it empty when nothing is left to do, but a "follow_up_needed" resolution always has at least one.
+Follow-ups: write them as the office's own actions. When waiting on the customer, write our next step ("send the quote", "follow up if no reply by Monday"), not the customer's task, and don't list a visit that's already scheduled. Include every action the employee promised or that clearly remains open, even when an appointment was booked: anything they said they'd send, call back about, tell the technician, or have collected at the visit (e.g. "send the service agreement", "call back after manager approval", "note the gate code for the technician", "call if an earlier slot opens", "technician to collect payment at the visit", "follow up Monday on the quote"). Don't invent routine tasks. Leave it empty when nothing is left to do, but a "follow_up_needed" resolution always has at least one.
 
 Cancel reason (retention calls only, else null): the customer's main reason, even if they were saved. Price = cost or budget; No longer needed = no pests anymore or the problem is solved; Service quality = pests came back, missed or late visits, technician issues; Moving = selling or leaving the area; Switching company = going to a competitor or doing it themselves; Scheduling = visit times don't work; Other = anything else, such as a death in the family.
 
@@ -74,12 +74,19 @@ function transcriptText(segments: readonly TranscriptSegment[]) {
 }
 
 /** Classifies the call and extracts the outcome and key details. */
-export async function analyzeCall(transcript: readonly TranscriptSegment[]): Promise<CallAnalysis> {
+export async function analyzeCall(
+  transcript: readonly TranscriptSegment[],
+  options: { teamNames?: readonly string[] } = {},
+): Promise<CallAnalysis> {
+  // The transcript often mishears names; the team list gives the right spelling.
+  const team = options.teamNames?.length
+    ? `The company's team, for spelling the employee's name: ${options.teamNames.join(", ")}. Use one of these only if it clearly matches the name said.\n\n`
+    : "";
   const result = await generateObject({
     name: "call_analysis",
     schema: analysisSchema,
     system: SYSTEM,
-    prompt: `Analyze this call.\n\n${transcriptText(transcript)}`,
+    prompt: `${team}Analyze this call.\n\n${transcriptText(transcript)}`,
   });
 
   return {

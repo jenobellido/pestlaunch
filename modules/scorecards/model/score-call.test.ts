@@ -101,4 +101,56 @@ describe("scoreCall", () => {
   it("trims the model's reasons", () => {
     expect(scoreCall(card, grading(), transcript).items[1].reason).toBe("Reason for item 1.");
   });
+
+  describe("one line earns one step", () => {
+    const shared: Scorecard = {
+      id: "all_calls",
+      name: "Shared quote card",
+      thresholds: { gold: 3, green: 2 },
+      sections: [
+        { title: "Validate", items: [{ name: "Confidence Statement", criteria: "" }, { name: "Validate", criteria: "" }] },
+        { title: "Solve", items: [{ name: "Consensus", criteria: "" }, { name: "Close", criteria: "" }] },
+      ],
+    };
+    const lines: TranscriptSegment[] = [
+      { speaker: "employee", start: 0, end: 4, text: "We can definitely help you with that today." },
+      { speaker: "employee", start: 5, end: 9, text: "Does Tuesday morning work? I'll put you down for it." },
+    ];
+
+    it("takes the credit back from a second step that reuses the same line", () => {
+      const result = scoreCall(
+        shared,
+        {
+          objectionsRaised: false,
+          items: [
+            judge(0, true, "We can definitely help you with that today"),
+            judge(1, true, "definitely help you with that"),
+            judge(2, false),
+            judge(3, false),
+          ],
+        },
+        lines,
+      );
+      expect(result.items.map((i) => i.passed)).toEqual([true, false, false, false]);
+      expect(result.items[1].reason).toContain("already credited to Confidence Statement");
+      expect(result.points).toBe(1);
+    });
+
+    it("lets a natural pair share a line, like agreeing and closing", () => {
+      const result = scoreCall(
+        shared,
+        {
+          objectionsRaised: false,
+          items: [
+            judge(0, false),
+            judge(1, false),
+            judge(2, true, "Does Tuesday morning work? I'll put you down for it."),
+            judge(3, true, "Does Tuesday morning work? I'll put you down for it."),
+          ],
+        },
+        lines,
+      );
+      expect(result.points).toBe(2);
+    });
+  });
 });

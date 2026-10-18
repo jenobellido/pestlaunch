@@ -198,6 +198,19 @@ describe("redactPaymentDetails", () => {
     expect(redactPaymentDetails(input).segments).toEqual(input);
   });
 
+  it("keeps dates and times inside the payment window", () => {
+    const { segments } = redactPaymentDetails([
+      line(0, "I'll take the card now."),
+      line(4, "He'll be there on the 25th between 10 and 12, or at 2 pm."),
+    ]);
+    expect(segments[1].text).toBe("He'll be there on the 25th between 10 and 12, or at 2 pm.");
+  });
+
+  it("doesn't treat sales talk about credit as a card cue", () => {
+    const input = [line(0, "We'll put a credit on your account."), line(4, "Unit 204.")];
+    expect(redactPaymentDetails(input).segments).toEqual(input);
+  });
+
   it("keeps percentages inside the payment window", () => {
     const { segments } = redactPaymentDetails([line(0, "Is that on the card?"), line(4, "He did 80% of the job.")]);
     expect(segments[1].text).toBe("He did 80% of the job.");

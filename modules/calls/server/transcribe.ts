@@ -55,6 +55,7 @@ Rules:
 - Label every numbered line in the "Label these lines" section exactly once, in order. Lines in the context sections are only there to help; don't label them.
 - "unknown" is only for recorded messages, phone menus, voicemail greetings and hold messages, or a third person who is neither.
 - Use the conversation to decide: who asks for the address and offers appointments is the employee; who describes the pest problem at their home is the customer.
+- A question and its answer come from different speakers. If a line ends with a question that the next line answers and both would get the same label, one of them is wrong (or the line holds both turns and needs a split). The customer asks about their own bill, visit or charge; the employee says what was done on the account ("I emailed you", "I voided it", "I'll move you").
 - The transcription sometimes puts two speakers' words on one line. Only then, add that line to "splits" with its exact words, in order, cut into consecutive pieces with a speaker each. Don't change, add or drop any words. Most calls need no splits.`;
 
 /** Lines per labelling request. Smaller requests come back complete and valid more reliably. */
