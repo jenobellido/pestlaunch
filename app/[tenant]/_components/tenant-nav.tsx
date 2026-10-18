@@ -31,7 +31,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
   const access = await requireTenantAccess(slug);
   const { tenant, user, role } = access;
   const [enabled, myTasks] = await Promise.all([getEnabledModules(slug), listTasks(tenant.id, { assigneeId: user.id })]);
-  // Follow-ups assigned to you, counted on Overview where your tasks are listed.
+  // Follow-ups assigned to you, counted on the Follow-ups item.
   const myOpen = myTasks.filter((t) => t.status === "open").length;
   const followUps = {
     badge: myOpen,
@@ -43,14 +43,13 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
 
   // Icons are rendered here, on the server, so the client links get elements, not components.
   const items = [
-    { href: `/${slug}`, label: "Overview", icon: <LayoutGrid aria-hidden />, exact: true, ...followUps },
+    { href: `/${slug}`, label: "Overview", icon: <LayoutGrid aria-hidden />, exact: true, badge: 0, badgeLabel: "" },
     ...modules.map(({ href, label, icon: Icon }) => ({
       href: `/${slug}${href}`,
       label,
       icon: Icon ? <Icon aria-hidden /> : null,
       exact: false,
-      badge: 0,
-      badgeLabel: "",
+      ...(href === "/follow-ups" ? followUps : { badge: 0, badgeLabel: "" }),
     })),
   ];
   const settings = { href: `/${slug}/settings`, label: "Settings", icon: <Settings aria-hidden /> };
@@ -58,7 +57,13 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
   // Everything the quick search can jump to without typing a name.
   const pages: CommandPage[] = [
     ...items.map(({ href, label, icon }) => ({ href, label, icon })),
-    { href: `/${slug}#tasks`, label: "My follow-ups", icon: <ListTodo aria-hidden />, keywords: "tasks assigned to me leaks" },
+    {
+      href: `/${slug}/follow-ups?view=mine`,
+      label: "My follow-ups",
+      icon: <ListTodo aria-hidden />,
+      keywords: "tasks assigned to me",
+      searchOnly: true,
+    },
     ...(can(access, "calls.upload")
       ? [{ href: `/${slug}/calls`, label: "Upload a call", icon: <Upload aria-hidden />, keywords: "recording new add" }]
       : []),

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState, useTransition } from "react";
-import { Check, ListTodo, UserPlus, X } from "lucide-react";
+import { ArrowRight, Check, ListTodo, UserPlus, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Spinner } from "@/shared/ui/button";
 import { assignTask, removeTask, setTaskDone, type TaskResult } from "../_lib/task-actions";
@@ -15,6 +15,16 @@ export interface TaskRow {
   assigneeName: string;
   title: string;
   status: "open" | "done";
+  /** When it was assigned, to show how long it's been waiting. */
+  createdAt?: string;
+}
+
+/** "today", "yesterday", "3d ago", "2w ago". */
+function age(iso: string, now = Date.now()) {
+  const days = Math.floor((now - new Date(iso).getTime()) / 86_400_000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  return days < 14 ? `${days}d ago` : `${Math.floor(days / 7)}w ago`;
 }
 
 export interface Assignee {
@@ -129,6 +139,7 @@ function TaskItem({
                 {task.callTitle}
               </Link>
               {!mine && ` · ${task.assigneeName}`}
+              {task.createdAt && task.status === "open" && ` · ${age(task.createdAt)}`}
             </>
           )}
         </p>
@@ -165,6 +176,8 @@ export function TasksCard({
   canManage,
   currentUserId,
   heading,
+  limit,
+  seeAllHref,
 }: {
   slug: string;
   tasks: TaskRow[];
@@ -172,6 +185,9 @@ export function TasksCard({
   currentUserId: string;
   /** Overrides the title and line under it, e.g. on a rep's page. */
   heading?: { title: string; description: string };
+  /** Shows only this many, with a link to the full list. */
+  limit?: number;
+  seeAllHref?: string;
 }) {
   const mineOpen = tasks.filter((t) => t.assigneeId === currentUserId && t.status === "open").length;
   const [view, setView] = useState<View>(mineOpen > 0 ? "mine" : "team");
@@ -231,10 +247,18 @@ export function TasksCard({
         </p>
       ) : (
         <ul className="mt-2 divide-y divide-line">
-          {[...open, ...recentDone].map((t) => (
+          {[...open, ...recentDone].slice(0, limit).map((t) => (
             <TaskItem key={t.id} slug={slug} task={t} canManage={canManage} mine={t.assigneeId === currentUserId} />
           ))}
         </ul>
+      )}
+      {seeAllHref && (
+        <Link
+          href={seeAllHref}
+          className="mt-2 flex items-center justify-center gap-1 border-t border-line pt-3 text-sm text-muted hover:text-fg"
+        >
+          See all follow-ups <ArrowRight className="size-4" aria-hidden />
+        </Link>
       )}
     </section>
   );
@@ -268,5 +292,26 @@ export function CallTasks({
         ))}
       </ul>
     </section>
+  );
+}
+
+/** A plain list of follow-ups, for the Follow-ups page. */
+export function TaskList({
+  slug,
+  tasks,
+  canManage,
+  currentUserId,
+}: {
+  slug: string;
+  tasks: TaskRow[];
+  canManage: boolean;
+  currentUserId: string;
+}) {
+  return (
+    <ul className="divide-y divide-line">
+      {tasks.map((t) => (
+        <TaskItem key={t.id} slug={slug} task={t} canManage={canManage} mine={t.assigneeId === currentUserId} />
+      ))}
+    </ul>
   );
 }

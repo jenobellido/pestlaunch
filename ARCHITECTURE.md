@@ -340,9 +340,23 @@ scorecards modules. Call types are grouped the way PestLaunch's Call Log does
   The Follow-up tasks card lists the team's tasks for assigners, with a
   Mine / Team switch that opens on Mine when they have open tasks, and "Your
   tasks" for everyone else; the assignee or an assigner marks them done.
-  Your open follow-ups are counted on Overview in the sidebar (and the mobile
-  bar), a call's page shows its follow-ups and whose they are at the top, and
-  quick search has "My follow-ups".
+  The Overview card shows the first 5 with a link to Follow-ups.
+
+## Follow-ups
+
+`/[tenant]/follow-ups` (a nav item from the calls module) is the to-do list
+for calls: everything someone has been asked to follow up on. Mine / Team
+(Team only with `calls.assign`) and Open / Done live in the URL
+(`?view=&status=`), so links can open "my open follow-ups"; assigners land
+on Mine when they have something open. Each task shows its call, owner and
+how long it's been waiting, with a circle to mark it done. For assigners,
+**Needs an owner** lists the leaks (same rules as the Overview) that have no
+open follow-up yet, each with Assign. The leak row and the Overview's call
+list builder are shared (`LeakRow`, `_lib/dashboard-calls.ts`).
+
+Your open follow-ups are counted as a badge on Follow-ups in the sidebar and
+the mobile bar, a call's page shows its follow-ups and whose they are at the
+top, and quick search has "My follow-ups".
 - **Reps:** calls, close rate and average score per rep (hidden for members
   without `calls.view_all`, who see only their own numbers).
 - **Why customers cancel:** each reason with saved vs lost.
@@ -357,7 +371,7 @@ scorecards modules. Call types are grouped the way PestLaunch's Call Log does
 
 ## Navigation and wording
 
-The sidebar is Overview · Calls · Leads · Team, then Settings. The company's
+The sidebar is Overview · Calls · Leads · Follow-ups · Team, then Settings. The company's
 name sits at the top with "Powered by PestLaunch", as in PestLaunch OS, with
 the Search box (quick search, ⌘K) under it. The
 scorecard rubric isn't in the sidebar; each call's score links to it

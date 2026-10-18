@@ -51,9 +51,9 @@ export function setupSteps(input: SetupInput): SetupStep[] {
     can.assign && {
       id: "assign",
       title: "Assign a follow-up",
-      description: "Use Assign on a call below that still needs someone, so it doesn't fall through the cracks.",
+      description: "Give a leak an owner on Follow-ups, so it doesn't fall through the cracks.",
       // Leaks only exist once there are calls; before that, start at the calls page.
-      action: input.callCount > 0 ? { label: "See leaks", href: `/${slug}#leaks` } : { label: "Open calls", href: `/${slug}/calls` },
+      action: input.callCount > 0 ? { label: "Follow-ups", href: `/${slug}/follow-ups` } : { label: "Open calls", href: `/${slug}/calls` },
       done: input.taskCount > 0,
     },
   ];

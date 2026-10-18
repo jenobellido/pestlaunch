@@ -2,15 +2,14 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { LayoutGrid } from "lucide-react";
 import { can, listInvites, listMembers } from "@/core/tenancy";
-import { CALL_TYPE_GROUP, CALL_TYPE_LABELS } from "@/modules/calls";
 import { callScope, listCalls, listTasks } from "@/modules/calls/server";
 import { isModuleEnabled } from "@/modules/registry";
-import { getScorecardResult } from "@/modules/scorecards";
 import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
 import { Overview, RangeChips } from "./_components/overview";
 import { SetupChecklist } from "./_components/setup-checklist";
 import { requireModule } from "./_lib/require-module";
-import { inRange, parseRange, summarize, type DashboardCall } from "./_lib/insights";
+import { toDashboardCalls } from "./_lib/dashboard-calls";
+import { inRange, parseRange, summarize } from "./_lib/insights";
 import { setupCookieName, setupSteps, showSetup } from "./_lib/setup";
 
 // The Overview answers an owner's questions at a glance: are sales calls closing, how many
@@ -42,25 +41,7 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
   });
   const setup = showSetup(steps, jar.get(setupCookieName(tenant.id))?.value === "1");
 
-  const dashboardCalls: DashboardCall[] = calls.map((c) => {
-    const score = scored ? getScorecardResult(c.analyses) : null;
-    return {
-      id: c.id,
-      href: `/${tenant.slug}/calls/${c.id}`,
-      title: c.fileName.replace(/\.[^.]+$/, ""),
-      typeLabel: c.callType ? CALL_TYPE_LABELS[c.callType] : null,
-      group: c.callType ? CALL_TYPE_GROUP[c.callType] : null,
-      employeeId: c.employeeId,
-      employeeName: c.employeeName,
-      createdAt: c.createdAt,
-      durationSec: c.durationSec ?? 0,
-      status: c.status,
-      resolution: c.outcome?.resolution ?? null,
-      followUps: c.outcome?.followUps ?? [],
-      cancelReason: c.outcome?.cancelReason ?? null,
-      score: score ? { points: score.points, maxPoints: score.maxPoints, grade: score.grade } : null,
-    };
-  });
+  const dashboardCalls = toDashboardCalls(calls, tenant.slug, scored);
 
   return (
     <PageStack>

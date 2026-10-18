@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle, EmptyState } from "@/shared/ui/card";
-import { RANGES, type Insights, type LeakKind, type Range } from "../_lib/insights";
+import { RANGES, type Insights, type Leak, type LeakKind, type Range } from "../_lib/insights";
 import { AssignTask, TasksCard, type Assignee, type TaskRow } from "./tasks";
 
 const LEAK_STYLE: Record<LeakKind, { icon: React.ComponentType<{ className?: string }>; tone: string }> = {
@@ -21,6 +21,48 @@ const LEAK_STYLE: Record<LeakKind, { icon: React.ComponentType<{ className?: str
   follow_up: { icon: Flag, tone: "bg-sky/15 text-sky" },
   below_standard: { icon: AlertTriangle, tone: "bg-danger/10 text-danger" },
 };
+
+/** One leak: what went wrong on which call, and who owns it (or an Assign control for assigners). */
+export function LeakRow({
+  slug,
+  leak: { call, kind, label, detail },
+  owner,
+  members,
+}: {
+  slug: string;
+  leak: Leak;
+  owner?: string;
+  members: Assignee[] | null;
+}) {
+  const { icon: Icon, tone } = LEAK_STYLE[kind];
+  return (
+    <li className="flex items-center gap-2 border-t border-line pr-4 transition-colors hover:bg-card-2 sm:pr-5">
+      <Link href={call.href} className="group flex min-w-0 flex-1 items-center gap-3 py-3.5 pl-5 sm:pl-6">
+        <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tone)}>
+          <Icon className="size-4" aria-hidden />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex min-w-0 items-center gap-2 text-sm">
+            <span className="shrink-0 font-medium whitespace-nowrap">{label}</span>
+            <span className="min-w-0 truncate text-muted">
+              · {call.title}
+              {call.employeeName && ` · ${call.employeeName}`}
+            </span>
+          </span>
+          <span className="block truncate text-sm text-muted">{detail}</span>
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" aria-hidden />
+      </Link>
+      {owner ? (
+        <span className="max-w-28 shrink-0 truncate rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
+          {owner.split(/\s+/)[0]}
+        </span>
+      ) : (
+        members && <AssignTask slug={slug} callId={call.id} title={`${label}: ${detail}`.slice(0, 200)} members={members} />
+      )}
+    </li>
+  );
+}
 
 const GRADE_DOT = { gold: "bg-orange", green: "bg-success", below: "bg-danger" } as const;
 
@@ -104,7 +146,14 @@ export function Overview({
   // A leak with an open task shows who owns it instead of the Assign control.
   const ownerByCall = new Map(tasks.filter((t) => t.status === "open").map((t) => [t.callId, t.assigneeName]));
   const tasksCard = (
-    <TasksCard slug={slug} tasks={tasks} canManage={members !== null} currentUserId={currentUserId} />
+    <TasksCard
+      slug={slug}
+      tasks={tasks}
+      canManage={members !== null}
+      currentUserId={currentUserId}
+      limit={5}
+      seeAllHref={`/${slug}/follow-ups`}
+    />
   );
   const { totals, sales, retention, quality, leaks, reps } = insights;
 
@@ -186,40 +235,8 @@ export function Overview({
           ) : (
             <ul className="mt-3">
               {leaks.slice(0, 8).map(({ call, kind, label, detail }) => {
-                const { icon: Icon, tone } = LEAK_STYLE[kind];
                 const owner = ownerByCall.get(call.id);
-                return (
-                  <li key={call.id} className="flex items-center gap-2 border-t border-line pr-4 transition-colors hover:bg-card-2 sm:pr-5">
-                    <Link
-                      href={call.href}
-                      className="group flex min-w-0 flex-1 items-center gap-3 py-3.5 pl-5 sm:pl-6"
-                    >
-                      <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tone)}>
-                        <Icon className="size-4" aria-hidden />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex min-w-0 items-center gap-2 text-sm">
-                          <span className="shrink-0 font-medium whitespace-nowrap">{label}</span>
-                          <span className="min-w-0 truncate text-muted">
-                            · {call.title}
-                            {call.employeeName && ` · ${call.employeeName}`}
-                          </span>
-                        </span>
-                        <span className="block truncate text-sm text-muted">{detail}</span>
-                      </span>
-                      <ChevronRight className="size-4 shrink-0 text-muted transition-transform group-hover:translate-x-0.5" aria-hidden />
-                    </Link>
-                    {owner ? (
-                      <span className="max-w-28 shrink-0 truncate rounded-full bg-accent/10 px-2.5 py-1 text-xs font-medium text-accent">
-                        {owner.split(/\s+/)[0]}
-                      </span>
-                    ) : (
-                      members && (
-                        <AssignTask slug={slug} callId={call.id} title={`${label}: ${detail}`.slice(0, 200)} members={members} />
-                      )
-                    )}
-                  </li>
-                );
+                return <LeakRow key={call.id} slug={slug} leak={{ call, kind, label, detail }} owner={owner} members={members} />;
               })}
             </ul>
           )}
