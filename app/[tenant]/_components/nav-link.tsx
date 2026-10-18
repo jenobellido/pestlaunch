@@ -12,6 +12,8 @@ export function NavLink({
   icon,
   exact = false,
   compact = false,
+  badge,
+  badgeLabel,
 }: {
   href: string;
   label: string;
@@ -20,6 +22,10 @@ export function NavLink({
   exact?: boolean;
   /** Icon-only, for the mobile nav. */
   compact?: boolean;
+  /** A count shown on the row, e.g. open follow-ups; hidden when 0. */
+  badge?: number;
+  /** What the count means, for screen readers, e.g. "3 open follow-ups". */
+  badgeLabel?: string;
 }) {
   const pathname = usePathname();
   const active = pathname === href || (!exact && pathname.startsWith(`${href}/`));
@@ -28,7 +34,7 @@ export function NavLink({
   return (
     <Link
       href={href}
-      aria-label={compact ? label : undefined}
+      aria-label={compact ? [label, badge ? badgeLabel : null].filter(Boolean).join(", ") : undefined}
       aria-current={active ? "page" : undefined}
       className={cn(
         "relative flex items-center rounded-full text-sm transition-colors duration-300",
@@ -44,6 +50,18 @@ export function NavLink({
         {icon}
         {!compact && <span className="min-w-0 truncate">{label}</span>}
       </span>
+      {!!badge && (
+        <span
+          className={cn(
+            "rounded-full bg-orange px-1.5 text-[11px] leading-[18px] font-medium text-white tabular-nums",
+            compact ? "absolute -top-0.5 -right-0.5 min-w-[18px] text-center" : "relative ml-auto",
+          )}
+          title={badgeLabel}
+        >
+          {badge > 99 ? "99+" : badge}
+          {!compact && badgeLabel && <span className="sr-only"> {badgeLabel}</span>}
+        </span>
+      )}
     </Link>
   );
 }

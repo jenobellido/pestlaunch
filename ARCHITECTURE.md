@@ -337,8 +337,12 @@ scorecards modules. Call types are grouped the way PestLaunch's Call Log does
 - **Assignable leaks:** anyone with `calls.assign` picks a teammate from a
   leak's Assign control, which creates a follow-up task on that call
   (`call_tasks`, owned by the calls module). The leak then shows its owner.
-  The Follow-up tasks card lists the team's tasks for assigners, and "Your
+  The Follow-up tasks card lists the team's tasks for assigners, with a
+  Mine / Team switch that opens on Mine when they have open tasks, and "Your
   tasks" for everyone else; the assignee or an assigner marks them done.
+  Your open follow-ups are counted on Overview in the sidebar (and the mobile
+  bar), a call's page shows its follow-ups and whose they are at the top, and
+  quick search has "My follow-ups".
 - **Reps:** calls, close rate and average score per rep (hidden for members
   without `calls.view_all`, who see only their own numbers).
 - **Why customers cancel:** each reason with saved vs lost.

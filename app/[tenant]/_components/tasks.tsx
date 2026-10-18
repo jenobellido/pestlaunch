@@ -93,11 +93,14 @@ function TaskItem({
   task,
   canManage,
   mine,
+  onCallPage = false,
 }: {
   slug: string;
   task: TaskRow;
   canManage: boolean;
   mine: boolean;
+  /** On the call's own page the link to it is pointless; say whose task it is instead. */
+  onCallPage?: boolean;
 }) {
   const { pending, error, run } = useAction();
   const done = task.status === "done";
@@ -118,10 +121,16 @@ function TaskItem({
       <div className="min-w-0 flex-1 text-sm">
         <p className={cn("line-clamp-2", done && "text-muted line-through")}>{task.title}</p>
         <p className="mt-0.5 text-xs text-muted">
-          <Link href={`/${slug}/calls/${task.callId}`} className="hover:text-fg hover:underline">
-            {task.callTitle}
-          </Link>
-          {!mine && ` · ${task.assigneeName}`}
+          {onCallPage ? (
+            <>Follow-up for {mine ? "you" : task.assigneeName}</>
+          ) : (
+            <>
+              <Link href={`/${slug}/calls/${task.callId}`} className="hover:text-fg hover:underline">
+                {task.callTitle}
+              </Link>
+              {!mine && ` · ${task.assigneeName}`}
+            </>
+          )}
         </p>
         {error && (
           <p role="alert" className="mt-1 text-xs text-danger">
@@ -144,7 +153,12 @@ function TaskItem({
   );
 }
 
-/** Follow-up tasks: the viewer's own, or the whole team's for people who assign them. */
+type View = "mine" | "team";
+
+/**
+ * Follow-up tasks. People who assign them see the team's, with a Mine / Team switch that
+ * opens on Mine whenever they have something open themselves; everyone else sees their own.
+ */
 export function TasksCard({
   slug,
   tasks,
@@ -159,26 +173,62 @@ export function TasksCard({
   /** Overrides the title and line under it, e.g. on a rep's page. */
   heading?: { title: string; description: string };
 }) {
-  const open = tasks.filter((t) => t.status === "open");
-  const recentDone = tasks.filter((t) => t.status === "done").slice(0, 3);
+  const mineOpen = tasks.filter((t) => t.assigneeId === currentUserId && t.status === "open").length;
+  const [view, setView] = useState<View>(mineOpen > 0 ? "mine" : "team");
+  const switchable = canManage && !heading;
+  const shown = switchable && view === "mine" ? tasks.filter((t) => t.assigneeId === currentUserId) : tasks;
+  const open = shown.filter((t) => t.status === "open");
+  const recentDone = shown.filter((t) => t.status === "done").slice(0, 3);
   if (tasks.length === 0 && !canManage) return null;
+
+  const description =
+    heading?.description ??
+    (!canManage
+      ? "Calls you've been asked to follow up on."
+      : view === "mine"
+        ? "Calls you've been asked to follow up on."
+        : "Leaks assigned to the team. Use Assign on a leak to add one.");
+
   return (
-    <section className="rounded-[28px] bg-card p-5 sm:p-6">
-      <div className="flex items-center gap-3">
+    <section id="tasks" className="scroll-mt-6 rounded-[28px] bg-card p-5 sm:p-6">
+      <div className="flex flex-wrap items-center gap-3">
         <span className="flex size-9 items-center justify-center rounded-xl bg-accent/15 text-accent">
           <ListTodo className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
           <h2 className="text-[15px] font-medium">{heading?.title ?? (canManage ? "Follow-up tasks" : "Your tasks")}</h2>
-          <p className="text-sm text-muted">
-            {heading?.description ??
-              (canManage ? "Leaks assigned to the team. Use Assign on a leak to add one." : "Calls you've been asked to follow up on.")}
-          </p>
+          <p className="text-sm text-muted">{description}</p>
         </div>
-        <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{open.length} open</span>
+        {switchable ? (
+          <div role="group" aria-label="Whose tasks" className="flex rounded-full bg-chip p-1 text-xs font-medium">
+            {(
+              [
+                ["mine", "Mine", mineOpen],
+                ["team", "Team", tasks.filter((t) => t.status === "open").length],
+              ] as const
+            ).map(([id, label, count]) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={view === id}
+                onClick={() => setView(id)}
+                className={cn(
+                  "press rounded-full px-3 py-1 tabular-nums transition-colors",
+                  view === id ? "bg-card text-fg shadow-sm" : "text-muted hover:text-fg",
+                )}
+              >
+                {label} <span className={view === id ? "text-accent" : ""}>{count}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{open.length} open</span>
+        )}
       </div>
-      {tasks.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">No follow-ups assigned yet.</p>
+      {shown.length === 0 ? (
+        <p className="mt-4 text-sm text-muted">
+          {switchable && view === "mine" ? "Nothing assigned to you. You're all caught up." : "No follow-ups assigned yet."}
+        </p>
       ) : (
         <ul className="mt-2 divide-y divide-line">
           {[...open, ...recentDone].map((t) => (
@@ -186,6 +236,37 @@ export function TasksCard({
           ))}
         </ul>
       )}
+    </section>
+  );
+}
+
+/** The follow-ups on one call, shown at the top of its page so nobody misses who owns it. */
+export function CallTasks({
+  slug,
+  tasks,
+  canManage,
+  currentUserId,
+}: {
+  slug: string;
+  tasks: TaskRow[];
+  canManage: boolean;
+  currentUserId: string;
+}) {
+  if (tasks.length === 0) return null;
+  return (
+    <section aria-label="Follow-ups on this call" className="rounded-[28px] border border-orange/30 bg-orange/10 px-5 py-1">
+      <ul className="divide-y divide-orange/20">
+        {tasks.map((t) => (
+          <TaskItem
+            key={t.id}
+            slug={slug}
+            task={t}
+            canManage={canManage}
+            mine={t.assigneeId === currentUserId}
+            onCallPage
+          />
+        ))}
+      </ul>
     </section>
   );
 }

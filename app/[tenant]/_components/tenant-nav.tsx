@@ -3,6 +3,7 @@ import {
   Building2,
   ClipboardCheck,
   LayoutGrid,
+  ListTodo,
   LogOut,
   Palette,
   Settings,
@@ -15,6 +16,7 @@ import { signOut } from "@/core/auth/actions";
 import { can, requireTenantAccess } from "@/core/tenancy";
 import { LogoMark } from "@/shared/ui/logo";
 import { Bone } from "@/shared/ui/page-header";
+import { listTasks } from "@/modules/calls/server";
 import { getEnabledModules } from "@/modules/registry";
 import { CommandMenu, SearchButton, type CommandPage } from "./command-menu";
 import { NavLink } from "./nav-link";
@@ -28,19 +30,27 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
   const { tenant: slug } = await params;
   const access = await requireTenantAccess(slug);
   const { tenant, user, role } = access;
-  const enabled = await getEnabledModules(slug);
+  const [enabled, myTasks] = await Promise.all([getEnabledModules(slug), listTasks(tenant.id, { assigneeId: user.id })]);
+  // Follow-ups assigned to you, counted on Overview where your tasks are listed.
+  const myOpen = myTasks.filter((t) => t.status === "open").length;
+  const followUps = {
+    badge: myOpen,
+    badgeLabel: `${myOpen} open follow-up${myOpen === 1 ? "" : "s"} for you`,
+  };
   const enabledIds = new Set<string>(enabled.map((m) => m.id));
   const modules = enabled.flatMap((m) => m.nav ?? []).filter((n) => n.inSidebar !== false);
   const displayName = user.name ?? user.email;
 
   // Icons are rendered here, on the server, so the client links get elements, not components.
   const items = [
-    { href: `/${slug}`, label: "Overview", icon: <LayoutGrid aria-hidden />, exact: true },
+    { href: `/${slug}`, label: "Overview", icon: <LayoutGrid aria-hidden />, exact: true, ...followUps },
     ...modules.map(({ href, label, icon: Icon }) => ({
       href: `/${slug}${href}`,
       label,
       icon: Icon ? <Icon aria-hidden /> : null,
       exact: false,
+      badge: 0,
+      badgeLabel: "",
     })),
   ];
   const settings = { href: `/${slug}/settings`, label: "Settings", icon: <Settings aria-hidden /> };
@@ -48,6 +58,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
   // Everything the quick search can jump to without typing a name.
   const pages: CommandPage[] = [
     ...items.map(({ href, label, icon }) => ({ href, label, icon })),
+    { href: `/${slug}#tasks`, label: "My follow-ups", icon: <ListTodo aria-hidden />, keywords: "tasks assigned to me leaks" },
     ...(can(access, "calls.upload")
       ? [{ href: `/${slug}/calls`, label: "Upload a call", icon: <Upload aria-hidden />, keywords: "recording new add" }]
       : []),
