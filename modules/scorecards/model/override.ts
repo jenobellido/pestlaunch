@@ -25,3 +25,9 @@ export function scorecardReviewFlag(result: ScorecardResult): string | null {
   if (result.items.some((i) => i.corrected)) return null;
   return borderlineReason(SCORECARDS[result.scorecardId], result.points);
 }
+
+/** What a scorecard step asks for, in the manual's terms, for coaching ("what good sounds like"). */
+export function stepCriteria(scorecardId: ScorecardResult["scorecardId"], section: string, item: string): string | null {
+  const card = SCORECARDS[scorecardId];
+  return card.sections.find((s) => s.title === section)?.items.find((i) => i.name === item)?.criteria ?? null;
+}

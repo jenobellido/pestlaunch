@@ -226,6 +226,16 @@ the app without exposing real recordings. Scripts import server code through
 `scripts/allow-server-only.cjs`, which points the `server-only` guard at an
 empty module outside Next.
 
+## Rep page
+
+`/[tenant]/team/[repId]` (linked from each team member's card on Team):
+average score, trend (needs 4 scored calls), close rate and cancels saved;
+**What to work on**, the steps the rep misses most with the manual's
+criteria for each (`stepCriteria`), as "what good sounds like"; a score-by-call
+chart linking to each call; the latest coaching focus with a "Try saying"
+line; their plays and follow-up tasks; and recent calls. A rep can open their
+own page; other reps' pages need `calls.view_all`.
+
 ## Review and corrections
 
 AI results can be wrong, so people with `calls.review` (Owner and Manager by

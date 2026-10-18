@@ -67,7 +67,8 @@ export function summarizeTeam(calls: CoachingCall[]): EmployeeSummary[] {
     const scores = scored.map((c) => percent(c.score!));
 
     let trend: number | null = null;
-    if (scores.length >= 2) {
+    // A trend needs at least 4 scored calls (2 per half) to mean anything.
+    if (scores.length >= 4) {
       const half = Math.floor(scores.length / 2);
       trend = average(scores.slice(-half))! - average(scores.slice(0, half))!;
     }

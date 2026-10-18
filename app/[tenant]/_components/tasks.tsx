@@ -150,11 +150,14 @@ export function TasksCard({
   tasks,
   canManage,
   currentUserId,
+  heading,
 }: {
   slug: string;
   tasks: TaskRow[];
   canManage: boolean;
   currentUserId: string;
+  /** Overrides the title and line under it, e.g. on a rep's page. */
+  heading?: { title: string; description: string };
 }) {
   const open = tasks.filter((t) => t.status === "open");
   const recentDone = tasks.filter((t) => t.status === "done").slice(0, 3);
@@ -166,9 +169,10 @@ export function TasksCard({
           <ListTodo className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-[15px] font-medium">{canManage ? "Follow-up tasks" : "Your tasks"}</h2>
+          <h2 className="text-[15px] font-medium">{heading?.title ?? (canManage ? "Follow-up tasks" : "Your tasks")}</h2>
           <p className="text-sm text-muted">
-            {canManage ? "Leaks assigned to the team. Use Assign on a leak to add one." : "Calls you've been asked to follow up on."}
+            {heading?.description ??
+              (canManage ? "Leaks assigned to the team. Use Assign on a leak to add one." : "Calls you've been asked to follow up on.")}
           </p>
         </div>
         <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{open.length} open</span>

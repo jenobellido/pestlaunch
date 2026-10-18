@@ -127,11 +127,14 @@ export function PlaysCard({
   plays,
   canManage,
   currentUserId,
+  heading,
 }: {
   slug: string;
   plays: PlayRow[];
   canManage: boolean;
   currentUserId: string;
+  /** Overrides the title and line under it, e.g. on a rep's page. */
+  heading?: { title: string; description: string };
 }) {
   const open = plays.filter((p) => p.status === "open");
   const done = plays.filter((p) => p.status === "done").slice(0, 3);
@@ -143,11 +146,12 @@ export function PlaysCard({
           <ClipboardList className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-[15px] font-medium">{canManage ? "Plays" : "Your plays"}</h2>
+          <h2 className="text-[15px] font-medium">{heading?.title ?? (canManage ? "Plays" : "Your plays")}</h2>
           <p className="text-sm text-muted">
-            {canManage
-              ? "Coaching assigned to the team. Assign a suggested play from a rep's card below."
-              : "What your manager asked you to work on."}
+            {heading?.description ??
+              (canManage
+                ? "Coaching assigned to the team. Assign a suggested play from a rep's card below."
+                : "What your manager asked you to work on.")}
           </p>
         </div>
         <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{open.length} open</span>
