@@ -63,7 +63,7 @@ describe("summarizeTeam", () => {
     expect(summaries).toHaveLength(2);
   });
 
-  it("puts calls with no name under Unknown employee, listed last", () => {
+  it("puts calls with no name under Unknown rep, listed last", () => {
     const summaries = summarizeTeam([
       call({ day: 1 }),
       call({ day: 2, employeeName: "  " }),
@@ -72,7 +72,7 @@ describe("summarizeTeam", () => {
     ]);
     expect(summaries.map((s) => [s.name, s.calls.length])).toEqual([
       ["Casey", 1],
-      ["Unknown employee", 3],
+      ["Unknown rep", 3],
     ]);
   });
 

@@ -10,7 +10,8 @@ const GRADE: Record<Grade, { label: string; badge: string; bar: string }> = {
   below: { label: "Below Standard", badge: "bg-badge-danger text-on-badge-danger", bar: "bg-danger" },
 };
 
-export function ScorecardPanel({ result }: { result: ScorecardResult | null | undefined }) {
+/** `rubricHref` links to the full scorecard rubric (the Scorecards page). */
+export function ScorecardPanel({ result, rubricHref }: { result: ScorecardResult | null | undefined; rubricHref?: string }) {
   if (!result)
     return (
       <Card className="flex items-center gap-3">
@@ -24,7 +25,14 @@ export function ScorecardPanel({ result }: { result: ScorecardResult | null | un
   return (
     <Card>
       <div className="flex items-start justify-between gap-3">
-        <CardTitle>{SCORECARDS[result.scorecardId].name}</CardTitle>
+        <div className="min-w-0">
+          <CardTitle>{SCORECARDS[result.scorecardId].name}</CardTitle>
+          {rubricHref && (
+            <a href={rubricHref} className="text-xs text-muted hover:text-fg hover:underline">
+              How calls are graded
+            </a>
+          )}
+        </div>
         <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap", grade.badge)}>
           {grade.label}
         </span>

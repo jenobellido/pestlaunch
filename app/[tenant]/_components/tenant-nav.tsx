@@ -14,8 +14,8 @@ function initialsOf(name: string) {
 
 export async function TenantNav({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant: slug } = await params;
-  const { tenant, user } = await requireTenantAccess(slug);
-  const modules = (await getEnabledModules(slug)).flatMap((m) => m.nav ?? []);
+  const { tenant, user, role } = await requireTenantAccess(slug);
+  const modules = (await getEnabledModules(slug)).flatMap((m) => m.nav ?? []).filter((n) => n.inSidebar !== false);
   const displayName = user.name ?? user.email;
 
   // Icons are rendered here, on the server, so the client links get elements, not components.
@@ -36,7 +36,10 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
         <div className="flex flex-col gap-8">
           <Link href={`/${slug}`} aria-label={`${tenant.name} overview`} className="flex items-center gap-2.5 pl-2">
             <LogoMark className="size-10 shrink-0" />
-            <span className="truncate text-xl font-medium tracking-tight">pestlaunch</span>
+            <span className="min-w-0">
+              <span className="block truncate text-base leading-tight font-medium">{tenant.name}</span>
+              <span className="block text-xs text-muted">Powered by PestLaunch</span>
+            </span>
           </Link>
           <nav aria-label="Modules" className="flex flex-col gap-2 rounded-[28px] bg-card p-1.5">
             {items.map((item) => (
@@ -62,7 +65,7 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
             </span>
             <span className="min-w-0 pr-2">
               <span className="block truncate text-sm font-medium">{displayName}</span>
-              <span className="block truncate text-xs text-muted">{tenant.name}</span>
+              <span className="block truncate text-xs text-muted">{role.name}</span>
             </span>
           </div>
         </div>
@@ -97,7 +100,10 @@ export function TenantNavSkeleton() {
       <div className="flex flex-col gap-8">
         <div className="flex items-center gap-2.5 pl-2">
           <LogoMark className="size-10 shrink-0" />
-          <span className="text-xl font-medium tracking-tight">pestlaunch</span>
+          <span className="space-y-1.5">
+            <Bone className="h-4 w-28 rounded-full" />
+            <span className="block text-xs text-muted">Powered by PestLaunch</span>
+          </span>
         </div>
         <div className="flex flex-col gap-2 rounded-[28px] bg-card p-1.5">
           {Array.from({ length: 4 }, (_, i) => (

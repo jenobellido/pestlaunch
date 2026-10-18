@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/cn";
 import { usePlayer } from "./call-player";
 import { formatDuration } from "./call-status";
 
-const SPEAKER_LABEL = { employee: "Employee", customer: "Customer", unknown: "Other" } as const;
+const SPEAKER_LABEL = { employee: "Rep", customer: "Caller", unknown: "Other" } as const;
 
 /** Wraps each case-insensitive match of `query` in a <mark>. */
 function highlight(text: string, query: string) {

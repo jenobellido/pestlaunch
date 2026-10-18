@@ -239,8 +239,8 @@ export function Overview({
             <Card>
               <div className="flex items-center justify-between gap-3">
                 <CardTitle>Reps</CardTitle>
-                <Link href={`/${slug}/coaching`} className="text-sm text-muted hover:text-fg">
-                  Coaching <ArrowRight className="inline size-3.5" aria-hidden />
+                <Link href={`/${slug}/team`} className="text-sm text-muted hover:text-fg">
+                  Team <ArrowRight className="inline size-3.5" aria-hidden />
                 </Link>
               </div>
               <table className="mt-3 w-full text-sm">

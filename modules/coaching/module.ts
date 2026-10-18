@@ -1,11 +1,11 @@
-import { MessageSquareText } from "lucide-react";
+import { UsersRound } from "lucide-react";
 import { defineModule } from "@/core/modules";
 
 export const coachingModule = defineModule({
   id: "coaching",
   name: "Coaching",
-  description: "Actionable feedback per call and trends per employee.",
+  description: "Feedback on every call, and how each rep is doing over time.",
   defaultEnabled: true,
   dependsOn: ["calls"],
-  nav: [{ label: "Coaching", href: "/coaching", icon: MessageSquareText }],
+  nav: [{ label: "Team", href: "/team", icon: UsersRound }],
 });

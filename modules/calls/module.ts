@@ -8,6 +8,6 @@ export const callsModule = defineModule({
   defaultEnabled: true,
   nav: [
     { label: "Calls", href: "/calls", icon: Phone },
-    { label: "Pipeline", href: "/pipeline", icon: SquareKanban },
+    { label: "Leads", href: "/leads", icon: SquareKanban },
   ],
 });
