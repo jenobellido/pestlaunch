@@ -10,6 +10,7 @@ import {
   listTasks,
 } from "@/modules/calls/server";
 import { CoachingPanel, getCoachingFeedback } from "@/modules/coaching";
+import { getCallSentiment, SentimentPanel, sentimentRanges } from "@/modules/sentiment";
 import { getEnabledModuleIds } from "@/modules/registry";
 import {
   ScorecardPanel,
@@ -59,6 +60,15 @@ export default async function Page({
     ? getScorecardResult(call.analyses)
     : null;
   const canReview = ready && can(access, "calls.review");
+  // Sentiment draws under the player's timeline as well as in its own panel.
+  const sentiment = ready && enabled.has("sentiment") ? getCallSentiment(call.analyses) : null;
+  const sentimentBands = sentiment
+    ? sentimentRanges(sentiment.turns).map((r) => ({
+        ...r,
+        tone: r.sentiment,
+        label: r.sentiment === "positive" ? "Positive" : r.sentiment === "negative" ? "Negative" : "Neutral",
+      }))
+    : undefined;
   // A reviewed call is trusted as is; otherwise flag what a person should check.
   const reviewFlags = call.review
     ? []
@@ -77,6 +87,8 @@ export default async function Page({
         name: m.displayName,
       }))}
       reviewFlags={ready ? reviewFlags : []}
+      timelineBands={sentimentBands}
+      timelineBandsLabel={sentimentBands ? "Sentiment" : undefined}
       lead={
         <>
           {/* Who owns this call's follow-up, before anything else. */}
@@ -110,6 +122,9 @@ export default async function Page({
     >
       {ready && enabled.has("coaching") && (
         <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />
+      )}
+      {sentiment && call.transcript && (
+        <SentimentPanel sentiment={sentiment} transcript={call.transcript} durationSec={call.durationSec} />
       )}
       {canReview && (
         <ReviewPanel

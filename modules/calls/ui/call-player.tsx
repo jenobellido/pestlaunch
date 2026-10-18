@@ -4,6 +4,7 @@ import { createContext, use, useEffect, useRef, useState } from "react";
 import { Pause, Play, RotateCcw, RotateCw } from "lucide-react";
 import type { TranscriptSegment } from "@/core/calls";
 import { cn } from "@/shared/lib/cn";
+import type { TimelineBand } from "../model/types";
 import { formatDuration } from "./call-status";
 
 interface Player {
@@ -14,6 +15,8 @@ interface Player {
   playing: boolean;
   rate: number;
   seek: (sec: number, play?: boolean) => void;
+  /** Counts jumps from #t= links, so the transcript can scroll to where it landed. */
+  jumps: number;
   toggle: () => void;
   setRate: (rate: number) => void;
 }
@@ -42,6 +45,7 @@ export function CallPlayerProvider({
   const [playing, setPlaying] = useState(false);
   const [rate, setRateState] = useState(1);
   const [failed, setFailed] = useState(false);
+  const [jumps, setJumps] = useState(0);
 
   // timeupdate fires only ~4 times a second; follow the frame clock while playing so the playhead glides.
   useEffect(() => {
@@ -61,11 +65,14 @@ export function CallPlayerProvider({
     rate,
     seek(sec, play = false) {
       const el = audio.current;
+      const to = Math.min(Math.max(sec, 0), duration || sec);
+      // Without audio (e.g. demo calls) the transcript still follows the position.
+      setTime(to);
       if (!el) return;
-      el.currentTime = Math.min(Math.max(sec, 0), duration || sec);
-      setTime(el.currentTime);
+      el.currentTime = to;
       if (play) void el.play();
     },
+    jumps,
     toggle() {
       const el = audio.current;
       if (!el) return;
@@ -77,6 +84,34 @@ export function CallPlayerProvider({
       setRateState(next);
     },
   };
+
+  // Links like <a href="#t=95"> anywhere on the page jump here: on load, and on click (also when
+  // the same link is clicked twice, which a hashchange alone would miss).
+  const jumpTo = useRef(player.seek);
+  useEffect(() => {
+    jumpTo.current = player.seek;
+  });
+  useEffect(() => {
+    const go = (hash: string) => {
+      const m = /^#t=(\d+(?:\.\d+)?)$/.exec(hash);
+      if (!m) return false;
+      jumpTo.current(Number(m[1]));
+      setJumps((n) => n + 1);
+      return true;
+    };
+    go(window.location.hash);
+    const onClick = (e: MouseEvent) => {
+      const link = (e.target as Element | null)?.closest?.('a[href^="#t="]');
+      if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const hash = link.getAttribute("href")!;
+      if (go(hash)) {
+        e.preventDefault();
+        history.replaceState(null, "", hash);
+      }
+    };
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
 
   return (
     <PlayerContext value={player}>
@@ -99,6 +134,11 @@ export function CallPlayerProvider({
 }
 
 const RATES = [1, 1.25, 1.5, 2];
+const BAND_FILL: Record<TimelineBand["tone"], string> = {
+  positive: "bg-mood-positive",
+  neutral: "bg-mood-neutral",
+  negative: "bg-mood-negative",
+};
 const SPEAKER_FILL = { employee: "bg-accent", customer: "bg-sky", unknown: "bg-muted" } as const;
 
 /** Share of talk time per speaker, from the transcript's timings. */
@@ -147,9 +187,15 @@ function SpeakerBlocks({
 export function CallPlayer({
   segments,
   employeeName,
+  bands,
+  bandsLabel,
 }: {
   segments: readonly TranscriptSegment[];
   employeeName: string | null;
+  /** Optional marks under the timeline (e.g. sentiment); nothing extra is drawn without them. */
+  bands?: readonly TimelineBand[];
+  /** What the bands show, e.g. "Sentiment". */
+  bandsLabel?: string;
 }) {
   const player = usePlayer();
   const total = player.duration || segments.at(-1)?.end || 0;
@@ -224,6 +270,23 @@ export function CallPlayer({
         <span className="pointer-events-none absolute -inset-1 rounded-xl ring-accent/25 peer-focus-visible:ring-4" aria-hidden />
       </div>
 
+      {bands && bands.length > 0 && total > 0 && (
+        <div
+          className="relative -mt-1 h-1.5"
+          role="img"
+          aria-label={`${bandsLabel ?? "Marks"}: ${bands.map((b) => `${formatDuration(b.start)} to ${formatDuration(b.end)} ${b.label}`).join(", ")}`}
+        >
+          {bands.map((b, i) => (
+            <span
+              key={i}
+              title={`${formatDuration(b.start)} to ${formatDuration(b.end)}: ${b.label}`}
+              className={cn("absolute inset-y-0 rounded-full", BAND_FILL[b.tone])}
+              style={{ left: `${(b.start / total) * 100}%`, width: `max(2px, calc(${((b.end - b.start) / total) * 100}% - 2px))` }}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted">
         <span className="flex items-center gap-1.5">
           <span className="size-2 rounded-full bg-accent" aria-hidden />
@@ -235,6 +298,16 @@ export function CallPlayer({
           Caller
           {share && <span className="tabular-nums">{share.customer}%</span>}
         </span>
+        {bands && bands.length > 0 && bandsLabel && (
+          <span className="flex items-center gap-1.5">
+            <span className="flex h-1.5 w-4 overflow-hidden rounded-full" aria-hidden>
+              <span className="flex-1 bg-mood-positive" />
+              <span className="flex-1 bg-mood-neutral" />
+              <span className="flex-1 bg-mood-negative" />
+            </span>
+            {bandsLabel}
+          </span>
+        )}
         {!player.available && <span className="ml-auto">The recording can&apos;t be played right now.</span>}
       </div>
     </div>

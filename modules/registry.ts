@@ -3,10 +3,11 @@ import { getTenantBySlug } from "@/core/tenancy";
 import { callsModule } from "./calls";
 import { scorecardsModule } from "./scorecards";
 import { coachingModule } from "./coaching";
+import { sentimentModule } from "./sentiment";
 
 // Every module must be registered here. Together with registry.server.ts this
 // is the only place in modules/ allowed to import from more than one module.
-export const moduleRegistry = [callsModule, scorecardsModule, coachingModule] as const;
+export const moduleRegistry = [callsModule, scorecardsModule, coachingModule, sentimentModule] as const;
 
 export type AppModule = (typeof moduleRegistry)[number];
 export type ModuleId = AppModule["id"];

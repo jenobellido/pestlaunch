@@ -17,6 +17,7 @@ Built with Next.js 16, Supabase (Postgres, Auth, Storage) and Drizzle. See
 | See the important outcome and details | Summary, resolution (booked, saved, cancelled, resolved, follow-up needed, unresolved), key facts (pest, price quoted, appointment…), open follow-ups and, for cancel calls, the reason. |
 | See the PestLaunch score or grade | All Calls, Retention and Sales scorecards from the manuals. Every item shows pass or fail with a quote from the call, checked against the transcript, or the reason it was missed. Points and grade (Gold, Green, Below) are computed in code. Each company can edit these, add its own call types and scorecards, or have uploaders pick the type (Settings → Call types). |
 | See coaching for the employee | Per call: strengths, up to 3 improvements with the words to say next time, and one focus. **Team** and each **rep's page**: average score, trend, the steps they miss most with what good sounds like (from the manual), and **Plays** a manager can assign. |
+| (beyond the brief) Customer sentiment | **Call page**: which parts of the call were positive, neutral or negative (a lane under the player), the customer's mood over the call, where it turned (upset, calmed down) with their words and a link that jumps the player there, and whether they ended happier than they started. |
 | (beyond the brief) Follow up | **Follow-ups**: everything you've been asked to follow up on (Mine / Team, Open / Done), with a count in the sidebar, and leaks that still need an owner, assigned in one click. |
 | Review all calls and results | **⌘K quick search** from any page jumps to a call, customer, rep or page, matching what was said too. **Search** inside every transcript ("termites") and **export** calls to CSV. **Overview**: close rate, cancels saved, follow-ups open, average score, a **Leaks** list of calls that lost money or need action (assign one to a teammate and it shows on their Overview, as a badge in the sidebar, and on the call), reps, and cancel reasons, for 7 days, 30 days or all time. **Calls**: filter by outcome, type, rep and date, and search. |
 
@@ -205,6 +206,10 @@ sidebar), split into pages with a settings menu:
 - There are no sub-teams inside a company yet (e.g. a manager who only sees
   their own reps). Roles are company-wide.
 - The theme is saved per browser, not per account.
+- Sentiment is read from the transcript's words, not the tone of voice, so
+  sarcasm or a flat "fine" can read differently from how it sounded. It adds
+  about one cent to a typical call (one small AI request). Calls processed
+  before it existed have no sentiment until they're re-run.
 
 ## Next steps
 

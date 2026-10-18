@@ -72,3 +72,16 @@ export interface CallRecord {
   /** Set once someone has checked and, if needed, corrected the AI's results. */
   review?: CallReview | null;
 }
+
+/**
+ * A stretch of the recording to mark under the player's timeline, e.g. where the call was
+ * positive or negative. Other modules supply these through the app layer, so calls never
+ * imports them.
+ */
+export interface TimelineBand {
+  start: number;
+  end: number;
+  tone: "positive" | "neutral" | "negative";
+  /** Read on hover and by screen readers, e.g. "Negative". */
+  label: string;
+}

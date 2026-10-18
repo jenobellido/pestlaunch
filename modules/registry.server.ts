@@ -2,12 +2,14 @@ import "server-only";
 import type { CallAnalysisStep } from "@/core/calls";
 import { coachingStep } from "./coaching/server";
 import { scoringStep } from "./scorecards/server";
+import { sentimentStep } from "./sentiment/server";
 import { getEnabledModuleIds, type ModuleId } from "./registry";
 
 // Analysis steps each module contributes to call processing.
 const analysisSteps: Partial<Record<ModuleId, CallAnalysisStep>> = {
   scorecards: scoringStep,
   coaching: coachingStep,
+  sentiment: sentimentStep,
 };
 
 /** Steps to run for a tenant: only those of modules the tenant has enabled. */

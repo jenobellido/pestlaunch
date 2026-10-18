@@ -15,6 +15,7 @@ import { processCall } from "@/modules/calls/server/process-call";
 import { coachingStep } from "@/modules/coaching/server";
 import { moduleRegistry } from "@/modules/registry";
 import { scoringStep } from "@/modules/scorecards/server";
+import { sentimentStep } from "@/modules/sentiment/server";
 import { DEMO_CALLS } from "./demo-calls";
 
 const WORDS_PER_SECOND = 2.6;
@@ -40,7 +41,11 @@ async function main() {
   const enabled = new Set(
     resolveEnabledModules(moduleRegistry, Object.fromEntries(overrides.map((o) => [o.moduleId, o.enabled]))).map((m) => m.id),
   );
-  const steps = [enabled.has("scorecards") && scoringStep, enabled.has("coaching") && coachingStep].filter((s) => !!s);
+  const steps = [
+    enabled.has("scorecards") && scoringStep,
+    enabled.has("coaching") && coachingStep,
+    enabled.has("sentiment") && sentimentStep,
+  ].filter((s) => !!s);
 
   for (const demo of DEMO_CALLS) {
     const transcript = toSegments(demo.lines);

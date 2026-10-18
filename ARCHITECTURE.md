@@ -59,6 +59,7 @@ modules/                 Toggleable features
   calls/                 Base module: pipeline, transcript, call type, outcome
   scorecards/            Grades calls with the manual scorecards (needs calls)
   coaching/              Per-call feedback and per-employee view (needs calls)
+  sentiment/             Sentiment of every turn: mood over the call and where it turned (needs calls)
 shared/                  Business-agnostic UI, helpers and config
   config/theme.ts        Theme cookie name and the boot script that applies it before first paint
   lib/theme.ts           Read, save and apply the theme in the browser
@@ -231,8 +232,9 @@ error:
    (notes for the technician, payment at the visit, a callback). Summaries
    say "the company" rather than its name, which the audio often garbles.
 3. **Module steps**: run the `CallAnalysisStep` of every enabled module
-   (scorecards, coaching) in parallel. Each result is stored under
+   (scorecards, coaching, sentiment) in parallel. Each result is stored under
    `analyses[moduleId]`.
+   - Sentiment: see "Sentiment" below.
    - Scoring: see "Call types and scorecards" below.
    - Coaching (`modules/coaching/server/coaching-step.ts`): grounded in the
      manuals' four-step call process plus notes for sales, retention and
@@ -623,6 +625,43 @@ real (invented) calls through the app.
 
 `vitest.config.mts` maps the `@/` alias and swaps `server-only` (which throws
 outside a Next server build) for an empty stub.
+
+## Sentiment
+
+`modules/sentiment` shows how the customer felt through a call and where it
+turned. It's a module, so a company can turn it off in Settings, and the call
+page looks exactly the same without it.
+
+- **What the AI does:** one low-effort request per call labels every
+  transcript turn positive, neutral or negative with a strength from 1 to 3.
+  To keep cost down the answer is one short code per line ("12x3" is line 12,
+  negative, strong); a line it skips or garbles counts as neutral rather than
+  paying for a retry. Calls under 4 turns (voicemail, wrong number) are skipped.
+- **What's computed in code** (`model/sentiment.ts`, unit tested): only the
+  labels are stored, so improving this applies to calls already analysed.
+  - The recording split into positive, neutral and negative ranges.
+  - The customer's mood over time, smoothed so one line doesn't swing it.
+  - Where it turned: became upset, calmed down, turned positive, each with
+    the customer's own words.
+  - How the customer started compared with how they ended, and the share of
+    talk time per sentiment.
+- **On the call page:** the ranges draw as a lane under the player's speaker
+  timeline, through CallDetail's generic `timelineBands` prop, so the calls
+  module never imports sentiment. A compact panel after coaching shows the
+  mood curve (hover for the words), shares, and the turning points as `#t=`
+  links. Any `#t=SECONDS` link on the call page moves the player and scrolls
+  the transcript there, also on load, also for demo calls without audio.
+- **Colours** are a diverging pair (`--mood-positive`, `--mood-negative`, a
+  gray `--mood-neutral`), validated for colour blindness against the card in
+  both themes. Dark mode uses its own steps. Labels and position always carry
+  the meaning too.
+- **Limits:** it reads the words, not the tone of voice. Sarcasm or a
+  flat "fine" can read differently from how it sounded.
+- **Cost:** measured on gpt-5.5 ($5 per million input tokens, $30 per million
+  output), a 12-turn call used 570 input and 60 output tokens, about $0.005.
+  About 330 input tokens are fixed instructions; each turn adds its text in
+  and about 5 tokens out. A typical 5-minute call is about $0.01, a 20-minute
+  call about $0.04.
 
 ## Status
 

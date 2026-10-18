@@ -3,7 +3,7 @@ import { AlertTriangle, ArrowLeft, AudioLines, BadgeCheck, CalendarDays, Check, 
 import { cn } from "@/shared/lib/cn";
 import { Badge, Card, CardTitle } from "@/shared/ui/card";
 import { PageHeader, PageStack } from "@/shared/ui/page-header";
-import type { CallRecord } from "../model/types";
+import type { CallRecord, TimelineBand } from "../model/types";
 import { AssignCall } from "./assign-call";
 import { AutoRefresh } from "./auto-refresh";
 import { CallPlayer, CallPlayerProvider } from "./call-player";
@@ -27,6 +27,10 @@ interface CallDetailProps {
   lead?: React.ReactNode;
   /** Panels after the outcome (coaching, review); the app layer fills it. */
   children?: React.ReactNode;
+  /** Optional marks under the player's timeline, e.g. where the call was positive or negative. */
+  timelineBands?: TimelineBand[];
+  /** What those marks show, e.g. "Sentiment", for the legend. */
+  timelineBandsLabel?: string;
 }
 
 function Meta({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
@@ -47,6 +51,8 @@ export function CallDetail({
   reviewFlags = [],
   lead,
   children,
+  timelineBands,
+  timelineBandsLabel,
 }: CallDetailProps) {
   const title = callTitle(call.fileName);
 
@@ -214,7 +220,12 @@ export function CallDetail({
               className="flex max-h-[34rem] min-w-0 flex-col overflow-hidden rounded-[28px] bg-card xl:sticky xl:top-6 xl:max-h-[calc(100dvh-3rem)]"
             >
               <div className="shrink-0 border-b border-line p-5">
-                <CallPlayer segments={call.transcript} employeeName={call.employeeName} />
+                <CallPlayer
+                  segments={call.transcript}
+                  employeeName={call.employeeName}
+                  bands={timelineBands}
+                  bandsLabel={timelineBandsLabel}
+                />
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-5">
                 <TranscriptView segments={call.transcript} employeeName={call.employeeName} />

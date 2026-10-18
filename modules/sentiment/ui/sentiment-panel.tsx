@@ -10,7 +10,6 @@ import {
   moodMoments,
   moodSentiment,
   moodSummary,
-  sentimentRanges,
   sentimentShares,
   type MomentKind,
   type MoodTrend,
@@ -35,19 +34,15 @@ const TREND: Record<MoodTrend, { label: string; icon: typeof TrendingUp }> = {
 const time = (sec: number) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
 const lower = (s: Sentiment) => LABEL[s].toLowerCase();
 
-/** Reads this module's result from a call's `analyses` map. */
-export function getCallSentiment(analyses: Record<string, unknown>) {
-  return analyses.sentiment as CallSentiment | null | undefined;
-}
-
 // The mood chart's drawing box, in SVG units; it stretches to the panel's width.
 const W = 600;
 const H = 120;
 
 /**
- * How the customer felt through the call: which parts of the recording were positive, neutral or
- * negative, the customer's mood over time, and the moments it changed. Sentiment is read from the
- * transcript's words, not the voice.
+ * How the customer felt through the call: their mood over time, the share of talk time per
+ * sentiment, and the moments it changed (links that jump the player there). Which parts of the
+ * recording were positive or negative is drawn under the player instead (sentimentRanges).
+ * Sentiment is read from the transcript's words, not the voice.
  */
 export function SentimentPanel({
   sentiment,
@@ -71,7 +66,6 @@ export function SentimentPanel({
     return {
       duration,
       words,
-      ranges: sentimentRanges(turns),
       shares: sentimentShares(turns),
       mood: customerMood(turns),
       moments: moodMoments(turns),
@@ -80,7 +74,7 @@ export function SentimentPanel({
   }, [sentiment, transcript, durationSec]);
 
   if (!data) return null;
-  const { duration, words, ranges, shares, mood, moments, summary } = data;
+  const { duration, words, shares, mood, moments, summary } = data;
   const x = (sec: number) => (sec / duration) * W;
   const y = (m: number) => ((1 - m) / 2) * H;
   const path = mood.map((p, i) => `${i ? "L" : "M"}${x(p.at).toFixed(1)},${y(p.mood).toFixed(1)}`).join(" ");
@@ -115,25 +109,12 @@ export function SentimentPanel({
         )}
       </div>
 
-      {/* The whole recording, split into its positive, neutral and negative parts. */}
-      <p className="mt-5 text-xs text-muted">Through the call</p>
-      <div className="mt-2 flex h-3 gap-[2px]" role="img" aria-label={ranges.map((r) => `${time(r.start)} to ${time(r.end)} ${lower(r.sentiment)}`).join(", ")}>
-        {ranges.map((r, i) => (
-          <span
-            key={i}
-            title={`${time(r.start)} to ${time(r.end)}: ${LABEL[r.sentiment]}`}
-            className={cn("h-full min-w-[3px] rounded-[3px]", FILL[r.sentiment])}
-            style={{ flexGrow: Math.max(r.end - r.start, 0.5) }}
-          />
-        ))}
-      </div>
-
       {mood.length >= 2 && (
         <>
-          <p className="mt-6 text-xs text-muted">Customer mood</p>
+          <p className="mt-5 text-xs text-muted">Customer mood</p>
           <div
             ref={chart}
-            className="relative mt-2 h-32 touch-none select-none"
+            className="relative mt-2 h-24 touch-none select-none"
             onPointerMove={onMove}
             onPointerLeave={() => setHover(null)}
           >
@@ -195,21 +176,18 @@ export function SentimentPanel({
         </>
       )}
 
-      <ul className="mt-5 grid grid-cols-3 gap-2">
+      <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
         {(["positive", "neutral", "negative"] as const).map((s) => (
-          <li key={s} className="rounded-2xl bg-chip px-3 py-2">
-            <p className="flex items-center gap-1.5 text-xs text-muted">
-              <span className={cn("size-2 rounded-full", FILL[s])} aria-hidden />
-              {LABEL[s]}
-            </p>
-            <p className="mt-0.5 text-sm font-medium tabular-nums">{Math.round(shares[s] * 100)}%</p>
-          </li>
+          <span key={s} className="flex items-center gap-1.5">
+            <span className={cn("size-2 rounded-full", FILL[s])} aria-hidden />
+            {LABEL[s]} <span className="font-medium text-fg tabular-nums">{Math.round(shares[s] * 100)}%</span>
+          </span>
         ))}
-      </ul>
-      <p className="mt-2 text-xs text-muted">Share of talk time. Read from the words, not the tone of voice.</p>
+        <span>of talk time, read from the words, not the tone of voice.</span>
+      </p>
 
       {moments.length > 0 && (
-        <div className="mt-6">
+        <div className="mt-5">
           <p className="text-xs text-muted">Where it turned</p>
           <ul className="mt-2 space-y-3">
             {moments.map((m) => {

@@ -42,6 +42,7 @@ export function TranscriptView({
   if (player.time > 0 || player.playing) {
     for (let i = 0; i < segments.length && segments[i].start <= player.time + 0.05; i++) active = i;
   }
+  const handledJump = useRef(0);
 
   // Keep the playing line in view, without fighting someone who is reading elsewhere while paused.
   useEffect(() => {
@@ -49,6 +50,14 @@ export function TranscriptView({
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     listRef.current?.children[active]?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
   }, [active, player.playing]);
+
+  // After a jump from a #t= link, bring the line it landed on into view, even when paused.
+  useEffect(() => {
+    if (player.jumps === handledJump.current || active < 0) return;
+    handledJump.current = player.jumps;
+    const line = listRef.current?.children[active];
+    line?.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }, [player.jumps, active]);
 
   return (
     <div className="flex flex-col gap-4">
