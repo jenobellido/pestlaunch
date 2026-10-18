@@ -49,7 +49,15 @@ function Trend({ value }: { value: number | null }) {
   );
 }
 
-function EmployeeCard({ employee, action }: { employee: EmployeeSummary; action?: React.ReactNode }) {
+function EmployeeCard({
+  employee,
+  action,
+  href,
+}: {
+  employee: EmployeeSummary;
+  action?: React.ReactNode;
+  href?: string | null;
+}) {
   const score = employee.averageScore;
   return (
     <Card className="flex flex-col gap-5">
@@ -58,7 +66,15 @@ function EmployeeCard({ employee, action }: { employee: EmployeeSummary; action?
           {initialsOf(employee.name)}
         </span>
         <div className="min-w-0 flex-1">
-          <CardTitle className="truncate">{employee.name}</CardTitle>
+          <CardTitle className="truncate">
+            {href ? (
+              <Link href={href} className="hover:text-accent hover:underline">
+                {employee.name}
+              </Link>
+            ) : (
+              employee.name
+            )}
+          </CardTitle>
           <p className="text-xs text-muted">
             {employee.calls.length} {employee.calls.length === 1 ? "call" : "calls"} · {employee.scoredCalls} scored
           </p>
@@ -164,10 +180,13 @@ export function CoachingPage({
   calls,
   plays,
   employeeAction,
+  profileHref,
 }: {
   calls: CoachingCall[];
   plays?: React.ReactNode;
   employeeAction?: (employee: EmployeeSummary) => React.ReactNode;
+  /** Link to a rep's own page; null for names that aren't team members. */
+  profileHref?: (employee: EmployeeSummary) => string | null;
 }) {
   const team = summarizeTeam(calls);
   const scored = calls.filter((c) => c.score);
@@ -214,6 +233,7 @@ export function CoachingPage({
                 key={`${employee.name}-${employee.calls[0]?.id}`}
                 employee={employee}
                 action={employeeAction?.(employee)}
+                href={profileHref?.(employee)}
               />
             ))}
           </div>

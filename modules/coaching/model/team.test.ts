@@ -131,10 +131,21 @@ describe("summarizeTeam", () => {
   it("leaves the middle call out of the trend when the count is odd", () => {
     const [summary] = summarizeTeam([
       call({ day: 1, employeeName: "Casey", score: score(8, 10) }),
-      call({ day: 2, employeeName: "Casey", score: score(0, 10) }),
-      call({ day: 3, employeeName: "Casey", score: score(6, 10) }),
+      call({ day: 2, employeeName: "Casey", score: score(8, 10) }),
+      call({ day: 3, employeeName: "Casey", score: score(0, 10) }),
+      call({ day: 4, employeeName: "Casey", score: score(6, 10) }),
+      call({ day: 5, employeeName: "Casey", score: score(6, 10) }),
     ]);
     expect(summary.trend).toBeCloseTo(-20);
+  });
+
+  it("gives no trend until there are 4 scored calls", () => {
+    const [summary] = summarizeTeam([
+      call({ day: 1, employeeName: "Casey", score: score(8, 10) }),
+      call({ day: 2, employeeName: "Casey", score: score(2, 10) }),
+      call({ day: 3, employeeName: "Casey", score: score(6, 10) }),
+    ]);
+    expect(summary.trend).toBeNull();
   });
 
   it("ranks the three most-missed items, counting each call once", () => {

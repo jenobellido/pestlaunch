@@ -35,6 +35,16 @@ export interface CallOutcome {
   cancelReason?: CancelReason | null;
 }
 
+/** A person's check of the AI's results on a call. */
+export interface CallReview {
+  reviewedBy: string;
+  reviewerName: string;
+  reviewedAt: string;
+  note: string | null;
+  /** What they changed, in words, e.g. "Call type: Scheduling → Re-service". */
+  changes: string[];
+}
+
 export interface CallRecord {
   id: string;
   tenant: string;
@@ -56,4 +66,6 @@ export interface CallRecord {
   outcome?: CallOutcome;
   /** Results from module analysis steps, keyed by module id. */
   analyses: Record<string, unknown>;
+  /** Set once someone has checked and, if needed, corrected the AI's results. */
+  review?: CallReview | null;
 }

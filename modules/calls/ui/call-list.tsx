@@ -30,6 +30,10 @@ export interface CallListItem {
   createdAtMs: number;
   /** Lower-case text the search box matches against. */
   search: string;
+  /** A person has checked this call's results. */
+  reviewed: boolean;
+  /** The AI's results look uncertain and a person should check them. */
+  needsReview: boolean;
   score?: React.ReactNode;
 }
 
@@ -78,7 +82,7 @@ const filterSelect =
 
 export function CallList({ items, showScore }: { items: CallListItem[]; showScore: boolean }) {
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState<"all" | CallGroup>("all");
+  const [filter, setFilter] = useState<"all" | "review" | CallGroup>("all");
   const [typeFilter, setTypeFilter] = useState<"all" | CallTypeGroup>("all");
   const [repFilter, setRepFilter] = useState("all");
   const [dateFilter, setDateFilter] = useState<(typeof DATE_FILTERS)[number]["id"]>("all");
@@ -93,9 +97,13 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
       </EmptyState>
     );
 
-  const counts = Object.fromEntries(FILTERS.map((f) => [f.id, f.id === "all" ? items.length : 0]));
+  const counts: Record<string, number> = Object.fromEntries(FILTERS.map((f) => [f.id, f.id === "all" ? items.length : 0]));
   for (const item of items) counts[item.group]++;
-  const filters = FILTERS.filter((f) => f.id === "all" || counts[f.id] > 0);
+  counts.review = items.filter((i) => i.needsReview).length;
+  const filters: { id: "all" | "review" | CallGroup; label: string }[] = [
+    ...FILTERS.filter((f) => f.id === "all" || counts[f.id] > 0),
+    ...(counts.review > 0 ? [{ id: "review" as const, label: "Needs review" }] : []),
+  ];
 
   const typeCounts = new Map<CallTypeGroup, number>();
   for (const item of items) if (item.typeGroup) typeCounts.set(item.typeGroup, (typeCounts.get(item.typeGroup) ?? 0) + 1);
@@ -107,7 +115,7 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
 
   const visible = items.filter(
     (item) =>
-      (filter === "all" || item.group === filter) &&
+      (filter === "all" || (filter === "review" ? item.needsReview : item.group === filter)) &&
       (typeFilter === "all" || item.typeGroup === typeFilter) &&
       (repFilter === "all" || item.repKey === repFilter) &&
       item.createdAtMs >= since &&
@@ -255,6 +263,16 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
                       <span className="flex min-w-0 items-center gap-2">
                         <span className="truncate font-medium">{item.title}</span>
                         {item.type && <Badge className="hidden shrink-0 sm:inline-flex">{item.type}</Badge>}
+                        {item.needsReview && (
+                          <Badge dot="bg-orange" className="shrink-0">
+                            Needs review
+                          </Badge>
+                        )}
+                        {item.reviewed && (
+                          <Badge dot="bg-success" className="hidden shrink-0 sm:inline-flex">
+                            Reviewed
+                          </Badge>
+                        )}
                       </span>
                       <span
                         className={cn(

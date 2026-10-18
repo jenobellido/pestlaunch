@@ -228,6 +228,38 @@ the app without exposing real recordings. Scripts import server code through
 `scripts/allow-server-only.cjs`, which points the `server-only` guard at an
 empty module outside Next.
 
+## Rep page
+
+`/[tenant]/team/[repId]` (linked from each team member's card on Team):
+average score, trend (needs 4 scored calls), close rate and cancels saved;
+**What to work on**, the steps the rep misses most with the manual's
+criteria for each (`stepCriteria`), as "what good sounds like"; a score-by-call
+chart linking to each call; the latest coaching focus with a "Try saying"
+line; their plays and follow-up tasks; and recent calls. A rep can open their
+own page; other reps' pages need `calls.view_all`.
+
+## Review and corrections
+
+AI results can be wrong, so people with `calls.review` (Owner and Manager by
+default) can check and correct them on the call page:
+
+- **Review card:** change the call type or outcome, add a note, or just mark
+  the call reviewed. A new call type re-scores the call in the background
+  against the right scorecard (`rescoreCall` reruns only the module steps, so
+  the correction isn't undone), and a call corrected to New customer joins
+  the leads board.
+- **Scorecard steps:** each pass or fail mark becomes a button. Flipping one
+  recomputes points and grade (`overrideScorecardItem`, unit tested) and tags
+  the step "Corrected by <name>".
+- `calls.review` stores who, when, the note, and every change in words
+  ("Outcome: Booked → Resolved"), shown on the call. The header and the Call
+  Log show **Reviewed**.
+- **Needs review:** unreviewed calls are flagged when no rep was identified,
+  the speaker labels look lopsided or unattributed (`callReviewFlags`), or
+  the grade is one point either side of a boundary (`scorecardReviewFlag`).
+  The Call Log has a Needs review filter; the call page lists the reasons.
+  The list has no transcripts, so speaker checks only run on the call page.
+
 ## Search and export
 
 - **Transcript search** (`?q=` on `/[tenant]/calls`): finds calls where any

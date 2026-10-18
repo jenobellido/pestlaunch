@@ -1,5 +1,6 @@
 // Server-only public API of the calls module.
-export { getCall, listCalls, searchTranscripts } from "./server/call-repository";
+export { applyCallReview, getCall, listCalls, searchTranscripts } from "./server/call-repository";
+export { rescoreCall } from "./server/process-call";
 export { getCallRecordingUrl } from "./server/playback";
 export {
   assignCallHandler,
@@ -13,5 +14,5 @@ export {
   type Viewer,
 } from "./server/handlers";
 export { createTask, deleteTask, findTask, listTasks, setTaskStatus, type CallTask } from "./server/task-repository";
-export { LEAD_STAGES, listLeads, setLeadStage, type Lead, type LeadStage } from "./server/lead-repository";
+export { LEAD_STAGES, listLeads, setLeadStage, upsertLeadForCall, type Lead, type LeadStage } from "./server/lead-repository";
 export { toCsv } from "./lib/csv";

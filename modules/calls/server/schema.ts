@@ -2,7 +2,7 @@ import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "d
 import type { CallType, TranscriptSegment } from "@/core/calls";
 import { authUsers } from "drizzle-orm/supabase";
 import { tenants } from "@/core/db/schema";
-import type { CallOutcome, ProcessingStage } from "../model/types";
+import type { CallOutcome, CallReview, ProcessingStage } from "../model/types";
 
 // Owned by the calls module; drizzle.config.ts picks up every modules/*/server/schema.ts.
 // RLS is on with no policies, like every table (see core/db/schema.ts).
@@ -33,6 +33,8 @@ export const calls = pgTable(
     outcome: jsonb().$type<CallOutcome>(),
     /** Results from module analysis steps, keyed by module id. */
     analyses: jsonb().$type<Record<string, unknown>>().notNull().default({}),
+    /** Set when a person has checked (and maybe corrected) the AI's results. */
+    review: jsonb().$type<CallReview>(),
     createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
   },

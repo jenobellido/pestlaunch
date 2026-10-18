@@ -1,5 +1,5 @@
 import "server-only";
-import type { CallAnalysisStep, TranscriptSegment } from "@/core/calls";
+import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
 import { downloadRecording } from "@/core/storage";
 import { listMembers } from "@/core/tenancy";
 import { analyzeCall } from "./analyze-call";
@@ -57,6 +57,31 @@ export async function processCall(
       status: "failed",
       stage: null,
       error: err instanceof Error ? err.message : "Processing failed",
+    });
+  }
+}
+
+/**
+ * Re-runs only the module steps (scoring, coaching) with the call's saved transcript and call
+ * type. Used after a reviewer corrects the call type, so the call is graded against the right
+ * scorecard without re-analysing (which could undo the correction).
+ */
+export async function rescoreCall(
+  call: { id: string; tenant: string; callType: CallType; transcript: TranscriptSegment[] },
+  steps: readonly CallAnalysisStep[],
+): Promise<void> {
+  try {
+    await updateCall(call.id, { status: "processing", stage: "reviewing", error: null });
+    const input = { tenant: call.tenant, callId: call.id, callType: call.callType, transcript: call.transcript };
+    const results = await Promise.all(steps.map((s) => s.run(input)));
+    const analyses = Object.fromEntries(steps.map((s, i) => [s.moduleId, results[i]]));
+    await updateCall(call.id, { analyses, status: "ready", stage: null });
+  } catch (err) {
+    console.error(`[calls] re-scoring ${call.id} failed`, err instanceof Error ? err.message : err);
+    await updateCall(call.id, {
+      status: "failed",
+      stage: null,
+      error: err instanceof Error ? err.message : "Re-scoring failed",
     });
   }
 }

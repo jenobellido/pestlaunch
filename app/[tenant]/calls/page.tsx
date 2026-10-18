@@ -2,6 +2,7 @@ import { can, listMembers } from "@/core/tenancy";
 import { CallsPage } from "@/modules/calls";
 import { callScope } from "@/modules/calls/server";
 import { isModuleEnabled } from "@/modules/registry";
+import { getScorecardResult, scorecardReviewFlag } from "@/modules/scorecards";
 import { requireModule } from "../_lib/require-module";
 import { ScoreBadge } from "./_components/score-badge";
 
@@ -21,6 +22,14 @@ export default async function Page({ params, searchParams }: PageProps<"/[tenant
       canUpload={can(access, "calls.upload")}
       members={members?.map((m) => ({ id: m.userId, name: m.displayName }))}
       score={scored ? (call) => <ScoreBadge analyses={call.analyses} /> : undefined}
+      extraReviewFlags={
+        scored
+          ? (call) => {
+              const result = getScorecardResult(call.analyses);
+              return [result ? scorecardReviewFlag(result) : null];
+            }
+          : undefined
+      }
       transcriptQuery={typeof (await searchParams).q === "string" ? ((await searchParams).q as string) : undefined}
     />
   );

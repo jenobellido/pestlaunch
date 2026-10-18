@@ -51,6 +51,7 @@ export default async function Page({ params }: PageProps<"/[tenant]/team">) {
     <CoachingPage
       calls={reviewed}
       plays={<PlaysCard slug={tenant.slug} plays={plays} canManage={canManage} currentUserId={user.id} />}
+      profileHref={(employee) => (employee.employeeId ? `/${tenant.slug}/team/${employee.employeeId}` : null)}
       employeeAction={(employee) => {
         // Suggest the step they miss most, once it's a pattern (missed on at least 2 calls).
         const top = employee.topMissed[0];

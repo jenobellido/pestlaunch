@@ -2,7 +2,7 @@ import { Check, ClipboardCheck, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle } from "@/shared/ui/card";
 import { SCORECARDS } from "../config/scorecards";
-import type { Grade, ScorecardResult } from "../model/types";
+import type { Grade, ScorecardItemResult, ScorecardResult } from "../model/types";
 
 const GRADE: Record<Grade, { label: string; badge: string; bar: string }> = {
   gold: { label: "Gold Standard", badge: "bg-orange text-on-orange", bar: "bg-orange" },
@@ -10,8 +10,19 @@ const GRADE: Record<Grade, { label: string; badge: string; bar: string }> = {
   below: { label: "Below Standard", badge: "bg-badge-danger text-on-badge-danger", bar: "bg-danger" },
 };
 
-/** `rubricHref` links to the full scorecard rubric (the Scorecards page). */
-export function ScorecardPanel({ result, rubricHref }: { result: ScorecardResult | null | undefined; rubricHref?: string }) {
+/**
+ * `rubricHref` links to the full scorecard rubric (the Scorecards page). `renderMark` lets the
+ * app layer swap each pass/fail mark for a control, e.g. so reviewers can correct a step.
+ */
+export function ScorecardPanel({
+  result,
+  rubricHref,
+  renderMark,
+}: {
+  result: ScorecardResult | null | undefined;
+  rubricHref?: string;
+  renderMark?: (index: number, item: ScorecardItemResult) => React.ReactNode;
+}) {
   if (!result)
     return (
       <Card className="flex items-center gap-3">
@@ -54,13 +65,20 @@ export function ScorecardPanel({ result, rubricHref }: { result: ScorecardResult
             <ul className="mt-2 space-y-2 text-sm">
               {items.map((i) => (
                 <li key={i.item} className="flex gap-2.5">
-                  {i.passed ? (
+                  {renderMark ? (
+                    renderMark(result.items.indexOf(i), i)
+                  ) : i.passed ? (
                     <Check className="mt-0.5 size-4 shrink-0 text-success" aria-label="Passed" />
                   ) : (
                     <X className="mt-0.5 size-4 shrink-0 text-danger" aria-label="Missed" />
                   )}
                   <span className="min-w-0">
                     <span className={i.passed ? "text-fg/90" : "text-fg"}>{i.item}</span>
+                    {i.corrected && (
+                      <span className="ml-1.5 rounded-full bg-accent/10 px-1.5 py-px text-[10px] font-medium text-accent">
+                        Corrected
+                      </span>
+                    )}
                     {i.evidence ? (
                       <span className="mt-0.5 block text-xs text-muted">&ldquo;{i.evidence}&rdquo;</span>
                     ) : (
