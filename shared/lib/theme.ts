@@ -50,3 +50,8 @@ export function saveThemePreference(preference: ThemePreference) {
   document.cookie = `${THEME_COOKIE}=${preference}; path=/; max-age=31536000; samesite=lax`;
   applyTheme(preference);
 }
+
+/** Reads a colour token (e.g. "--accent") as currently themed, for canvases that can't use CSS. */
+export function themeColor(token: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+}

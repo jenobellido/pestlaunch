@@ -234,3 +234,38 @@ textarea {
     animation-delay: 0s !important;
   }
 }
+
+/* Landing page (app/_landing). Decorative loops, so they stop under reduced motion. */
+@keyframes landing-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes landing-bar {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+@keyframes landing-ring {
+  from {
+    stroke-dashoffset: var(--ring-from, 327);
+  }
+}
+.landing-bar {
+  animation: landing-bar 1.8s ease-in-out infinite;
+  transform-origin: center;
+}
+.landing-ring {
+  stroke-dashoffset: var(--ring-to);
+  animation: landing-ring 1.6s var(--motion-ease-out) 0.3s both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landing-bar,
+  .landing-ring {
+    animation: none;
+  }
+}
