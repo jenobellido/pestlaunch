@@ -177,7 +177,7 @@ interface GenerateObjectOptions<T> {
   prompt: string;
   /** How much the model thinks first. Thinking tokens count against rate limits; use "low" for simple tasks. */
   reasoningEffort?: "low" | "medium" | "high";
-  /** "best" (default) for results the product is judged on; "fast" for simpler, high-volume jobs. */
+  /** "best" (default) for results the product is judged on and what feeds them; "fast" for simpler jobs. */
   tier?: ModelTier;
   /**
    * Checks the answer beyond its shape, e.g. that every item was graded. Return a problem to

@@ -1,9 +1,9 @@
 // Which chat models a request tries, in order. Pure, so it's unit tested without the network.
 
 /**
- * "best" is for the results the product is judged on (scoring, call analysis). "fast" is for
- * simpler, high-volume jobs (speaker labels, coaching, sentiment), where a smaller model matched
- * the main one in testing at a fraction of the cost.
+ * "best" is for the results the product is judged on and what feeds them (scoring, call
+ * analysis, speaker labels). "fast" is for simpler jobs (coaching, sentiment), where a smaller
+ * model matched the main one in testing at a fraction of the cost.
  */
 export type ModelTier = "best" | "fast";
 

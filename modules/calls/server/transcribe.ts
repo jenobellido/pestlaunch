@@ -90,9 +90,8 @@ async function labelChunk(segments: WhisperSegment[], from: number): Promise<Map
       return missing.length ? `lines ${missing.join(", ")} weren't labelled` : null;
     },
     // Low effort mislabelled turns on the smaller fallback model; labels feed every later step.
+    // Stays on the best tier: on real calls the fast model mislabelled a few turns (see "AI models").
     reasoningEffort: "medium",
-    // At medium effort the fast model labelled known-speaker test audio as well as the main one.
-    tier: "fast",
     prompt: [...context, `Label these lines (${from} to ${from + chunk.length - 1}):\n${numbered(chunk, from)}`].join("\n\n"),
   });
 
