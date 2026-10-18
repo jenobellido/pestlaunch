@@ -189,6 +189,11 @@ sidebar), split into pages with a settings menu:
   calls are far smaller (a 20-minute call is about 10 MB). Splitting long
   files would remove the limit.
 - Processing a call takes about 20 seconds to 4 minutes on OpenAI.
+  Each call makes several chat requests (speaker labels, analysis, then
+  scoring, coaching and sentiment at once). On OpenAI's lowest usage tier
+  `gpt-5.5` allows 3 requests a minute, so processing several calls at once
+  can hit the limit; switch off modules you don't need, use a higher tier, or
+  a cheaper model.
 - A rate limit that would take more than a minute to clear fails the call
   with a message saying when to retry, and an empty prepaid balance fails it
   with "out of credits". Processing has a 5-minute ceiling, so it can't wait
