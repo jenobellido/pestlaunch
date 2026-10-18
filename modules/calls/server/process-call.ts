@@ -1,7 +1,9 @@
 import "server-only";
 import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
 import { downloadRecording } from "@/core/storage";
-import { listMembers } from "@/core/tenancy";
+import { listMembers, type Member } from "@/core/tenancy";
+import { db, schema } from "@/core/db";
+import { eq } from "drizzle-orm";
 import { analyzeCall } from "./analyze-call";
 import { updateCall } from "./call-repository";
 import { upsertLeadForCall } from "./lead-repository";
@@ -27,12 +29,13 @@ export async function processCall(
   options: { transcript?: TranscriptSegment[] } = {},
 ): Promise<void> {
   try {
+    const [team, companyName] = await Promise.all([listMembers(call.tenantId), tenantName(call.tenantId)]);
     let segments = options.transcript;
     if (!segments?.length) {
       await updateCall(call.id, { stage: "transcribing" });
       const blob = await downloadRecording(call.recordingPath);
       const audio = new File([blob], call.fileName, { type: blob.type });
-      const result = await transcribe(audio);
+      const result = await transcribe(audio, { companyName, staffNames: team.map((m) => m.displayName) });
       segments = result.segments;
       await updateCall(call.id, { durationSec: Math.round(result.durationSec), transcript: segments });
     }
@@ -41,7 +44,7 @@ export async function processCall(
     const { callType, employeeName, outcome } = await analyzeCall(segments);
     // Unassigned calls (uploaded with "work it out from the call") get the team member whose
     // name the employee gave, when exactly one member matches.
-    const employeeId = call.employeeId ?? (await matchEmployee(call.tenantId, employeeName));
+    const employeeId = call.employeeId ?? matchEmployee(team, employeeName);
     await updateCall(call.id, { callType, employeeName, employeeId, outcome, stage: "reviewing" });
     // Every new-customer call is a sales opportunity on the pipeline.
     if (callType === "new_customer") await upsertLeadForCall({ id: call.id, tenantId: call.tenantId }, outcome);
@@ -87,10 +90,16 @@ export async function rescoreCall(
 }
 
 /** The one team member whose first name matches the name heard in the call, if any. */
-async function matchEmployee(tenantId: string, heardName: string | null): Promise<string | null> {
+function matchEmployee(team: readonly Member[], heardName: string | null): string | null {
   const first = (name: string) => name.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
   const heard = heardName ? first(heardName) : "";
   if (!heard) return null;
-  const matches = (await listMembers(tenantId)).filter((m) => first(m.displayName) === heard);
+  const matches = team.filter((m) => first(m.displayName) === heard);
   return matches.length === 1 ? matches[0].userId : null;
+}
+
+/** The company's name, read directly: Next's tenant cache isn't available in background work or scripts. */
+async function tenantName(tenantId: string): Promise<string | undefined> {
+  const [row] = await db.select({ name: schema.tenants.name }).from(schema.tenants).where(eq(schema.tenants.id, tenantId)).limit(1);
+  return row?.name;
 }

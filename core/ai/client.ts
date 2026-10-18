@@ -37,6 +37,12 @@ export class AiError extends Error {
   }
 }
 
+/** Whether a 429 means the account has no credit left, rather than a rate limit. */
+async function isOutOfCredits(res: Response) {
+  const body = await res.clone().text().catch(() => "");
+  return /insufficient_quota|credit_balance_exhausted|exceeded your current quota/.test(body);
+}
+
 /** Retries rate limits and server errors with backoff, honouring Retry-After. */
 async function request(path: string, init: RequestInit): Promise<Response> {
   for (let attempt = 1; ; attempt++) {
@@ -46,6 +52,10 @@ async function request(path: string, init: RequestInit): Promise<Response> {
     });
     if (res.ok) return res;
 
+    // OpenAI reports an empty prepaid balance as a 429 too. Waiting won't help, so say so.
+    if (res.status === 429 && (await isOutOfCredits(res))) {
+      throw new AiError("The AI account has run out of credits. Add credits with the AI provider, then retry the call.", 429);
+    }
     const retryAfter = Number(res.headers.get("retry-after"));
     const waitMs = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 1000 * 2 ** attempt;
     // A wait longer than we're willing to sit through (e.g. a daily token limit) fails now,
@@ -81,6 +91,8 @@ export interface WhisperSegment {
   /** Average log probability; very low values usually mean noise or a hallucination. */
   avg_logprob?: number;
   no_speech_prob?: number;
+  /** How repetitive the text is; above 2.4 Whisper is usually stuck in a loop. */
+  compression_ratio?: number;
 }
 
 export interface WhisperResult {

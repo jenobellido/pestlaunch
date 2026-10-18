@@ -3,7 +3,16 @@ import { z } from "zod";
 import { generateObject, transcribeAudio, type WhisperSegment } from "@/core/ai";
 import type { Speaker, TranscriptSegment } from "@/core/calls";
 import { formatTimestamp } from "../lib/format";
-import { countWords, isExactSplit, isSpeech, MIN_WORDS, mergeTurns, splitSegment } from "../lib/transcript";
+import {
+  countWords,
+  dropRepeats,
+  isExactSplit,
+  isSpeech,
+  MIN_WORDS,
+  mergeTurns,
+  redactPaymentDetails,
+  splitSegment,
+} from "../lib/transcript";
 
 export interface TranscriptionResult {
   durationSec: number;
@@ -113,11 +122,34 @@ async function labelSpeakers(segments: WhisperSegment[]): Promise<TranscriptSegm
   });
 }
 
-/** Speech to text with speaker labels (employee vs customer). */
-export async function transcribe(audio: File): Promise<TranscriptionResult> {
-  const whisper = await transcribeAudio(audio, { prompt: VOCABULARY });
-  const speech = whisper.segments
-    .filter((s) => isSpeech(s, whisper.duration))
+/** Whisper reads at most 224 tokens of prompt; this keeps the names well inside that. */
+const MAX_HINT_NAMES = 20;
+
+/**
+ * The vocabulary hint, starting with the company's and team's names so Whisper spells them
+ * right instead of guessing from the sound (it otherwise invents a new spelling per call).
+ */
+export function whisperPrompt(hints: { companyName?: string; staffNames?: readonly string[] } = {}) {
+  const names = [...new Set((hints.staffNames ?? []).map((n) => n.trim()).filter(Boolean))].slice(0, MAX_HINT_NAMES);
+  return [
+    hints.companyName && `Phone call for ${hints.companyName}.`,
+    names.length > 0 && `Team: ${names.join(", ")}.`,
+    VOCABULARY,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+/**
+ * Speech to text with speaker labels (employee vs customer). Card details read out on the
+ * call are masked before the transcript is stored or sent to the labelling model.
+ */
+export async function transcribe(
+  audio: File,
+  hints: { companyName?: string; staffNames?: readonly string[] } = {},
+): Promise<TranscriptionResult> {
+  const whisper = await transcribeAudio(audio, { prompt: whisperPrompt(hints) });
+  const speech = dropRepeats(whisper.segments.filter((s) => isSpeech(s, whisper.duration)))
     .map((s) => (whisper.duration > 0 ? { ...s, end: Math.min(s.end, whisper.duration) } : s));
   // On silence Whisper can still return a confident "Thank you.", so judge by the whole call:
   // a real phone conversation has more than a handful of words.
@@ -125,7 +157,9 @@ export async function transcribe(audio: File): Promise<TranscriptionResult> {
     throw new Error("No conversation was found in this recording. Check it's a phone call with people talking.");
   }
 
-  const segments = await labelSpeakers(speech);
+  const { segments: safe, redacted } = redactPaymentDetails(speech);
+  if (redacted > 0) console.info(`[calls] masked card details on ${redacted} transcript lines`);
+  const segments = await labelSpeakers(safe);
 
   const durationSec = whisper.duration || speech.at(-1)!.end;
   return { durationSec, segments: mergeTurns(segments) };

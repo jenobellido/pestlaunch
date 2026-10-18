@@ -168,7 +168,10 @@ const sales: Scorecard = {
           "Restates the objection in their own words and suggests a possible reason, so the customer confirms the real concern.",
         ),
         item("Resolve", "Addresses the concern with a solution and builds more value."),
-        item("Re-Close", "Confidently asks for the sale again after resolving the objection, in a low-pressure way."),
+        item(
+          "Re-Close",
+          "Confidently asks for the sale again after resolving the objection, in a low-pressure way. Passes if the customer commits on their own right after the concern is resolved.",
+        ),
       ],
     },
     { title: "Verify", items: [conclusion, finalInformation, thank] },

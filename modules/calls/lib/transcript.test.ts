@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 import type { TranscriptSegment } from "@/core/calls";
-import { countWords, isExactSplit, isSpeech, mergeTurns, splitSegment } from "./transcript";
+import { countWords, dropRepeats, isExactSplit, isSpeech, mergeTurns, REDACTED, redactPaymentDetails, splitSegment } from "./transcript";
 
 // Invented lines only.
-const seg = (start: number, end: number, text: string, no_speech_prob?: number) => ({ start, end, text, no_speech_prob });
+const seg = (start: number, end: number, text: string, no_speech_prob?: number, avg_logprob?: number) => ({
+  start,
+  end,
+  text,
+  no_speech_prob,
+  avg_logprob,
+});
 const line = (speaker: TranscriptSegment["speaker"], start: number, end: number, text: string): TranscriptSegment => ({
   speaker,
   start,
@@ -20,9 +26,19 @@ describe("isSpeech", () => {
     expect(isSpeech(seg(0, 2, "   "), 60)).toBe(false);
   });
 
-  it("drops segments Whisper marks as likely non-speech", () => {
-    expect(isSpeech(seg(0, 2, "Thank you.", 0.7), 60)).toBe(false);
-    expect(isSpeech(seg(0, 2, "Thank you.", 0.5), 60)).toBe(true);
+  it("drops likely silence only when the text is also a low-confidence guess", () => {
+    expect(isSpeech(seg(0, 2, "Thank you.", 0.7, -1.4), 60)).toBe(false);
+    expect(isSpeech(seg(0, 2, "Thank you.", 0.5, -1.4), 60)).toBe(true);
+  });
+
+  it("keeps confident speech even when the window's no-speech score is high", () => {
+    // whisper-1 shares the score across a 30-second window, so real speech can score 0.58.
+    expect(isSpeech(seg(0, 2, "We can come out on Tuesday.", 0.58, -0.27), 60)).toBe(true);
+  });
+
+  it("drops very repetitive text, which is Whisper stuck in a loop", () => {
+    expect(isSpeech({ start: 0, end: 30, text: "I can come. I can come. I can come.", compression_ratio: 3.1 }, 60)).toBe(false);
+    expect(isSpeech({ start: 0, end: 3, text: "I can come Tuesday.", compression_ratio: 1.2 }, 60)).toBe(true);
   });
 
   it("treats a missing no-speech probability as speech", () => {
@@ -146,5 +162,109 @@ describe("mergeTurns", () => {
     const input = [line("employee", 0, 1, "A."), line("employee", 1, 2, "B.")];
     mergeTurns(input);
     expect(input[0]).toEqual(line("employee", 0, 1, "A."));
+  });
+});
+
+// Invented, obviously fake numbers (the standard test card), never real ones.
+describe("redactPaymentDetails", () => {
+  const line = (start: number, text: string) => ({ start, end: start + 2, text });
+
+  it("masks a card read out in groups after it's asked for, and the expiry and code", () => {
+    const { segments, redacted } = redactPaymentDetails([
+      line(0, "What card would you like to use?"),
+      line(5, "4111."),
+      line(8, "4111, yep."),
+      line(11, "1111 1111."),
+      line(15, "And the expiration?"),
+      line(18, "08/29."),
+      line(22, "And the security code on the back?"),
+      line(25, "123."),
+    ]);
+    expect(segments.map((s) => s.text)).toEqual([
+      "What card would you like to use?",
+      `${REDACTED}.`,
+      `${REDACTED}, yep.`,
+      `${REDACTED}.`,
+      "And the expiration?",
+      `${REDACTED}.`,
+      "And the security code on the back?",
+      `${REDACTED}.`,
+    ]);
+    expect(redacted).toBe(5);
+  });
+
+  it("leaves numbers alone when nobody mentioned a card", () => {
+    const input = [line(0, "The house is at 42 Example Lane."), line(4, "Between 10 and 12 works.")];
+    expect(redactPaymentDetails(input).segments).toEqual(input);
+  });
+
+  it("keeps percentages inside the payment window", () => {
+    const { segments } = redactPaymentDetails([line(0, "Is that on the card?"), line(4, "He did 80% of the job.")]);
+    expect(segments[1].text).toBe("He did 80% of the job.");
+  });
+
+  it("keeps prices and phone numbers inside the payment window", () => {
+    const { segments } = redactPaymentDetails([
+      line(0, "I'll put the $149 initial on the card."),
+      line(4, "Text me at 555-010-0199 when he's on the way."),
+    ]);
+    expect(segments.map((s) => s.text)).toEqual([
+      "I'll put the $149 initial on the card.",
+      "Text me at 555-010-0199 when he's on the way.",
+    ]);
+  });
+
+  it("closes the window a minute after the last card detail", () => {
+    const { segments } = redactPaymentDetails([line(0, "Which card?"), line(5, "4111."), line(200, "Gate code is 2468.")]);
+    expect(segments[2].text).toBe("Gate code is 2468.");
+  });
+
+  it("masks digits read out a while after the card was mentioned, before the expiry is asked", () => {
+    const { segments } = redactPaymentDetails([
+      line(0, "I can take the card whenever you're ready."),
+      line(150, "Okay. 4111."),
+      line(155, "4111."),
+      line(160, "Yep. 1111."),
+      line(170, "1111. And expiration?"),
+    ]);
+    expect(segments.slice(1).map((s) => s.text)).toEqual([
+      `Okay. ${REDACTED}.`,
+      `${REDACTED}.`,
+      `Yep. ${REDACTED}.`,
+      `${REDACTED}. And expiration?`,
+    ]);
+  });
+
+  it("masks a read-back of digit groups even when no card was mentioned", () => {
+    const { segments } = redactPaymentDetails([line(0, "Okay. 4111."), line(3, "4111, yes.")]);
+    expect(segments.map((s) => s.text)).toEqual([`Okay. ${REDACTED}.`, `${REDACTED}, yes.`]);
+  });
+
+  it("leaves a lone number in conversation alone", () => {
+    const input = [line(0, "Unit 204."), line(4, "Great, and is there parking out front?")];
+    expect(redactPaymentDetails(input).segments).toEqual(input);
+  });
+
+  it("masks a whole card number anywhere, even without a cue", () => {
+    expect(redactPaymentDetails([line(0, "It's 4111 1111 1111 1111.")]).segments[0].text).toBe(`It's ${REDACTED}.`);
+  });
+});
+
+describe("dropRepeats", () => {
+  const t = (text: string) => ({ text });
+
+  it("drops a long line repeated right after itself", () => {
+    const out = dropRepeats([t("I can't leave work until after five."), t("I can't leave work until after five."), t("Sure.")]);
+    expect(out.map((s) => s.text)).toEqual(["I can't leave work until after five.", "Sure."]);
+  });
+
+  it("keeps short replies that really do repeat", () => {
+    expect(dropRepeats([t("Okay."), t("Okay."), t("Okay.")])).toHaveLength(3);
+  });
+
+  it("keeps a line said again much later in the call", () => {
+    const line = "Is the best number the one you're calling from?";
+    const between = ["One.", "Two.", "Three.", "Four.", "Five."].map(t);
+    expect(dropRepeats([t(line), ...between, t(line)])).toHaveLength(7);
   });
 });

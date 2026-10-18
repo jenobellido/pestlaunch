@@ -55,7 +55,46 @@ Key decisions:
   per company.
 - **Pluggable AI:** the client speaks to any OpenAI-compatible provider.
 - **Private call data:** recordings and customer data never leave private
-  storage.
+  storage, and card details read out on a call are masked before the
+  transcript is saved or sent to a language model.
+
+## Accuracy
+
+All 20 test recordings were run on OpenAI (`whisper-1`, `gpt-5.5`), and
+every result was checked by hand against the transcript and the call
+manuals:
+
+| What | Agreed with the hand check |
+| --- | --- |
+| Call type | 19 of 20 |
+| Outcome (resolution) | 19 of 20 |
+| Scorecard steps | 268 of 283 (95%) |
+
+The "Below Standard" grades are right: after correcting the 15 disputed
+steps, no call reaches Green. The reps really do skip steps such as
+thanking the customer (2 of 19 calls) and voicing empathy (3 of 18).
+
+The check found problems, now fixed:
+
+- **Lost speech.** A silence filter tuned for Groq dropped 25–60 seconds of
+  real speech on 9 calls. It now uses Whisper's own rule, and the words
+  recovered per call went up as much as 2.5×. It also guards against
+  Whisper's repetition loops.
+- **A card number in a transcript.** Card details are now masked before
+  anything is stored or sent to a model (see ARCHITECTURE.md).
+- **Missed follow-ups** (9 calls): promises such as notes for the
+  technician or payment at the visit are now extracted even on booked calls.
+- **A quote that didn't book was marked resolved.** It's now follow-up
+  needed.
+- **Grading:** one quote can no longer pass two steps, and short scheduling
+  calls use the manual's lighter version of the steps.
+- **Coaching** no longer invents placeholder prices, and calls where the rep
+  never speaks get no coaching.
+
+After the fixes, 16 calls were re-run: the quote call is now follow-up
+needed, follow-ups were found on 11 more calls, and the card digits are
+masked. The 4 longest calls and a second full hand check are still to do
+(see Known limitations).
 
 ## Local setup
 
@@ -133,8 +172,14 @@ sidebar), split into pages with a settings menu:
   up to 50 MB, so a very long WAV fails at transcription. MP3s of normal
   calls are far smaller (a 20-minute call is about 10 MB). Splitting long
   files would remove the limit.
-- Processing a call takes about 20 seconds to 4 minutes on OpenAI; all 20
-  test calls ran in about 5 minutes, 5 at a time.
+- Processing a call takes about 20 seconds to 4 minutes on OpenAI.
+- A rate limit that would take more than a minute to clear fails the call
+  with a message saying when to retry, and an empty prepaid balance fails it
+  with "out of credits". Processing has a 5-minute ceiling, so it can't wait
+  longer; a job queue would queue such calls instead. During the accuracy
+  run the test account ran out of credits, so the 4 longest calls (CALL
+  015, 016, 019, 020) still need re-running with the fixes, and the re-run
+  hasn't had a second hand check yet.
 - Processing runs in the background with Next's `after()`, not a durable job
   queue. If the server stops mid-way, the call shows as failed after 10
   minutes and can be retried. A queue (e.g. Inngest or a database-backed
@@ -151,9 +196,9 @@ sidebar), split into pages with a settings menu:
 
 ## Next steps
 
-1. Switch the AI provider to OpenAI (configuration only), then run every test
-   call and tune prompts for accuracy, including speaker labels, against a
-   small hand-checked answer key.
+1. Turn the hand check into a saved answer key (call type, outcome,
+   follow-ups and each scorecard step per call) and a script that scores
+   every prompt change against it, then finish the second accuracy pass.
 2. Notify people when a follow-up is assigned to them (email or SMS), and
    alert the owner when a new leak appears.
 3. Link callers to customers in the PestLaunch CRM, and import calls

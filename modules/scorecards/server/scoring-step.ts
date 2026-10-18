@@ -1,7 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { generateObject } from "@/core/ai";
-import type { CallAnalysisStep, TranscriptSegment } from "@/core/calls";
+import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
 import { SCORECARDS } from "../config/scorecards";
 import { maxPoints, scorecardFor } from "../model/grade";
 import { scoreCall } from "../model/score-call";
@@ -33,8 +33,14 @@ How to grade:
 - Judge only what the employee says. Each item passes only if the call clearly shows the behaviour in its criteria; the exact wording doesn't matter, the intent does.
 - Be strict but fair. A passing evidence quote must be copied exactly from the transcript and must be the employee's own words, never the customer's (e.g. the customer saying "thank you" doesn't mean the employee thanked them). If you can't quote the employee, it didn't pass.
 - An item that doesn't fit the call can still be judged on its intent (e.g. with no cost, agreeing to the plan is the close).
+- One quote earns two items only if it clearly does both. "We can help with that" is a confidence statement, not validation: validation voices empathy for the customer's specific situation.
+- Agreeing with an objection needs the employee to say they understand the customer's view; "yeah" or repeating the objection isn't agreement.
+- A conclusion recaps the agreed date, time or next step near the end of the call; the line that first offered the time doesn't count.
 - Grade every numbered item exactly once.
 - The speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
+
+// The office manual's lighter version of the steps for short scheduling and billing calls.
+const LIGHT_CALL_NOTE = `This is a short scheduling or billing call, and the manual's lighter version of the steps applies: stating the change made or the new appointment is Present Solution; "let me check the schedule" is an Expectation Statement; a short confirm-back ("so after 12 works?") is a Summary Statement; the Understand steps may be brief.`;
 
 function transcriptText(segments: readonly TranscriptSegment[]) {
   const name = { employee: "Employee", customer: "Customer", unknown: "Other" } as const;
@@ -48,7 +54,11 @@ function itemList(card: Scorecard) {
     .join("\n");
 }
 
-export async function gradeCall(card: Scorecard, transcript: readonly TranscriptSegment[]): Promise<ScorecardResult> {
+export async function gradeCall(
+  card: Scorecard,
+  transcript: readonly TranscriptSegment[],
+  callType?: CallType,
+): Promise<ScorecardResult> {
   const itemCount = maxPoints(card);
   const graded = await generateObject({
     name: "scorecard_grading",
@@ -60,7 +70,13 @@ export async function gradeCall(card: Scorecard, transcript: readonly Transcript
       const missing = Array.from({ length: itemCount }, (_, n) => n).filter((n) => !seen.has(n));
       return missing.length ? `items ${missing.join(", ")} weren't graded` : null;
     },
-    prompt: `Scorecard: ${card.name}\n${itemList(card)}\n\nTranscript:\n${transcriptText(transcript)}`,
+    prompt: [
+      `Scorecard: ${card.name}\n${itemList(card)}`,
+      (callType === "scheduling" || callType === "billing") && LIGHT_CALL_NOTE,
+      `Transcript:\n${transcriptText(transcript)}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n"),
   });
 
   return scoreCall(card, graded, transcript);
@@ -70,6 +86,6 @@ export const scoringStep: CallAnalysisStep<ScorecardResult | null> = {
   moduleId: "scorecards",
   async run({ callType, transcript }) {
     const id = scorecardFor(callType);
-    return id ? gradeCall(SCORECARDS[id], transcript) : null;
+    return id ? gradeCall(SCORECARDS[id], transcript, callType) : null;
   },
 };

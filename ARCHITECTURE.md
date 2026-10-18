@@ -184,10 +184,27 @@ error:
 
 1. **Transcribe** (`transcribe.ts`) with speaker labels:
    - Whisper (`whisper-1` on OpenAI) returns timed segments. A vocabulary
-     hint (pests, service plans) helps it spell the trade's words.
-   - Segments Whisper marks as non-speech are dropped, and a recording with
-     fewer than 5 words is rejected: on silence Whisper invents text such as
-     "Thank you."
+     hint helps it spell the trade's words, and starts with the company's
+     name and its team members' names, so names aren't guessed from the
+     sound (`whisperPrompt`).
+   - A segment is dropped as silence only when Whisper thinks it's probably
+     not speech *and* the text is a low-confidence guess (no-speech > 0.6
+     and average log-probability < -1, Whisper's own rule). The no-speech
+     score alone isn't enough: whisper-1 shares it across a 30-second
+     window, and a stricter cutoff silently lost up to a minute of real
+     speech on 9 of the 20 test calls. Whisper can also get stuck repeating
+     a sentence; segments with a compression ratio over 2.4 (its own loop
+     check) are dropped, and so is a line of 5+ words that repeats one of
+     the 4 lines before it (`dropRepeats`). A recording with fewer than 5
+     words is rejected: on silence Whisper invents text such as "Thank you."
+   - **Card details are masked** before the transcript is stored or sent to
+     a language model (`redactPaymentDetails` in `lib/transcript.ts`, unit
+     tested). Customers read card numbers out four digits at a time over
+     several lines, often minutes after the card was first mentioned. Digits
+     become `[redacted]` within a minute either side of a line mentioning a
+     card, its expiry, code or brand; in a read-back (neighbouring lines,
+     within 20 seconds, that are little more than digit groups); and in any
+     13–19 digit run. Prices, percentages and phone numbers are kept.
    - Whisper doesn't say who is talking, so the chat model (`gpt-5.5`) labels each
      segment employee, customer or unknown (phone menus, hold messages). It
      works in chunks of 40 lines, each shown the call's opening lines and the
@@ -205,7 +222,10 @@ error:
    dates as spoken and no invented follow-ups. Retention calls also get a
    `cancelReason` from a fixed list (Price, No longer needed, Service
    quality, Moving, Switching company, Scheduling, Other) so reasons can be
-   counted.
+   counted. A quote that didn't book is never "resolved" (follow-up needed
+   or unresolved). Follow-ups include every promise, even on booked calls
+   (notes for the technician, payment at the visit, a callback). Summaries
+   say "the company" rather than its name, which the audio often garbles.
 3. **Module steps**: run the `CallAnalysisStep` of every enabled module
    (scorecards, coaching) in parallel. Each result is stored under
    `analyses[moduleId]`.
@@ -215,7 +235,9 @@ error:
      re-service calls. Returns up to 3 strengths (only things the employee
      actually did), up to 3 improvements, each with a quote and a line the
      employee could say next time, and one focus for the next call. Quotes are
-     kept only if they appear in the transcript.
+     kept only if they appear in the transcript. Suggestions never use
+     placeholder or invented prices. A call where the employee never speaks
+     (a voicemail) gets no coaching.
 
 The calls module never imports scorecards or coaching. The route asks
 `registry.server.ts` for the enabled steps and passes them in. Turning a module
@@ -446,7 +468,10 @@ request gets pass/fail, an evidence quote and a one-line reason per item,
 plus whether the customer raised objections. A quote is kept only if its
 words really appear in the transcript, so every quote shown can be trusted.
 Points and grade are computed in code from the scorecard, never by the
-model.
+model. The prompt stops one quote from earning two different items unless it
+clearly does both (a confidence line isn't validation), and short
+scheduling and billing calls are graded on the manual's lighter version of
+the steps.
 
 ## Module toggling
 

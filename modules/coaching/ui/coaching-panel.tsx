@@ -51,5 +51,5 @@ export function CoachingPanel({ feedback }: { feedback: CoachingFeedback | undef
 }
 
 export function getCoachingFeedback(analyses: Record<string, unknown>) {
-  return analyses.coaching as CoachingFeedback | undefined;
+  return (analyses.coaching as CoachingFeedback | null | undefined) ?? undefined;
 }

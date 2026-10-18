@@ -2,6 +2,7 @@ import "server-only";
 import { z } from "zod";
 import { generateObject } from "@/core/ai";
 import type { CallAnalysisStep, CallType, TranscriptSegment } from "@/core/calls";
+import { unquote } from "../model/text";
 import type { CoachingFeedback } from "../model/types";
 
 const coachingSchema = z.object({
@@ -43,11 +44,11 @@ Rules:
 - Pick the improvements that would most change the outcome or the customer's experience.
 - Quotes must be copied exactly from the transcript: the full phrase or sentence (5 to 25 words), not a fragment. Use null when the improvement is about something the employee never said.
 - Suggestions are lines the employee could actually say on the phone, in a warm and natural tone, following the call process.
+- Never use placeholders such as "$X" or "[price]", and never invent prices, discounts or programs: only use figures said in the call. Don't suggest something the employee already did.
+- Don't credit a step the employee skipped: "we can help with that" is a confidence statement, not empathy.
 - Keep it short and encouraging. No more than 3 strengths and 3 improvements.
 - The speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
 
-/** Models sometimes wrap a suggested line in quote marks; the UI adds its own framing. */
-const unquote = (text: string) => text.trim().replace(/^["“'‘]+|["”'’]+$/g, "").trim();
 
 /** Words only, so a quote matches the transcript despite punctuation and casing. */
 const words = (text: string) => text.toLowerCase().replace(/[^a-z0-9']+/g, " ").trim();
@@ -90,7 +91,9 @@ export async function coachCall(callType: CallType, transcript: readonly Transcr
   };
 }
 
-export const coachingStep: CallAnalysisStep<CoachingFeedback> = {
+export const coachingStep: CallAnalysisStep<CoachingFeedback | null> = {
   moduleId: "coaching",
-  run: ({ callType, transcript }) => coachCall(callType, transcript),
+  // Nothing to coach when the employee never speaks (a voicemail, a dropped call).
+  run: ({ callType, transcript }) =>
+    transcript.some((s) => s.speaker === "employee") ? coachCall(callType, transcript) : Promise.resolve(null),
 };
