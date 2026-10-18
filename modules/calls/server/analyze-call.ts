@@ -42,7 +42,7 @@ const SYSTEM = `You review recorded phone calls for a pest control company and r
 
 Call types (pick the caller's real purpose, not the phone menu option they chose):
 - new_customer: someone who isn't a customer yet asks about service: a quote, inspection or signing up. Inbound sales.
-- scheduling: setting, moving or asking about a service appointment, or special needs for an upcoming visit. Includes a new customer whose sale was already agreed (e.g. by email or a web form) when the call only arranges the timing or payment.
+- scheduling: setting, moving or asking about a service appointment (including whether a visit's work was finished or when the technician comes back), or special needs for an upcoming visit. Includes a new customer whose sale was already agreed (e.g. by email or a web form) when the call only arranges the timing or payment.
 - billing: invoices, payments, charges, balances, declined cards, updating the card on file.
 - reservice: an existing customer still has pests after a treatment and needs a technician to come back.
 - retention: the customer wants to cancel or stop service, including when the company calls back about a cancel request.
@@ -67,6 +67,8 @@ Follow-ups: write them as the office's own actions. When waiting on the customer
 Cancel reason (retention calls only, else null): the customer's main reason, even if they were saved. Price = cost or budget; No longer needed = no pests anymore or the problem is solved; Service quality = pests came back, missed or late visits, technician issues; Moving = selling or leaving the area; Switching company = going to a competitor or doing it themselves; Scheduling = visit times don't work; Other = anything else, such as a death in the family.
 
 The transcript speaker labels were added automatically and can occasionally be wrong; use the content to judge who said what.`;
+
+const EMPTY_VALUE = /^(not (provided|given|stated|mentioned)|unknown|n\/a|none)\.?$/i;
 
 function transcriptText(segments: readonly TranscriptSegment[]) {
   const name = { employee: "Employee", customer: "Customer", unknown: "Other" } as const;
@@ -95,7 +97,8 @@ export async function analyzeCall(
     outcome: {
       summary: result.summary.trim(),
       resolution: result.resolution,
-      details: result.details.filter((d) => d.label.trim() && d.value.trim()).slice(0, 8),
+      // Models sometimes fill a label with "Not provided"; a missing fact is just left out.
+      details: result.details.filter((d) => d.label.trim() && d.value.trim() && !EMPTY_VALUE.test(d.value.trim())).slice(0, 8),
       followUps: result.followUps.map((f) => f.trim()).filter(Boolean),
       cancelReason: result.callType === "retention" ? result.cancelReason : null,
     },

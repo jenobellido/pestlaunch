@@ -13,7 +13,9 @@ import type { Scorecard, ScorecardResult } from "../model/types";
 const gradingSchema = z.object({
   objectionsRaised: z
     .boolean()
-    .describe("True if the customer raised any objection or hesitation about buying (price, timing, spouse, other companies)"),
+    .describe(
+      "True if the customer pushed back on buying: price, needing to ask a spouse, comparing other companies, or doubting they need it. A clash over appointment times or a question about how to pay isn't an objection",
+    ),
   items: z.array(
     z.object({
       item: z.number().int().describe("The item number in brackets"),

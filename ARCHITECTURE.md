@@ -457,7 +457,8 @@ From the call manuals in `../docs/call-manuals/`:
 
 Sections follow the manuals' four steps (Validate, Understand, Solve,
 Verify), plus Pricing and Objections on sales calls. On sales calls with no
-objections, the 4 objection points are awarded automatically.
+objections, the 4 objection points are awarded automatically. A clash over
+appointment times or a question about paying isn't an objection.
 
 The scorecards are data in `modules/scorecards/config/scorecards.ts`. Each
 item carries its criteria, paraphrased from the manual's definition of that
@@ -470,9 +471,11 @@ plus whether the customer raised objections. A quote is kept only if its
 words really appear in the transcript, so every quote shown can be trusted.
 Points and grade are computed in code from the scorecard, never by the
 model. One line earns one step: the model kept double counting despite the
-prompt, so `scoreCall` enforces it. When a passing quote is the same line
-as an earlier step's, the later step fails with "already credited to …",
-except for natural pairs (Consensus and Close, Present Solution and Close,
+prompt, so `scoreCall` enforces it. When two passing steps quote the same
+line, the later step in scorecard order keeps it (a reused line is nearly
+always the call moving forward, e.g. a confirm line is the Close, not the
+earlier Confidence) and the earlier one fails with the reason, except for
+natural pairs (Consensus and Close, Present Solution and Close,
 Close and Provide a Conclusion). Short scheduling and billing calls are
 graded on the manual's lighter version of the steps, but a greeting is
 never Investigate and offering a slot is never a Summary.

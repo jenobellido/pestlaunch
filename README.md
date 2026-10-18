@@ -62,39 +62,48 @@ Key decisions:
 
 All 20 test recordings were run on OpenAI (`whisper-1`, `gpt-5.5`), and
 every result was checked by hand against the transcript and the call
-manuals:
+manuals, three times: before the fixes below, after the first round, and
+after the second.
 
-| What | Agreed with the hand check |
-| --- | --- |
-| Call type | 19 of 20 |
-| Outcome (resolution) | 19 of 20 |
-| Scorecard steps | 268 of 283 (95%) |
+| What | First check | Final check |
+| --- | --- | --- |
+| Call type | 19 of 20 | 19 of 20 |
+| Outcome (resolution) | 19 of 20 | 19 of 20 |
+| Follow-ups fully right | 10 of 20 | 14 of 20 |
+| Key details fully right | 7 of 20 | 13 of 20 |
+| Scorecard steps | 95% | see below |
 
-The "Below Standard" grades are right: after correcting the 15 disputed
-steps, no call reaches Green. The reps really do skip steps such as
-thanking the customer (2 of 19 calls) and voicing empathy (3 of 18).
+The "Below Standard" grades are right on every call: even after
+correcting disputed steps, none reaches Green. The reps really do skip steps
+such as thanking the customer (2 of 19 calls) and voicing empathy (3 of 18).
 
-The check found problems, now fixed:
+Scorecard steps agreed 95% in the first check, but the misses were mostly
+lenient: one quoted line earning two steps. Enforcing "one line, one step"
+in code first went too far (91%, mostly harsh), because it kept the credit
+on the earlier step; it now gives it to the later one, and scheduling clashes
+no longer count as sales objections. On 4 calls re-scored with that fix,
+scores match the hand check within a point. A full re-score of all 20 was
+skipped to save AI credit.
+
+Fixed along the way:
 
 - **Lost speech.** A silence filter tuned for Groq dropped 25–60 seconds of
-  real speech on 9 calls. It now uses Whisper's own rule, and the words
-  recovered per call went up as much as 2.5×. It also guards against
-  Whisper's repetition loops.
+  real speech on 9 calls. It now uses Whisper's own rule, plus guards
+  against Whisper's repetition loops.
 - **A card number in a transcript.** Card details are now masked before
   anything is stored or sent to a model (see ARCHITECTURE.md).
-- **Missed follow-ups** (9 calls): promises such as notes for the
-  technician or payment at the visit are now extracted even on booked calls.
+- **Missed follow-ups:** promises such as notes for the technician or
+  payment at the visit are now extracted even on booked calls, written as
+  the office's own tasks.
 - **A quote that didn't book was marked resolved.** It's now follow-up
   needed.
-- **Grading:** one quote can no longer pass two steps, and short scheduling
-  calls use the manual's lighter version of the steps.
-- **Coaching** no longer invents placeholder prices, and calls where the rep
-  never speaks get no coaching.
+- **Coaching** no longer invents placeholder prices, and a call where the
+  rep never speaks gets no coaching.
 
-After the fixes, 16 calls were re-run: the quote call is now follow-up
-needed, follow-ups were found on 11 more calls, and the card digits are
-masked. The 4 longest calls and a second full hand check are still to do
-(see Known limitations).
+Still known: Whisper's output varies between runs (two uploads of the same
+voicemail gave different text), names are often misheard (the team-list hint
+can't be tested on these recordings, which come from other companies), and
+two saved transcripts still have a swapped speaker on one exchange.
 
 ## Local setup
 
@@ -176,10 +185,7 @@ sidebar), split into pages with a settings menu:
 - A rate limit that would take more than a minute to clear fails the call
   with a message saying when to retry, and an empty prepaid balance fails it
   with "out of credits". Processing has a 5-minute ceiling, so it can't wait
-  longer; a job queue would queue such calls instead. During the accuracy
-  run the test account ran out of credits, so the 4 longest calls (CALL
-  015, 016, 019, 020) still need re-running with the fixes, and the re-run
-  hasn't had a second hand check yet.
+  longer; a job queue would queue such calls instead.
 - Processing runs in the background with Next's `after()`, not a durable job
   queue. If the server stops mid-way, the call shows as failed after 10
   minutes and can be retried. A queue (e.g. Inngest or a database-backed

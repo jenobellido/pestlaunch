@@ -117,7 +117,7 @@ describe("scoreCall", () => {
       { speaker: "employee", start: 5, end: 9, text: "Does Tuesday morning work? I'll put you down for it." },
     ];
 
-    it("takes the credit back from a second step that reuses the same line", () => {
+    it("gives a reused line to the later step, as the call moves forward", () => {
       const result = scoreCall(
         shared,
         {
@@ -131,8 +131,8 @@ describe("scoreCall", () => {
         },
         lines,
       );
-      expect(result.items.map((i) => i.passed)).toEqual([true, false, false, false]);
-      expect(result.items[1].reason).toContain("already credited to Confidence Statement");
+      expect(result.items.map((i) => i.passed)).toEqual([false, true, false, false]);
+      expect(result.items[0].reason).toContain("counts for Validate");
       expect(result.points).toBe(1);
     });
 

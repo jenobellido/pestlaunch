@@ -35,7 +35,9 @@ function sameLine(a: string, b: string) {
  * points and grade are computed here so the maths always matches the scorecard, and a
  * quote is kept only when it's really in the employee's words. One line earns one step
  * (bar a few natural pairs): the model was told so but still double counted, so it's
- * enforced here, and the first step in scorecard order keeps the credit.
+ * enforced here. The later step in scorecard order keeps the credit: a reused line is
+ * nearly always the call moving forward (a confirm line is the Close, not the earlier
+ * Confidence or Summary), which a hand check of the test calls bore out.
  */
 export function scoreCall(
   card: Scorecard,
@@ -48,7 +50,6 @@ export function scoreCall(
   const employeeWords = words(transcript.filter((s) => s.speaker !== "customer").map((s) => s.text).join(" "));
   const customerWords = words(transcript.filter((s) => s.speaker === "customer").map((s) => s.text).join(" "));
   let n = 0;
-  const credited: { item: string; quote: string }[] = [];
 
   const items: ScorecardItemResult[] = card.sections.flatMap((section) =>
     section.items.map((it) => {
@@ -80,22 +81,32 @@ export function scoreCall(
         };
       }
       const verified = q && employeeWords.includes(q) ? quote! : null;
-      if (g.passed && verified) {
-        const earlier = credited.find((c) => sameLine(c.quote, q) && !canShare(c.item, it.name));
-        if (earlier) {
-          return {
-            section: section.title,
-            item: it.name,
-            passed: false,
-            evidence: null,
-            reason: `This line was already credited to ${earlier.item}; this step needs its own moment in the call.`,
-          };
-        }
-        credited.push({ item: it.name, quote: q });
-      }
       return { section: section.title, item: it.name, passed: g.passed, evidence: verified, reason: g.reason.trim() };
     }),
   );
+
+  // Walk back from the end so the later step keeps a shared line.
+  const credited: { item: string; section: string; quote: string }[] = [];
+  // Some cards use a name twice (an Expectation Statement in two sections); then say which.
+  const nameCount = new Map<string, number>();
+  for (const it of items) nameCount.set(it.item, (nameCount.get(it.item) ?? 0) + 1);
+  const label = (c: { item: string; section: string }) => ((nameCount.get(c.item) ?? 0) > 1 ? `${c.item} (${c.section})` : c.item);
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    if (!it.passed || !it.evidence) continue;
+    const q = words(it.evidence);
+    const later = credited.find((c) => sameLine(c.quote, q) && !canShare(c.item, it.item));
+    if (later) {
+      items[i] = {
+        ...it,
+        passed: false,
+        evidence: null,
+        reason: `The line quoted for this step counts for ${label(later)}; this step needs its own moment in the call.`,
+      };
+    } else {
+      credited.push({ item: it.item, section: it.section, quote: q });
+    }
+  }
 
   const points = items.filter((i) => i.passed).length;
   return { scorecardId: card.id, points, maxPoints: maxPoints(card), grade: gradeFor(card, points), items };
