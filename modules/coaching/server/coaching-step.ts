@@ -68,6 +68,8 @@ export async function coachCall(callType: CallTypeDefinition, transcript: readon
     ? CALL_TYPE_NOTES[callType.key]
     : [callType.description, steps?.length && `The company grades these calls on: ${steps.join("; ")}`].filter(Boolean).join(" ");
   const result = await generateObject({
+    // In testing the fast model's coaching was as specific as the main one's, at about a third of the cost.
+    tier: "fast",
     name: "call_coaching",
     schema: coachingSchema,
     system: SYSTEM,

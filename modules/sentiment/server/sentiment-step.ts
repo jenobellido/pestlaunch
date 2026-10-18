@@ -41,6 +41,8 @@ export async function analyzeSentiment(transcript: readonly TranscriptSegment[])
     schema: labels,
     system: SYSTEM,
     reasoningEffort: "low",
+    // Simple labelling: the fast model agreed with the main one on 94% of lines, never opposite.
+    tier: "fast",
     prompt: transcript.map((s, i) => `${i} ${who[s.speaker]}: ${s.text}`).join("\n"),
   });
   return parseSentimentCodes(result.r, transcript);

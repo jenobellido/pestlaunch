@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { serverEnv } from "@/core/config/env";
+import { modelOrder, type ModelTier } from "./models";
 
 // Thin client for any OpenAI-compatible API: OpenAI by default, or Groq by setting AI_BASE_URL
 // and the model names (see .env.example). Plain fetch keeps it dependency-free. Neither Groq
@@ -123,16 +124,18 @@ export async function transcribeAudio(audio: File, options: { prompt?: string } 
  * occasionally produces output that fails validation, so that is retried.
  */
 export async function generateObject<T>(options: GenerateObjectOptions<T>): Promise<T> {
-  const models = chatModels();
+  const models = chatModels(options.tier ?? "best");
   for (const [i, model] of models.entries()) {
     try {
       return await generateWithRetries(options, model);
     } catch (err) {
       // Usage limit on this model (e.g. the free daily tokens): remember it, use the next one.
       const limited = err instanceof AiError && err.retryAfterMs !== undefined;
-      if (!limited || i === models.length - 1) throw err;
-      limitedUntil.set(model, Date.now() + err.retryAfterMs!);
-      console.warn(`[ai] ${model} hit its usage limit; using ${models[i + 1]} instead`);
+      // A model this provider doesn't have (e.g. the fast default on Groq): use the next one.
+      const unknownModel = err instanceof AiError && err.status === 404;
+      if (!(limited || unknownModel) || i === models.length - 1) throw err;
+      if (limited) limitedUntil.set(model, Date.now() + err.retryAfterMs!);
+      console.warn(`[ai] ${model} ${limited ? "hit its usage limit" : "isn't available"}; using ${models[i + 1]} instead`);
     }
   }
   throw new AiError("No AI model is available right now.");
@@ -145,13 +148,13 @@ export async function generateObject<T>(options: GenerateObjectOptions<T>): Prom
 const globalForAi = globalThis as unknown as { aiLimitedUntil?: Map<string, number> };
 const limitedUntil = (globalForAi.aiLimitedUntil ??= new Map<string, number>());
 
-/** The main chat model, then the fallback. A model still inside a known limit goes last. */
-function chatModels() {
-  const all = [serverEnv.AI_CHAT_MODEL, serverEnv.AI_CHAT_FALLBACK_MODEL].filter(
-    (m, i, list) => m.trim() !== "" && list.indexOf(m) === i,
+/** The models to try for a tier, from the environment (see core/ai/models.ts). */
+function chatModels(tier: ModelTier) {
+  return modelOrder(
+    tier,
+    { main: serverEnv.AI_CHAT_MODEL, fallback: serverEnv.AI_CHAT_FALLBACK_MODEL, fast: serverEnv.AI_CHAT_FAST_MODEL },
+    limitedUntil,
   );
-  const available = (m: string) => (limitedUntil.get(m) ?? 0) <= Date.now();
-  return [...all.filter(available), ...all.filter((m) => !available(m))];
 }
 
 async function generateWithRetries<T>(options: GenerateObjectOptions<T>, model: string): Promise<T> {
@@ -174,6 +177,8 @@ interface GenerateObjectOptions<T> {
   prompt: string;
   /** How much the model thinks first. Thinking tokens count against rate limits; use "low" for simple tasks. */
   reasoningEffort?: "low" | "medium" | "high";
+  /** "best" (default) for results the product is judged on; "fast" for simpler, high-volume jobs. */
+  tier?: ModelTier;
   /**
    * Checks the answer beyond its shape, e.g. that every item was graded. Return a problem to
    * have the request retried like any other invalid output, or null when it's complete.

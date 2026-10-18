@@ -66,6 +66,11 @@ every result was checked by hand against the transcript and the call
 manuals, three times: before the fixes below, after the first round, and
 after the second.
 
+Since then, speaker labels, coaching and sentiment moved to the cheaper
+`gpt-5.4-mini` after a side-by-side test on invented calls (see "AI models" in
+ARCHITECTURE.md). The 20 real calls weren't re-run on it; scoring and call
+type and outcome, the results checked above, still use `gpt-5.5`.
+
 | What | First check | Final check |
 | --- | --- | --- |
 | Call type | 19 of 20 | 19 of 20 |
@@ -119,8 +124,10 @@ npm run dev
 ```
 
 Put an OpenAI API key in `AI_API_KEY` in `.env.local`; transcription
-(`whisper-1`) and call analysis (`gpt-5.5`, falling back to `gpt-5.4-mini`)
-use it. The AI client works with any OpenAI-compatible API: to use Groq
+(`whisper-1`) and the AI steps use it. Scoring and call analysis use
+`gpt-5.5`; speaker labels, coaching and sentiment use the cheaper
+`gpt-5.4-mini`, which matched it in testing (see "AI models" in
+ARCHITECTURE.md). The AI client works with any OpenAI-compatible API: to use Groq
 instead, set `AI_BASE_URL`, the model names and a Groq key as shown in
 `.env.example`. No code changes are needed.
 
@@ -190,10 +197,10 @@ sidebar), split into pages with a settings menu:
   files would remove the limit.
 - Processing a call takes about 20 seconds to 4 minutes on OpenAI.
   Each call makes several chat requests (speaker labels, analysis, then
-  scoring, coaching and sentiment at once). On OpenAI's lowest usage tier
-  `gpt-5.5` allows 3 requests a minute, so processing several calls at once
-  can hit the limit; switch off modules you don't need, use a higher tier, or
-  a cheaper model.
+  scoring, coaching and sentiment at once). The account's current limits
+  (5,000 requests a minute) are far above that, but OpenAI's lowest usage
+  tier allows only a few requests a minute; there, processing several calls
+  at once can hit the limit.
 - A rate limit that would take more than a minute to clear fails the call
   with a message saying when to retry, and an empty prepaid balance fails it
   with "out of credits". Processing has a 5-minute ceiling, so it can't wait
