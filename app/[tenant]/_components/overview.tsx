@@ -34,16 +34,27 @@ export function LeakRow({
   leak: { call, kind, label, detail, next },
   owner,
   members,
+  inset = false,
 }: {
   slug: string;
   leak: Leak;
   owner?: string;
   members: Assignee[] | null;
+  /** Inside a padded card (rows divided by the list), instead of edge to edge. */
+  inset?: boolean;
 }) {
   const { icon: Icon, tone } = LEAK_STYLE[kind];
   return (
-    <li className="flex items-center gap-2 border-t border-line pr-4 transition-colors hover:bg-card-2 sm:pr-5">
-      <Link href={call.href} className="group flex min-w-0 flex-1 items-center gap-3 py-3.5 pl-5 sm:pl-6">
+    <li
+      className={cn(
+        "flex items-center gap-2 transition-colors",
+        inset ? "py-0.5" : "border-t border-line pr-4 hover:bg-card-2 sm:pr-5",
+      )}
+    >
+      <Link
+        href={call.href}
+        className={cn("group flex min-w-0 flex-1 items-center gap-3", inset ? "py-3" : "py-3.5 pl-5 sm:pl-6")}
+      >
         <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-xl", tone)}>
           <Icon className="size-4" aria-hidden />
         </span>
@@ -238,7 +249,7 @@ export function Overview({
       )}
 
       <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <Card id="leaks" className="min-w-0 scroll-mt-6 p-0 sm:p-0">
+        <Card id="leaks" flush className="min-w-0 scroll-mt-6">
           <div className="flex items-start justify-between gap-3 px-5 pt-5 sm:px-6 sm:pt-6">
             <div>
               <CardTitle>Leaks</CardTitle>

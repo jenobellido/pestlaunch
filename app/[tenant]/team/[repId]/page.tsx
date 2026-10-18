@@ -242,7 +242,7 @@ async function RepBody({ params }: { params: PageProps<"/[tenant]/team/[repId]">
                     : { title: "Follow-up tasks", description: `Calls ${member.displayName.split(/\s+/)[0]} has been asked to follow up on.` }
                 }
               />
-              <Card className="p-0 sm:p-0">
+              <Card flush>
                 <CardTitle className="px-5 pt-5 sm:px-6 sm:pt-6">Recent calls</CardTitle>
                 <ul className="mt-2">
                   {ready.slice(0, 6).map((c) => {
