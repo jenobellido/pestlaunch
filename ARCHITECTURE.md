@@ -683,9 +683,14 @@ page looks exactly the same without it.
     talk time per sentiment.
 - **On the call page:** the ranges draw as a lane under the player's speaker
   timeline, through CallDetail's generic `timelineBands` prop, so the calls
-  module never imports sentiment. A compact panel after coaching shows the
-  mood curve (hover for the words), shares, and the turning points as `#t=`
-  links. Any `#t=SECONDS` link on the call page moves the player and scrolls
+  module never imports sentiment. A compact panel after coaching leads with
+  the story: how the customer started and ended (Upset, Neutral, Happy) and a
+  coloured trend chip (Improved, Got worse, Steady). Then the mood curve,
+  filled green above the middle and red below with the neutral band shaded,
+  its labels in a gutter so they never cover the line, and clickable markers
+  where it turned (hover anywhere for the customer's words); a stacked bar
+  of talk time per sentiment; and the turning points, each with a time button
+  that jumps the player (`#t=` links). Any `#t=SECONDS` link on the call page moves the player and scrolls
   the transcript there, also on load, also for demo calls without audio.
 - **Colours** are a diverging pair (`--mood-positive`, `--mood-negative`, a
   gray `--mood-neutral`), validated for colour blindness against the card in
