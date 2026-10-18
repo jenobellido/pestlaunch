@@ -21,7 +21,7 @@ app/                     Routing only: thin pages, layouts, route handlers
     scorecards/          The scoring rubric; linked from each call's score, not the sidebar
     team/                Reps: scores, trends, most-missed steps, plays (coaching module)
     settings/            Profile (page.tsx), appearance/, company/ (name + modules),
-                         team/ (members, invites), roles/; layout.tsx holds the
+                         members/ (invites, roles per person), roles/; layout.tsx holds the
                          header and settings menu
                          (server actions in actions.ts)
   api/[tenant]/          Backend API, e.g. /api/noble-pest/calls
@@ -380,7 +380,7 @@ a server-side permission check.
 | Appearance | Theme: preview cards for System, Light, Dark | Everyone | `pestlaunch-theme` cookie (browser only) |
 | Company | Company name | `company.manage` | `tenants.name`; the URL slug never changes |
 | Company | Modules | `modules.manage` | `tenant_modules` |
-| Team | Members, invites, member roles, remove | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
+| Members | Members, invites, member roles, remove | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
 | Roles | Custom roles and permissions | `roles.manage`; everyone sees the roles | `tenant_roles` |
 
 Without the permission a section shows read-only.

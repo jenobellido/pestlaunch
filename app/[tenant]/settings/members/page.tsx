@@ -3,7 +3,7 @@ import { can, canGrantRole, listInvites, listMembers, listRoles, requireTenantAc
 import { SettingsPage, SettingsSection } from "../_components/settings-frame";
 import { TeamSection } from "../_components/team-section";
 
-export default async function TeamSettingsPage({ params }: PageProps<"/[tenant]/settings/team">) {
+export default async function MembersSettingsPage({ params }: PageProps<"/[tenant]/settings/members">) {
   const { tenant: slug } = await params;
   const [access, h] = await Promise.all([requireTenantAccess(slug), headers()]);
   const { tenant, user, role } = access;
@@ -21,8 +21,8 @@ export default async function TeamSettingsPage({ params }: PageProps<"/[tenant]/
   return (
     <SettingsPage>
       <SettingsSection
-        id="settings-team"
-        title="Team"
+        id="settings-members"
+        title="Members"
         description="Everyone in the company and their role. Invite people with a link; reps only see their own calls."
       >
         <TeamSection

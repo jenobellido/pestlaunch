@@ -108,8 +108,8 @@ sidebar), split into pages with a settings menu:
   change) and **Modules**: turn Scorecards and Coaching on or off for the
   whole company (needs `modules.manage`). Calls is the base module and is
   always on.
-- **Team:** members and their roles. Invite someone by email and role, and
-  copy the link to send them (needs `team.manage`).
+- **Members:** everyone in the company and their role. Invite someone by
+  email and role, and copy the link to send them (needs `team.manage`).
 - **Roles:** what each role can do, with custom roles (needs `roles.manage`).
   Every company starts with Owner, Manager and Rep.
 

@@ -14,7 +14,7 @@ async function Menu({ params }: { params: Promise<{ tenant: string }> }) {
         { href: base, label: "Profile", icon: <UserRound aria-hidden /> },
         { href: `${base}/appearance`, label: "Appearance", icon: <Palette aria-hidden /> },
         { href: `${base}/company`, label: "Company", icon: <Building2 aria-hidden /> },
-        { href: `${base}/team`, label: "Team", icon: <Users aria-hidden /> },
+        { href: `${base}/members`, label: "Members", icon: <Users aria-hidden /> },
         { href: `${base}/roles`, label: "Roles", icon: <ShieldCheck aria-hidden /> },
       ]}
     />
