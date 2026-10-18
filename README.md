@@ -98,15 +98,16 @@ database or env vars.
 
 ## Settings
 
-Each workspace has a Settings page (`/<company>/settings`, at the bottom of
-the sidebar):
+Each workspace has Settings (`/<company>/settings`, at the bottom of the
+sidebar), split into pages with a settings menu:
 
-- **Appearance:** System, Light or Dark. Saved in a cookie on this browser.
-- **Profile:** your display name.
-- **Company:** the company name (needs `company.manage`). The URL doesn't
-  change.
-- **Modules:** turn Scorecards and Coaching on or off for the whole company
-  (needs `modules.manage`). Calls is the base module and is always on.
+- **Profile:** your display name; your email and role are shown read-only.
+- **Appearance:** System, Light or Dark, picked from preview cards. Saved in
+  a cookie on this browser.
+- **Company:** the company name (needs `company.manage`; the URL doesn't
+  change) and **Modules**: turn Scorecards and Coaching on or off for the
+  whole company (needs `modules.manage`). Calls is the base module and is
+  always on.
 - **Team:** members and their roles. Invite someone by email and role, and
   copy the link to send them (needs `team.manage`).
 - **Roles:** what each role can do, with custom roles (needs `roles.manage`).

@@ -1,11 +1,17 @@
 import { Settings } from "lucide-react";
-import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
+import { Bone, PageHeader } from "@/shared/ui/page-header";
 
 export function SettingsHeader() {
-  return <PageHeader title="Settings" description="Your profile, appearance and company." icon={Settings} />;
+  return (
+    <PageHeader
+      title="Settings"
+      description="Your profile and appearance, and how your company is set up."
+      icon={Settings}
+    />
+  );
 }
 
-/** A settings section: title and explanation on the left, controls on the right. */
+/** A settings section: title and explanation on the left, controls on the right (stacked on small screens). */
 export function SettingsSection({
   id,
   title,
@@ -20,7 +26,7 @@ export function SettingsSection({
   return (
     <section
       aria-labelledby={id}
-      className="grid gap-5 rounded-[28px] bg-card p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-10"
+      className="grid gap-5 rounded-[28px] bg-card p-5 sm:p-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] xl:gap-10"
     >
       <div>
         <h2 id={id} className="text-[15px] font-medium">
@@ -33,22 +39,18 @@ export function SettingsSection({
   );
 }
 
-/** The four sections at roughly their real heights. */
+/** One page's sections, 16px apart. */
+export function SettingsPage({ children }: { children: React.ReactNode }) {
+  return <div className="space-y-4">{children}</div>;
+}
+
+/** Shown in the content column while a settings page loads; the menu stays put. */
 export function SettingsBodySkeleton() {
   return (
     <div className="space-y-4" aria-busy="true" aria-label="Loading">
-      {[136, 264, 168, 300].map((height, i) => (
+      {[220, 160].map((height, i) => (
         <Bone key={i} className="rounded-[28px]" style={{ height }} />
       ))}
     </div>
-  );
-}
-
-export function SettingsSkeleton() {
-  return (
-    <PageStack>
-      <SettingsHeader />
-      <SettingsBodySkeleton />
-    </PageStack>
   );
 }

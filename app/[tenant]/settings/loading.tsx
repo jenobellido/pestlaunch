@@ -1,1 +1,1 @@
-export { SettingsSkeleton as default } from "./_components/settings-frame";
+export { SettingsBodySkeleton as default } from "./_components/settings-frame";

@@ -19,7 +19,8 @@ app/                     Routing only: thin pages, layouts, route handlers
                          recording URL and whether the user may delete
     scorecards/          The scoring standards
     coaching/            Employee coaching
-    settings/            Appearance, profile, company name, module switches
+    settings/            Profile (page.tsx), appearance/, company/ (name + modules),
+                         team/, roles/; layout.tsx holds the header and settings menu
                          (server actions in actions.ts)
   api/[tenant]/          Backend API, e.g. /api/noble-pest/calls
     _lib/                withModule (auth + membership + module check)
@@ -354,17 +355,22 @@ while a module it depends on is off.
 ## Settings
 
 `/[tenant]/settings`, linked at the bottom of the sidebar and in the mobile
-bar. Every change is a server action with zod validation and a server-side
-permission check.
+bar. Like Freehold's settings, each section is a card with its title and
+explanation on the left and the controls on the right (stacked below `xl`).
+Settings is split into pages so it never becomes one long scroll.
+`layout.tsx` renders the header and a settings menu (a column beside the page
+on wide screens, a row above it on small ones), so moving between pages only
+reloads the content. Every change is a server action with zod validation and
+a server-side permission check.
 
-| Section | Who can change it | Saved in |
-| --- | --- | --- |
-| Appearance | Everyone | `pestlaunch-theme` cookie (browser only) |
-| Profile (display name) | Everyone, for themselves | Supabase Auth user metadata (`full_name`); the session is refreshed so the new name shows at once |
-| Company name | `company.manage` | `tenants.name`; the URL slug never changes |
-| Modules | `modules.manage` | `tenant_modules` |
-| Team (invites, member roles, remove) | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
-| Roles (custom roles, permissions) | `roles.manage`; everyone sees the roles | `tenant_roles` |
+| Page | Section | Who can change it | Saved in |
+| --- | --- | --- | --- |
+| Profile (`/settings`) | Display name | Everyone, for themselves | Supabase Auth user metadata (`full_name`); the session is refreshed so the new name shows at once |
+| Appearance | Theme: preview cards for System, Light, Dark | Everyone | `pestlaunch-theme` cookie (browser only) |
+| Company | Company name | `company.manage` | `tenants.name`; the URL slug never changes |
+| Company | Modules | `modules.manage` | `tenant_modules` |
+| Team | Members, invites, member roles, remove | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
+| Roles | Custom roles and permissions | `roles.manage`; everyone sees the roles | `tenant_roles` |
 
 Without the permission a section shows read-only.
 
