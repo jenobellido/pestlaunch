@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { can, checkTenantAccess, listMembers, seesAllCalls } from "@/core/tenancy";
+import { can, checkTenantAccess, listMembers } from "@/core/tenancy";
 import { callScope, createTask, deleteTask, findTask, getCall, setTaskStatus } from "@/modules/calls/server";
 
 export type TaskResult = { ok: true } | { ok: false; error: string };
@@ -23,14 +23,13 @@ export async function assignTask(slug: string, callId: string, assigneeId: strin
   if (!result.ok) return { ok: false, error: SESSION_ENDED };
   const { access } = result;
   if (!can(access, "calls.assign")) return { ok: false, error: "You don't have permission to assign follow-ups." };
-  // The assigner must be able to see the call...
-  const call = await getCall(slug, parsed.data.callId, callScope({ userId: access.user.id, permissions: access.permissions }));
-  if (!call) return { ok: false, error: "That call doesn't exist." };
-  const assignee = (await listMembers(access.tenant.id)).find((m) => m.userId === parsed.data.assigneeId);
-  if (!assignee) return { ok: false, error: "That person isn't on the team." };
-  // ...and so must the assignee, or the follow-up would link to a call they can't open.
-  if (call.employeeId !== assignee.userId && !seesAllCalls(assignee.role)) {
-    return { ok: false, error: `${assignee.displayName} can only see their own calls. Assign this to the call's rep or a manager.` };
+  // The assigner must be able to see the call. The assignee needn't: the follow-up itself lets
+  // them open this call (see callScope), and only this one.
+  if (!(await getCall(slug, parsed.data.callId, callScope({ userId: access.user.id, permissions: access.permissions })))) {
+    return { ok: false, error: "That call doesn't exist." };
+  }
+  if (!(await listMembers(access.tenant.id)).some((m) => m.userId === parsed.data.assigneeId)) {
+    return { ok: false, error: "That person isn't on the team." };
   }
   await createTask({ tenantId: access.tenant.id, assignedBy: access.user.id, ...parsed.data });
   refresh();

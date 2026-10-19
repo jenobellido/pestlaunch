@@ -145,12 +145,14 @@ modules/<name>/
   hint ("maybe Marcus", or that nobody on the team has that name). Calls can
   be reassigned on the call page, which also flags a mismatch with the heard
   name. Without `calls.view_all` a member only sees their own calls
-  and coaching, enforced in the queries (`callScope`), so other calls 404.
+  and coaching, plus any call they've been given a follow-up on, enforced in
+  the queries (`callScope`), so other calls 404. Their Overview numbers count
+  only their own calls.
   Every action that takes a call id loads it through the same scope first
-  (assigning the rep, review flags, follow-ups), and a follow-up can only go
-  to the call's rep or someone who can see every call (`seesAllCalls`). Each
-  leak's Assign list only offers those people, and a refused assignment
-  says why under the button.
+  (assigning the rep, review flags, follow-ups). A follow-up can go to
+  anyone on the team: it lets the assignee open that one call (and stops
+  when the follow-up is removed). A refused assignment says why under the
+  button.
 - **Authorization** is enforced in the app, not by RLS. Every table has RLS
   enabled with no policies, so Supabase's public REST API returns nothing.
   The server reads data over a direct Postgres connection and checks access
@@ -665,7 +667,7 @@ so they run in well under a second and the same way in CI.
 | --- | --- |
 | Points, grades and which scorecard grades a call type | `modules/scorecards/model/grade.test.ts` |
 | Scoring a call: auto-awarded objections, quotes kept only when they're the employee's words | `modules/scorecards/model/score-call.test.ts` |
-| Permission checks, who may grant which role, permissions that need another, who sees every call | `core/tenancy/rules.test.ts` |
+| Permission checks, who may grant which role, permissions that need another | `core/tenancy/rules.test.ts` |
 | Which parts of the app each set of permissions sees | `app/[tenant]/_lib/areas.test.ts` |
 | Transcript rules: dropping non-speech, accepting speaker splits, joining turns | `modules/calls/lib/transcript.test.ts` |
 | The Coaching page's per-person summaries (grouping, trend, most-missed items) | `modules/coaching/model/team.test.ts` |

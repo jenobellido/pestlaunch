@@ -38,7 +38,7 @@ Beyond the brief, it's ready for a real team:
 - Invite people with a link.
 - Permission-based roles, with custom roles.
 - Calls belong to the rep who made them.
-- Each role only sees its part of the app: a Rep gets their own calls, follow-ups and coaching, and Profile and Appearance in Settings; the rest is hidden and returns 404.
+- Each role only sees its part of the app: a Rep gets their own calls, the calls they're given a follow-up on, their coaching, and Profile and Appearance in Settings; the rest is hidden and returns 404.
 - A landing page at `/` with a 3D hero (react-three-fiber), in both themes.
 
 ## How it works

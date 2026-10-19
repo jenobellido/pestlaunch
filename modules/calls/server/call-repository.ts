@@ -1,12 +1,12 @@
 import "server-only";
 import { findCallType, type CallTypeDefinition } from "@/core/calls";
 import { getCallTypes } from "@/core/calls/server";
-import { and, desc, eq, getTableColumns, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, getTableColumns, lt, or, sql } from "drizzle-orm";
 import { connection } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/core/db";
 import type { CallRecord } from "../model/types";
-import { calls } from "./schema";
+import { calls, callTasks } from "./schema";
 
 // Every query joins tenants on the slug, so a call is only ever read or changed
 // through the tenant it belongs to.
@@ -14,12 +14,30 @@ import { calls } from "./schema";
 const { tenants, tenantMembers } = schema;
 type CallRow = typeof calls.$inferSelect;
 
-/** Which calls a member may see: everything, or only calls assigned to them. */
-export type CallScope = { employeeId?: string };
+/**
+ * Which calls to read. `viewerId`: what a member without "calls.view_all" may open, their own
+ * calls plus any call they've been given a follow-up on. `employeeId`: only that rep's own calls
+ * (for their numbers). Empty: every call in the tenant.
+ */
+export type CallScope = { viewerId?: string; employeeId?: string };
 
 /** The assigned member's display name, joined on the call's own tenant. */
 const memberJoin = and(eq(tenantMembers.tenantId, calls.tenantId), eq(tenantMembers.userId, calls.employeeId));
-const scoped = (scope: CallScope) => (scope.employeeId ? eq(calls.employeeId, scope.employeeId) : undefined);
+const scoped = (scope: CallScope) =>
+  and(
+    scope.employeeId ? eq(calls.employeeId, scope.employeeId) : undefined,
+    scope.viewerId
+      ? or(
+          eq(calls.employeeId, scope.viewerId),
+          exists(
+            db
+              .select({ one: sql`1` })
+              .from(callTasks)
+              .where(and(eq(callTasks.callId, calls.id), eq(callTasks.assigneeId, scope.viewerId))),
+          ),
+        )
+      : undefined,
+  );
 
 /**
  * Processing runs after the upload response. If the server stops mid-way (a deploy, a crash,

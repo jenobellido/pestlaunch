@@ -59,9 +59,9 @@ export interface Viewer {
   permissions: readonly Permission[];
 }
 
-/** Without "calls.view_all" a member only ever sees calls assigned to them. */
+/** Without "calls.view_all" a member only sees their own calls and the calls they have a follow-up on. */
 export function callScope(viewer: Viewer): CallScope {
-  return viewer.permissions.includes("calls.view_all") ? {} : { employeeId: viewer.userId };
+  return viewer.permissions.includes("calls.view_all") ? {} : { viewerId: viewer.userId };
 }
 
 const forbidden = (action: string) => fail(`You don't have permission to ${action}.`, 403);

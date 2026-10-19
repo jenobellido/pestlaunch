@@ -5,12 +5,7 @@ import { useId, useState, useTransition } from "react";
 import { ArrowRight, Check, ListTodo, UserPlus, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Spinner } from "@/shared/ui/button";
-import {
-  assignTask,
-  removeTask,
-  setTaskDone,
-  type TaskResult,
-} from "../_lib/task-actions";
+import { assignTask, removeTask, setTaskDone, type TaskResult } from "../_lib/task-actions";
 
 export interface TaskRow {
   id: string;
@@ -35,8 +30,6 @@ function age(iso: string, now = Date.now()) {
 export interface Assignee {
   id: string;
   name: string;
-  /** Sees every call, so any call's follow-up can go to them (otherwise only their own calls'). */
-  seesAll: boolean;
 }
 
 function useAction() {
@@ -79,11 +72,7 @@ export function AssignTask({
           )}
           aria-hidden
         >
-          {pending ? (
-            <Spinner className="size-3.5" />
-          ) : (
-            <UserPlus className="size-3.5" />
-          )}
+          {pending ? <Spinner className="size-3.5" /> : <UserPlus className="size-3.5" />}
         </span>
         <select
           id={id}
@@ -91,8 +80,7 @@ export function AssignTask({
           disabled={pending}
           onChange={(e) => {
             const assigneeId = e.target.value;
-            if (assigneeId)
-              run(() => assignTask(slug, callId, assigneeId, title));
+            if (assigneeId) run(() => assignTask(slug, callId, assigneeId, title));
           }}
           title={error ?? "Assign a follow-up"}
           className={cn(
@@ -142,36 +130,23 @@ function TaskItem({
         onClick={() => run(() => setTaskDone(slug, task.id, !done))}
         className={cn(
           "press mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full border transition-colors",
-          done
-            ? "border-success bg-success text-accent-ink"
-            : "border-line-strong hover:border-accent",
+          done ? "border-success bg-success text-accent-ink" : "border-line-strong hover:border-accent",
         )}
       >
-        {pending ? (
-          <Spinner className="size-3" />
-        ) : done ? (
-          <Check className="size-3.5" strokeWidth={3} aria-hidden />
-        ) : null}
+        {pending ? <Spinner className="size-3" /> : done ? <Check className="size-3.5" strokeWidth={3} aria-hidden /> : null}
       </button>
       <div className="min-w-0 flex-1 text-sm">
-        <p className={cn("line-clamp-2", done && "text-muted line-through")}>
-          {task.title}
-        </p>
+        <p className={cn("line-clamp-2", done && "text-muted line-through")}>{task.title}</p>
         <p className="mt-0.5 text-xs text-muted">
           {onCallPage ? (
             <>Follow-up for {mine ? "you" : task.assigneeName}</>
           ) : (
             <>
-              <Link
-                href={`/${slug}/calls/${task.callId}`}
-                className="hover:text-fg hover:underline"
-              >
+              <Link href={`/${slug}/calls/${task.callId}`} className="hover:text-fg hover:underline">
                 {task.callTitle}
               </Link>
               {!mine && ` · ${task.assigneeName}`}
-              {task.createdAt &&
-                task.status === "open" &&
-                ` · ${age(task.createdAt)}`}
+              {task.createdAt && task.status === "open" && ` · ${age(task.createdAt)}`}
             </>
           )}
         </p>
@@ -221,15 +196,10 @@ export function TasksCard({
   limit?: number;
   seeAllHref?: string;
 }) {
-  const mineOpen = tasks.filter(
-    (t) => t.assigneeId === currentUserId && t.status === "open",
-  ).length;
+  const mineOpen = tasks.filter((t) => t.assigneeId === currentUserId && t.status === "open").length;
   const [view, setView] = useState<View>(mineOpen > 0 ? "mine" : "team");
   const switchable = canManage && !heading;
-  const shown =
-    switchable && view === "mine"
-      ? tasks.filter((t) => t.assigneeId === currentUserId)
-      : tasks;
+  const shown = switchable && view === "mine" ? tasks.filter((t) => t.assigneeId === currentUserId) : tasks;
   const open = shown.filter((t) => t.status === "open");
   const recentDone = shown.filter((t) => t.status === "done").slice(0, 3);
   if (tasks.length === 0 && !canManage) return null;
@@ -243,34 +213,21 @@ export function TasksCard({
         : "Leaks assigned to the team. Use Assign on a leak to add one.");
 
   return (
-    <section
-      id="tasks"
-      className="scroll-mt-6 rounded-[28px] bg-card p-5 sm:p-6"
-    >
+    <section id="tasks" className="scroll-mt-6 rounded-[28px] bg-card p-5 sm:p-6">
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex size-9 items-center justify-center rounded-xl bg-accent/15 text-accent">
           <ListTodo className="size-4" aria-hidden />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-[15px] font-medium">
-            {heading?.title ?? (canManage ? "Follow-up tasks" : "Your tasks")}
-          </h2>
+          <h2 className="text-[15px] font-medium">{heading?.title ?? (canManage ? "Follow-up tasks" : "Your tasks")}</h2>
           <p className="text-sm text-muted">{description}</p>
         </div>
         {switchable ? (
-          <div
-            role="group"
-            aria-label="Whose tasks"
-            className="flex rounded-full bg-chip p-1 text-xs font-medium"
-          >
+          <div role="group" aria-label="Whose tasks" className="flex rounded-full bg-chip p-1 text-xs font-medium">
             {(
               [
                 ["mine", "Mine", mineOpen],
-                [
-                  "team",
-                  "Team",
-                  tasks.filter((t) => t.status === "open").length,
-                ],
+                ["team", "Team", tasks.filter((t) => t.status === "open").length],
               ] as const
             ).map(([id, label, count]) => (
               <button
@@ -280,40 +237,25 @@ export function TasksCard({
                 onClick={() => setView(id)}
                 className={cn(
                   "press rounded-full px-3 py-1 tabular-nums transition-colors",
-                  view === id
-                    ? "bg-card text-fg shadow-sm"
-                    : "text-muted hover:text-fg",
+                  view === id ? "bg-card text-fg shadow-sm" : "text-muted hover:text-fg",
                 )}
               >
-                {label}{" "}
-                <span className={view === id ? "text-accent" : ""}>
-                  {count}
-                </span>
+                {label} <span className={view === id ? "text-accent" : ""}>{count}</span>
               </button>
             ))}
           </div>
         ) : (
-          <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">
-            {open.length} open
-          </span>
+          <span className="rounded-full bg-chip px-2.5 py-0.5 text-xs font-medium tabular-nums">{open.length} open</span>
         )}
       </div>
       {shown.length === 0 ? (
         <p className="mt-4 text-sm text-muted">
-          {switchable && view === "mine"
-            ? "Nothing assigned to you. You're all caught up."
-            : "No follow-ups assigned yet."}
+          {switchable && view === "mine" ? "Nothing assigned to you. You're all caught up." : "No follow-ups assigned yet."}
         </p>
       ) : (
         <ul className="mt-2 divide-y divide-line">
           {[...open, ...recentDone].slice(0, limit).map((t) => (
-            <TaskItem
-              key={t.id}
-              slug={slug}
-              task={t}
-              canManage={canManage}
-              mine={t.assigneeId === currentUserId}
-            />
+            <TaskItem key={t.id} slug={slug} task={t} canManage={canManage} mine={t.assigneeId === currentUserId} />
           ))}
         </ul>
       )}
@@ -343,10 +285,7 @@ export function CallTasks({
 }) {
   if (tasks.length === 0) return null;
   return (
-    <section
-      aria-label="Follow-ups on this call"
-      className="rounded-[28px] border border-orange/30 bg-orange/10 px-5 py-1"
-    >
+    <section aria-label="Follow-ups on this call" className="rounded-[28px] border border-orange/30 bg-orange/10 px-5 py-1">
       <ul className="divide-y divide-orange/20">
         {tasks.map((t) => (
           <TaskItem
@@ -378,13 +317,7 @@ export function TaskList({
   return (
     <ul className="divide-y divide-line">
       {tasks.map((t) => (
-        <TaskItem
-          key={t.id}
-          slug={slug}
-          task={t}
-          canManage={canManage}
-          mine={t.assigneeId === currentUserId}
-        />
+        <TaskItem key={t.id} slug={slug} task={t} canManage={canManage} mine={t.assigneeId === currentUserId} />
       ))}
     </ul>
   );
