@@ -83,7 +83,8 @@ export function LeakRow({
             callId={call.id}
             // The task says who and what, plus the next step when the call left one.
             title={[`${label}: ${detail}`, next].filter(Boolean).join(". Next: ").slice(0, 200)}
-            members={members}
+            // Only people who can open this call: its rep, and anyone who sees every call.
+            members={members.filter((m) => m.seesAll || m.id === call.employeeId)}
           />
         )
       )}

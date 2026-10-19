@@ -8,6 +8,11 @@ export function can(access: { readonly permissions: readonly Permission[] }, per
   return access.permissions.includes(permission);
 }
 
+/** Whether a role sees every call (owners always do), so a follow-up on any call can go to them. */
+export function seesAllCalls(role: Pick<Role, "isOwner" | "permissions">) {
+  return role.isOwner || role.permissions.includes("calls.view_all");
+}
+
 /** The permissions plus everything they require (e.g. "calls.review" brings "calls.view_all"). */
 export function withRequiredPermissions<P extends string>(permissions: readonly P[]): P[] {
   const all = new Set<string>(permissions);

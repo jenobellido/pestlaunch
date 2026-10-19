@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ALL_PERMISSIONS, DEFAULT_ROLES, isPermission, type Permission } from "./permissions";
-import { can, canGrantRole, withRequiredPermissions } from "./rules";
+import { can, canGrantRole, seesAllCalls, withRequiredPermissions } from "./rules";
 import type { Role } from "./types";
 
 const role = (name: string, permissions: Permission[], isOwner = false): Role => ({
@@ -102,5 +102,15 @@ describe("withRequiredPermissions", () => {
 
   it("is satisfied by every default role", () => {
     for (const r of DEFAULT_ROLES) expect(withRequiredPermissions(r.permissions).sort()).toEqual([...r.permissions].sort());
+  });
+});
+
+describe("seesAllCalls", () => {
+  it("is true for owners and anyone with calls.view_all", () => {
+    expect(seesAllCalls({ isOwner: true, permissions: [] })).toBe(true);
+    expect(seesAllCalls({ isOwner: false, permissions: ["calls.view_all"] })).toBe(true);
+  });
+  it("is false for a rep who only sees their own calls", () => {
+    expect(seesAllCalls({ isOwner: false, permissions: ["calls.upload"] })).toBe(false);
   });
 });

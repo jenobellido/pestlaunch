@@ -2,7 +2,7 @@
 
 import { refresh } from "next/cache";
 import { z } from "zod";
-import { can, checkTenantAccess, listMembers } from "@/core/tenancy";
+import { can, checkTenantAccess, listMembers, seesAllCalls } from "@/core/tenancy";
 import { callScope, createTask, deleteTask, findTask, getCall, setTaskStatus } from "@/modules/calls/server";
 
 export type TaskResult = { ok: true } | { ok: false; error: string };
@@ -29,7 +29,7 @@ export async function assignTask(slug: string, callId: string, assigneeId: strin
   const assignee = (await listMembers(access.tenant.id)).find((m) => m.userId === parsed.data.assigneeId);
   if (!assignee) return { ok: false, error: "That person isn't on the team." };
   // ...and so must the assignee, or the follow-up would link to a call they can't open.
-  if (call.employeeId !== assignee.userId && !assignee.role.isOwner && !assignee.role.permissions.includes("calls.view_all")) {
+  if (call.employeeId !== assignee.userId && !seesAllCalls(assignee.role)) {
     return { ok: false, error: `${assignee.displayName} can only see their own calls. Assign this to the call's rep or a manager.` };
   }
   await createTask({ tenantId: access.tenant.id, assignedBy: access.user.id, ...parsed.data });
