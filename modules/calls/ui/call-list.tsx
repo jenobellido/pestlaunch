@@ -24,7 +24,7 @@ export interface CallListItem {
   group: CallGroup;
   /** PestLaunch's call type group (Sales, Service, ...), null until analyzed. */
   typeGroup: CallTypeGroup | null;
-  /** Groups calls by rep for the Rep filter: the member id, or the heard name. */
+  /** Groups calls by rep for the Rep filter: the member id, or "unassigned". */
   repKey: string | null;
   /** Upload time in ms, for the date filter. */
   createdAtMs: number;
@@ -107,7 +107,7 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
 
   const typeCounts = new Map<CallTypeGroup, number>();
   for (const item of items) if (item.typeGroup) typeCounts.set(item.typeGroup, (typeCounts.get(item.typeGroup) ?? 0) + 1);
-  const reps = [...new Map(items.filter((i) => i.repKey).map((i) => [i.repKey!, i.employee ?? "Unknown"]))].sort((a, b) =>
+  const reps = [...new Map(items.filter((i) => i.repKey).map((i) => [i.repKey!, i.employee ?? "Unassigned"]))].sort((a, b) =>
     a[1].localeCompare(b[1]),
   );
   const days = DATE_FILTERS.find((d) => d.id === dateFilter)?.days;
@@ -299,7 +299,7 @@ export function CallList({ items, showScore }: { items: CallListItem[]; showScor
                         <span className="truncate text-sm">{item.employee}</span>
                       </>
                     ) : (
-                      <span className="text-sm text-muted">Unknown</span>
+                      <span className="text-sm text-muted">Unassigned</span>
                     )}
                   </span>
                   {showScore && <span className="hidden lg:block">{item.score ?? <span className="text-sm text-muted">–</span>}</span>}

@@ -42,21 +42,21 @@ export interface EmployeeSummary {
   latestFocus: string | null;
 }
 
-const UNKNOWN = "Unknown rep";
+const UNKNOWN = "Unassigned";
 
 const percent = (s: NonNullable<CoachingCall["score"]>) => (s.points / Math.max(s.maxPoints, 1)) * 100;
 const average = (values: number[]) =>
   values.length ? values.reduce((sum, v) => sum + v, 0) / values.length : null;
 
 /**
- * Groups calls by team member, and unassigned calls by the name heard in the call (compared
- * case-insensitively), then summarises each group.
+ * Groups calls by team member, then summarises each group. Unassigned calls go in one
+ * "Unassigned" group, whatever name was heard on them: a heard name is never a rep.
  */
 export function summarizeTeam(calls: CoachingCall[]): EmployeeSummary[] {
   const groups = new Map<string, CoachingCall[]>();
   for (const call of calls) {
-    const name = call.employeeName?.trim() || UNKNOWN;
-    const key = call.employeeId ? `member:${call.employeeId}` : `heard:${name.toLowerCase()}`;
+    const name = (call.employeeId && call.employeeName?.trim()) || UNKNOWN;
+    const key = call.employeeId ? `member:${call.employeeId}` : "unassigned";
     groups.set(key, [...(groups.get(key) ?? []), { ...call, employeeName: name }]);
   }
 

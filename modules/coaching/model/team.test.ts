@@ -6,15 +6,18 @@ let nextId = 0;
 function call(overrides: Partial<CoachingCall> & { day: number }): CoachingCall {
   const { day, ...rest } = overrides;
   const id = `call-${++nextId}`;
+  // A named call belongs to that team member unless a test says otherwise (employeeId: null).
+  const name = rest.employeeName?.trim();
+  const memberId = rest.employeeId !== undefined ? rest.employeeId : name ? `member-${name.toLowerCase()}` : null;
   return {
     id,
     href: `/example/calls/${id}`,
     title: id,
     callType: "Scheduling",
-    employeeId: null,
     employeeName: null,
     createdAt: new Date(Date.UTC(2026, 0, day)).toISOString(),
     ...rest,
+    employeeId: memberId,
   };
 }
 
@@ -46,24 +49,24 @@ describe("summarizeTeam", () => {
     expect(summaries).toHaveLength(2);
   });
 
-  it("groups unassigned calls by the heard name, ignoring case and spaces", () => {
+  it("puts every unassigned call in one Unassigned group, whatever name was heard", () => {
     const summaries = summarizeTeam([
-      call({ day: 1, employeeName: "Jordan" }),
-      call({ day: 2, employeeName: " jordan " }),
-      call({ day: 3, employeeName: "Casey" }),
+      call({ day: 1, employeeId: null, employeeName: "Jordan" }),
+      call({ day: 2, employeeId: null, employeeName: "Casey" }),
+      call({ day: 3, employeeId: null }),
     ]);
-    expect(summaries.map((s) => s.calls.length)).toEqual([2, 1]);
+    expect(summaries.map((s) => [s.name, s.employeeId, s.calls.length])).toEqual([["Unassigned", null, 3]]);
   });
 
   it("doesn't merge an unassigned call into a member with the same name", () => {
     const summaries = summarizeTeam([
       call({ day: 1, employeeId: "u1", employeeName: "Jordan" }),
-      call({ day: 2, employeeName: "Jordan" }),
+      call({ day: 2, employeeId: null, employeeName: "Jordan" }),
     ]);
-    expect(summaries).toHaveLength(2);
+    expect(summaries.map((s) => s.name)).toEqual(["Jordan", "Unassigned"]);
   });
 
-  it("puts calls with no name under Unknown rep, listed last", () => {
+  it("lists unassigned calls last", () => {
     const summaries = summarizeTeam([
       call({ day: 1 }),
       call({ day: 2, employeeName: "  " }),
@@ -72,7 +75,7 @@ describe("summarizeTeam", () => {
     ]);
     expect(summaries.map((s) => [s.name, s.calls.length])).toEqual([
       ["Casey", 1],
-      ["Unknown rep", 3],
+      ["Unassigned", 3],
     ]);
   });
 

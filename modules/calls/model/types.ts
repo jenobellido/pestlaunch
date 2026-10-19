@@ -49,7 +49,7 @@ export interface CallRecord {
   id: string;
   tenant: string;
   fileName: string;
-  /** Who the call belongs to: the assigned team member's name, else the name heard in the call. */
+  /** The assigned team member's name; null while the call is unassigned. */
   employeeName: string | null;
   /** The team member the call belongs to; null while unassigned. */
   employeeId: string | null;

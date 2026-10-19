@@ -123,12 +123,18 @@ modules/<name>/
   invited email can accept it. No email server is needed: the inviter copies
   the link.
 - **Calls belong to members.** `calls.employee_id` is the team member; the
-  name heard in the call (`employee_name`) is only a hint. A member without
-  `calls.assign` uploads calls as their own, whatever the recording says.
-  Someone with it picks the member, or leaves "Work it out from the call",
-  and processing assigns the one member whose first name matches the heard
-  name. Calls can be reassigned on the call page, which flags a mismatch with
-  the heard name. Without `calls.view_all` a member only sees their own calls
+  name heard in the call (`employee_name`) is only a hint and never becomes
+  a rep. A member without `calls.assign` uploads calls as their own,
+  whatever the recording says. Someone with it picks the member, or leaves
+  "Work it out from the call", and processing assigns the one member whose
+  first name matches the heard name; if nobody (or more than one person)
+  matches, the call stays **Unassigned**. Everywhere a call's rep shows, it's
+  the member or "Unassigned": the Team page puts all unassigned calls in one
+  Unassigned group (not counted as a rep), the call list's Rep filter has an
+  Unassigned option, and an unassigned call's page shows the heard name as a
+  hint ("maybe Marcus", or that nobody on the team has that name). Calls can
+  be reassigned on the call page, which also flags a mismatch with the heard
+  name. Without `calls.view_all` a member only sees their own calls
   and coaching, enforced in the queries (`callScope`), so other calls 404.
 - **Authorization** is enforced in the app, not by RLS. Every table has RLS
   enabled with no policies, so Supabase's public REST API returns nothing.

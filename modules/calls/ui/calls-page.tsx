@@ -75,7 +75,8 @@ export async function CallsPage({
       outcome: call.outcome ? { resolution: call.outcome.resolution } : undefined,
       group: callGroup(call),
       typeGroup: call.callTypeGroup ?? null,
-      repKey: call.employeeId ?? (call.employeeName ? `heard:${call.employeeName.toLowerCase()}` : null),
+      // Team members, plus one "Unassigned" option; a heard name is never a rep.
+      repKey: call.employeeId ?? "unassigned",
       createdAtMs: new Date(call.createdAt).getTime(),
       search: [call.fileName, type, call.employeeName, call.outcome?.summary].filter(Boolean).join(" ").toLowerCase(),
       score: score && call.status === "ready" ? score(call) : undefined,

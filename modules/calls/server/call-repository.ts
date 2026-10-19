@@ -45,7 +45,9 @@ function toRecord(
     id: row.id,
     tenant,
     fileName: row.fileName,
-    employeeName: (row.employeeId && memberName) || row.employeeName,
+    // The rep is always a team member. A name heard in the call never becomes a rep; an
+    // unassigned call stays unassigned, with the heard name kept separately as a hint.
+    employeeName: row.employeeId ? (memberName ?? row.employeeName) : null,
     employeeId: row.employeeId,
     heardEmployeeName: row.employeeName,
     status: stalled ? "failed" : row.status,

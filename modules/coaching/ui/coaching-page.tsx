@@ -78,6 +78,9 @@ function EmployeeCard({
           <p className="text-xs text-muted">
             {employee.calls.length} {employee.calls.length === 1 ? "call" : "calls"} · {employee.scoredCalls} scored
           </p>
+          {!employee.employeeId && (
+            <p className="mt-0.5 text-xs text-orange">Not assigned to anyone on the team. Assign each call to its rep.</p>
+          )}
         </div>
         {score !== null && (
           <div className="text-right">
@@ -213,7 +216,8 @@ export function CoachingPage({
       ) : (
         <>
           <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
-            <Stat label="Reps" value={String(team.length)} />
+            {/* Only team members count; unassigned calls aren't a rep. */}
+            <Stat label="Reps" value={String(team.filter((e) => e.employeeId).length)} />
             <Stat label="Calls reviewed" value={String(calls.length)} hint={`${scored.length} scored`} />
             <Stat
               label="Team average"

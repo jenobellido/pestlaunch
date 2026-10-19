@@ -33,6 +33,25 @@ interface CallDetailProps {
   timelineBandsLabel?: string;
 }
 
+const firstName = (name: string) => name.trim().split(/\s+/)[0]?.toLowerCase() ?? "";
+
+/** The name heard on an unassigned call, as a hint: who it may be, or that nobody matches. */
+function HeardNameHint({ heard, members }: { heard: string; members?: AssignableMember[] }) {
+  const match = members?.filter((m) => firstName(m.name) === firstName(heard));
+  return (
+    <span className="text-xs text-orange">
+      Heard &ldquo;{heard}&rdquo; on the call
+      {!members
+        ? "; not assigned to anyone yet."
+        : match?.length === 1
+          ? `, maybe ${match[0].name}. Pick who it is.`
+          : match && match.length > 1
+            ? `; ${match.length} people on the team have that name. Pick who it is.`
+            : "; no one on the team has that name. Pick who it is, or invite them."}
+    </span>
+  );
+}
+
 function Meta({ icon: Icon, children }: { icon: React.ComponentType<{ className?: string }>; children: React.ReactNode }) {
   return (
     <span className="flex items-center gap-1.5">
@@ -103,8 +122,10 @@ export function CallDetail({
               members={assignableMembers}
             />
           ) : (
-            <Meta icon={UserRound}>{call.employeeName ?? "Unknown rep"}</Meta>
+            <Meta icon={UserRound}>{call.employeeName ?? "Unassigned"}</Meta>
           )}
+          {/* A name heard in the call is only a hint: it's never a rep until someone assigns the call. */}
+          {!call.employeeId && call.heardEmployeeName && <HeardNameHint heard={call.heardEmployeeName} members={assignableMembers} />}
           {/* The name heard in the call is a hint; flag it when it doesn't match the assignment. */}
           {call.employeeId &&
             call.heardEmployeeName &&
