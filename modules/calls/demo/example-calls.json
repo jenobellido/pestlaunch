@@ -758,12 +758,12 @@
      {
       "point": "Present the regular price first, then the discounted price, and close with a scheduling question.",
       "quote": "For mice it's usually about two fifty for the first visit.",
-      "suggestion": "Our regular price for a first visit is $250, but we’re currently offering a 20% discount, so it’s only $200. Would you like to schedule a visit for Tuesday or Wednesday?"
+      "suggestion": "Our regular price for a first visit is $250, but we\u2019re currently offering a 20% discount, so it\u2019s only $200. Would you like to schedule a visit for Tuesday or Wednesday?"
      },
      {
       "point": "Handle objections using the four-step approach.",
       "quote": null,
-      "suggestion": "I hear you, $250 can feel high. Let me explain why it’s worth it. Our service includes traps and a follow-up visit if needed, which saves you time and money in the long run. Does that help address your concern?"
+      "suggestion": "I hear you, $250 can feel high. Let me explain why it\u2019s worth it. Our service includes traps and a follow-up visit if needed, which saves you time and money in the long run. Does that help address your concern?"
      },
      {
       "point": "Mention the referral program at the end of the call.",
@@ -1086,7 +1086,7 @@
      {
       "point": "Ask a more specific open-ended question about the spiders to uncover root cause.",
       "quote": null,
-      "suggestion": "Can you tell me what kind of spiders you’re seeing and how often you notice them on the porch?"
+      "suggestion": "Can you tell me what kind of spiders you\u2019re seeing and how often you notice them on the porch?"
      }
     ]
    },
@@ -1374,17 +1374,85 @@
      {
       "point": "Validate the customer's situation and express empathy before agreeing to cancel.",
       "quote": "Okay, I can cancel that.",
-      "suggestion": "I’m sorry to hear you’re moving; I understand how stressful that can be."
+      "suggestion": "I\u2019m sorry to hear you\u2019re moving; I understand how stressful that can be."
      },
      {
-      "point": "Ask open‑ended questions to uncover the real reason for cancellation.",
+      "point": "Ask open\u2011ended questions to uncover the real reason for cancellation.",
       "quote": "Okay, I can cancel that.",
-      "suggestion": "Can you tell me a bit more about why you’re considering canceling?"
+      "suggestion": "Can you tell me a bit more about why you\u2019re considering canceling?"
      },
      {
       "point": "Offer a tailored solution before confirming cancellation.",
       "quote": null,
-      "suggestion": "We have a few options that might help you keep your service, like a free re‑service or a discounted rate."
+      "suggestion": "We have a few options that might help you keep your service, like a free re\u2011service or a discounted rate."
+     }
+    ]
+   },
+   "sentiment": {
+    "version": 1,
+    "turns": [
+     {
+      "start": 0,
+      "end": 2.3076923076923075,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 2.9076923076923076,
+      "end": 9.061538461538461,
+      "speaker": "customer",
+      "sentiment": "negative",
+      "intensity": 2
+     },
+     {
+      "start": 9.661538461538461,
+      "end": 12.738461538461538,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 13.338461538461537,
+      "end": 14.838461538461537,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 15.438461538461537,
+      "end": 16.93846153846154,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 17.538461538461537,
+      "end": 19.076923076923073,
+      "speaker": "customer",
+      "sentiment": "negative",
+      "intensity": 1
+     },
+     {
+      "start": 19.676923076923075,
+      "end": 23.138461538461534,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 1
+     },
+     {
+      "start": 23.738461538461536,
+      "end": 25.238461538461536,
+      "speaker": "customer",
+      "sentiment": "positive",
+      "intensity": 2
+     },
+     {
+      "start": 25.838461538461537,
+      "end": 27.338461538461537,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
      }
     ]
    }
@@ -1591,6 +1659,81 @@
       "point": "Ask for the customer's name to personalize the interaction.",
       "quote": null,
       "suggestion": "Could you please confirm your name for the record?"
+     }
+    ]
+   },
+   "sentiment": {
+    "version": 1,
+    "turns": [
+     {
+      "start": 0,
+      "end": 4.230769230769231,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 1
+     },
+     {
+      "start": 4.8307692307692305,
+      "end": 13.676923076923078,
+      "speaker": "customer",
+      "sentiment": "negative",
+      "intensity": 1
+     },
+     {
+      "start": 14.276923076923076,
+      "end": 21.584615384615383,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 2
+     },
+     {
+      "start": 22.184615384615384,
+      "end": 27.569230769230767,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 28.16923076923077,
+      "end": 30.861538461538462,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 31.46153846153846,
+      "end": 41.07692307692307,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 1
+     },
+     {
+      "start": 41.676923076923075,
+      "end": 43.176923076923075,
+      "speaker": "customer",
+      "sentiment": "positive",
+      "intensity": 2
+     },
+     {
+      "start": 43.776923076923076,
+      "end": 54.16153846153846,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 1
+     },
+     {
+      "start": 54.761538461538464,
+      "end": 56.261538461538464,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 56.861538461538466,
+      "end": 60.323076923076925,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 2
      }
     ]
    }
@@ -1800,10 +1943,10 @@
      {
       "point": "Include an empathy statement and expectation before asking for card details.",
       "quote": null,
-      "suggestion": "I’m sorry to hear your card was declined—let’s get that updated quickly."
+      "suggestion": "I\u2019m sorry to hear your card was declined\u2014let\u2019s get that updated quickly."
      },
      {
-      "point": "Ask an open‑ended question to confirm the new card details and ensure accuracy.",
+      "point": "Ask an open\u2011ended question to confirm the new card details and ensure accuracy.",
       "quote": null,
       "suggestion": "Could you please read out the new card number and the expiration date so I can update it correctly?"
      },
@@ -1811,6 +1954,81 @@
       "point": "Confirm the payment and ask for agreement before closing.",
       "quote": "Perfect, I've got that new card saved, and I ran this month's payment, so you're all caught up.",
       "suggestion": "Does that look good to you, Sam?"
+     }
+    ]
+   },
+   "sentiment": {
+    "version": 1,
+    "turns": [
+     {
+      "start": 0,
+      "end": 1.5,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 2.1,
+      "end": 6.330769230769231,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 6.930769230769231,
+      "end": 8.430769230769231,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 9.03076923076923,
+      "end": 18.646153846153844,
+      "speaker": "employee",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 19.246153846153845,
+      "end": 25.015384615384615,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 25.615384615384613,
+      "end": 27.92307692307692,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 1
+     },
+     {
+      "start": 28.52307692307692,
+      "end": 30.446153846153845,
+      "speaker": "customer",
+      "sentiment": "neutral",
+      "intensity": 1
+     },
+     {
+      "start": 31.046153846153842,
+      "end": 37.96923076923076,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 2
+     },
+     {
+      "start": 38.569230769230764,
+      "end": 45.107692307692304,
+      "speaker": "employee",
+      "sentiment": "positive",
+      "intensity": 2
+     },
+     {
+      "start": 45.7076923076923,
+      "end": 47.2076923076923,
+      "speaker": "customer",
+      "sentiment": "positive",
+      "intensity": 1
      }
     ]
    }
@@ -2015,23 +2233,23 @@
    "coaching": {
     "focus": "Add an expectation statement before asking questions to set the stage",
     "strengths": [
-     "Empathized with the customer’s frustration: \"I'm sorry you're still seeing them, that's frustrating after a treatment.\", \"Asked an open‑ended question to gather details: \"Where are you seeing them, and are they big or small?\", \"Provided a clear solution and closed the call: \"I'll send the technician back for a free re-service ... Does Monday morning work?\""
+     "Empathized with the customer\u2019s frustration: \"I'm sorry you're still seeing them, that's frustrating after a treatment.\", \"Asked an open\u2011ended question to gather details: \"Where are you seeing them, and are they big or small?\", \"Provided a clear solution and closed the call: \"I'll send the technician back for a free re-service ... Does Monday morning work?\""
     ],
     "improvements": [
      {
       "point": "Add an expectation statement before asking questions to set the stage",
       "quote": null,
-      "suggestion": "I’m going to ask a few questions so I can pinpoint exactly where the roaches are coming from."
+      "suggestion": "I\u2019m going to ask a few questions so I can pinpoint exactly where the roaches are coming from."
      },
      {
-      "point": "Explain why the re‑service is free and what the technician will do",
+      "point": "Explain why the re\u2011service is free and what the technician will do",
       "quote": "Seeing a few in the first couple of weeks is normal while the bait works",
-      "suggestion": "Because the bait takes a few days to work, we’re offering a free re‑service to ensure the problem is fully addressed."
+      "suggestion": "Because the bait takes a few days to work, we\u2019re offering a free re\u2011service to ensure the problem is fully addressed."
      },
      {
       "point": "Ask if there are any other pest concerns before closing",
       "quote": null,
-      "suggestion": "Is there anything else you’re noticing that we should address during the visit?"
+      "suggestion": "Is there anything else you\u2019re noticing that we should address during the visit?"
      }
     ]
    },
