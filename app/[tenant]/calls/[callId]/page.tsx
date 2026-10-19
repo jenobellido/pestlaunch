@@ -104,6 +104,7 @@ export default async function Page({
             tasks={tasks}
             canManage={canAssign}
             currentUserId={user.id}
+            members={members?.map((m) => ({ id: m.userId, name: m.displayName }))}
           />
           {ready && enabled.has("scorecards") && (
             <ScorecardPanel

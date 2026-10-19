@@ -72,6 +72,14 @@ export async function setTaskStatus(tenantId: string, taskId: string, status: "o
     .where(and(eq(callTasks.tenantId, tenantId), eq(callTasks.id, taskId)));
 }
 
+/** Hands the task to someone else; it stays open or done as it was. */
+export async function setTaskAssignee(tenantId: string, taskId: string, assigneeId: string) {
+  await db
+    .update(callTasks)
+    .set({ assigneeId })
+    .where(and(eq(callTasks.tenantId, tenantId), eq(callTasks.id, taskId)));
+}
+
 export async function deleteTask(tenantId: string, taskId: string) {
   await db.delete(callTasks).where(and(eq(callTasks.tenantId, tenantId), eq(callTasks.id, taskId)));
 }

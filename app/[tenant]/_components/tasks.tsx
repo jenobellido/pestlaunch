@@ -5,7 +5,7 @@ import { useId, useState, useTransition } from "react";
 import { ArrowRight, Check, ListTodo, UserPlus, X } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { Spinner } from "@/shared/ui/button";
-import { assignTask, removeTask, setTaskDone, type TaskResult } from "../_lib/task-actions";
+import { assignTask, reassignTask, removeTask, setTaskDone, type TaskResult } from "../_lib/task-actions";
 
 export interface TaskRow {
   id: string;
@@ -111,6 +111,7 @@ function TaskItem({
   canManage,
   mine,
   onCallPage = false,
+  members,
 }: {
   slug: string;
   task: TaskRow;
@@ -118,8 +119,11 @@ function TaskItem({
   mine: boolean;
   /** On the call's own page the link to it is pointless; say whose task it is instead. */
   onCallPage?: boolean;
+  /** Who it can be handed to, for people who assign follow-ups. */
+  members?: Assignee[];
 }) {
   const { pending, error, run } = useAction();
+  const reassignId = useId();
   const done = task.status === "done";
   return (
     <li className="flex items-start gap-3 py-3">
@@ -138,7 +142,27 @@ function TaskItem({
       <div className="min-w-0 flex-1 text-sm">
         <p className={cn("line-clamp-2", done && "text-muted line-through")}>{task.title}</p>
         <p className="mt-0.5 text-xs text-muted">
-          {onCallPage ? (
+          {onCallPage && canManage && members ? (
+            <>
+              <label htmlFor={reassignId}>Follow-up for</label>{" "}
+              <select
+                id={reassignId}
+                value={task.assigneeId}
+                disabled={pending}
+                onChange={(e) => {
+                  const assigneeId = e.target.value;
+                  if (assigneeId !== task.assigneeId) run(() => reassignTask(slug, task.id, assigneeId));
+                }}
+                className="cursor-pointer rounded-md bg-transparent font-medium text-fg underline decoration-line-strong underline-offset-2 outline-none hover:decoration-accent focus-visible:ring-2 focus-visible:ring-accent/40"
+              >
+                {members.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.id === task.assigneeId && mine ? `${m.name} (you)` : m.name}
+                  </option>
+                ))}
+              </select>
+            </>
+          ) : onCallPage ? (
             <>Follow-up for {mine ? "you" : task.assigneeName}</>
           ) : (
             <>
@@ -277,11 +301,14 @@ export function CallTasks({
   tasks,
   canManage,
   currentUserId,
+  members,
 }: {
   slug: string;
   tasks: TaskRow[];
   canManage: boolean;
   currentUserId: string;
+  /** Lets people who assign follow-ups hand one to someone else. */
+  members?: Assignee[];
 }) {
   if (tasks.length === 0) return null;
   return (
@@ -295,6 +322,7 @@ export function CallTasks({
             canManage={canManage}
             mine={t.assigneeId === currentUserId}
             onCallPage
+            members={members}
           />
         ))}
       </ul>

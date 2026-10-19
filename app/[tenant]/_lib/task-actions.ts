@@ -3,7 +3,7 @@
 import { refresh } from "next/cache";
 import { z } from "zod";
 import { can, checkTenantAccess, listMembers } from "@/core/tenancy";
-import { callScope, createTask, deleteTask, findTask, getCall, setTaskStatus } from "@/modules/calls/server";
+import { callScope, createTask, deleteTask, findTask, getCall, setTaskAssignee, setTaskStatus } from "@/modules/calls/server";
 
 export type TaskResult = { ok: true } | { ok: false; error: string };
 
@@ -32,6 +32,28 @@ export async function assignTask(slug: string, callId: string, assigneeId: strin
     return { ok: false, error: "That person isn't on the team." };
   }
   await createTask({ tenantId: access.tenant.id, assignedBy: access.user.id, ...parsed.data });
+  refresh();
+  return { ok: true };
+}
+
+/** Hands a follow-up to someone else. Needs "calls.assign", like assigning it in the first place. */
+export async function reassignTask(slug: string, taskId: string, assigneeId: string): Promise<TaskResult> {
+  if (!z.uuid().safeParse(taskId).success || !z.uuid().safeParse(assigneeId).success) {
+    return { ok: false, error: "Choose who should follow up." };
+  }
+  const result = await checkTenantAccess(slug);
+  if (!result.ok) return { ok: false, error: SESSION_ENDED };
+  const { access } = result;
+  if (!can(access, "calls.assign")) return { ok: false, error: "You don't have permission to reassign follow-ups." };
+  const task = await findTask(access.tenant.id, taskId);
+  if (!task) return { ok: false, error: "That task doesn't exist." };
+  if (!(await getCall(slug, task.callId, callScope({ userId: access.user.id, permissions: access.permissions })))) {
+    return { ok: false, error: "That task doesn't exist." };
+  }
+  if (!(await listMembers(access.tenant.id)).some((m) => m.userId === assigneeId)) {
+    return { ok: false, error: "That person isn't on the team." };
+  }
+  await setTaskAssignee(access.tenant.id, taskId, assigneeId);
   refresh();
   return { ok: true };
 }

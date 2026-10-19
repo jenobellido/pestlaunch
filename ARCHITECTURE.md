@@ -152,7 +152,10 @@ modules/<name>/
   (assigning the rep, review flags, follow-ups). A follow-up can go to
   anyone on the team: it lets the assignee open that one call (and stops
   when the follow-up is removed). A refused assignment says why under the
-  button.
+  button. A call's rep (whose call it is) and its follow-ups (who acts on
+  it) are separate: changing the rep doesn't move a follow-up. On the call
+  page, people with `calls.assign` hand a follow-up to someone else from
+  its "Follow-up for" picker (`reassignTask`).
 - **Authorization** is enforced in the app, not by RLS. Every table has RLS
   enabled with no policies, so Supabase's public REST API returns nothing.
   The server reads data over a direct Postgres connection and checks access
