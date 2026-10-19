@@ -32,11 +32,21 @@ export async function countExampleCalls(tenantId: string): Promise<number> {
   return row?.n ?? 0;
 }
 
-/** Adds the example calls, dated over the last couple of weeks. Does nothing if they're already there. */
-export async function loadExampleCalls(tenantId: string): Promise<number> {
-  if ((await countExampleCalls(tenantId)) > 0) return 0;
+/** The example calls' rep names (they're the same in every company). */
+export const EXAMPLE_REP_NAMES = [...new Set(EXAMPLE_CALLS.map((c) => c.employeeName).filter((n): n is string => !!n))];
+
+/**
+ * Adds the example calls, dated over the last couple of weeks, each assigned to its rep when
+ * `employees` maps the rep's name to a team member. Returns the new calls by file name; empty
+ * if they were already there.
+ */
+export async function loadExampleCalls(
+  tenantId: string,
+  employees: Record<string, string> = {},
+): Promise<{ id: string; fileName: string }[]> {
+  if ((await countExampleCalls(tenantId)) > 0) return [];
   const now = Date.now();
-  await db.insert(calls).values(
+  return db.insert(calls).values(
     EXAMPLE_CALLS.map((c) => ({
       tenantId,
       fileName: c.fileName,
@@ -45,13 +55,13 @@ export async function loadExampleCalls(tenantId: string): Promise<number> {
       callType: c.callType,
       durationSec: c.durationSec,
       employeeName: c.employeeName,
+      employeeId: (c.employeeName && employees[c.employeeName]) || null,
       transcript: c.transcript,
       outcome: c.outcome,
       analyses: c.analyses,
       createdAt: new Date(now - c.daysAgo * DAY_MS),
     })),
-  );
-  return EXAMPLE_CALLS.length;
+  ).returning({ id: calls.id, fileName: calls.fileName });
 }
 
 /** Removes the example calls (and anything hanging off them, like follow-ups). Real calls are untouched. */

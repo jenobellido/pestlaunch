@@ -7,7 +7,7 @@ import { ModuleToggles, type ModuleRow } from "../_components/module-toggles";
 import { NameForm } from "../_components/name-form";
 import { SettingsPage, SettingsSection } from "../_components/settings-frame";
 import { ExampleCallsSetting } from "../../_components/example-calls";
-import { countExampleCalls } from "@/modules/calls/server";
+import { exampleDataStatus } from "../../_lib/example-data";
 
 const NO_PERMISSION = "You don't have permission to change this.";
 
@@ -18,7 +18,7 @@ export default async function CompanySettingsPage({ params }: PageProps<"/[tenan
   const canCompany = can(access, "company.manage");
   const canModules = can(access, "modules.manage");
   const canExamples = can(access, "calls.upload");
-  const examples = await countExampleCalls(tenant.id);
+  const examples = await exampleDataStatus(tenant.id);
 
   const modules: ModuleRow[] = moduleRegistry.map((m) => {
     const Icon = m.nav?.[0]?.icon ?? LayoutGrid;
@@ -64,10 +64,10 @@ export default async function CompanySettingsPage({ params }: PageProps<"/[tenan
 
       <SettingsSection
         id="settings-example-calls"
-        title="Example calls"
-        description={`Seven made-up calls to show how PestLaunch works, for demos or training.${canExamples ? "" : ` ${NO_PERMISSION}`}`}
+        title="Example data"
+        description={`Made-up calls and reps to show how PestLaunch works, for demos or training.${canExamples ? "" : ` ${NO_PERMISSION}`}`}
       >
-        <ExampleCallsSetting slug={slug} count={examples} canEdit={canExamples} />
+        <ExampleCallsSetting slug={slug} calls={examples.calls} reps={examples.reps} canEdit={canExamples} />
       </SettingsSection>
     </SettingsPage>
   );

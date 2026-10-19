@@ -13,6 +13,7 @@ export {
 } from "./tenant-repository";
 export {
   acceptInvite,
+  addMember,
   createInvite,
   createRole,
   deleteRole,

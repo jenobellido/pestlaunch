@@ -2,7 +2,9 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { LayoutGrid } from "lucide-react";
 import { can, listInvites, listMembers } from "@/core/tenancy";
-import { callScope, countExampleCalls, listCalls, listTasks } from "@/modules/calls/server";
+import { callScope, listCalls, listTasks } from "@/modules/calls/server";
+import { isPlaceholderEmail } from "@/core/auth/admin";
+import { exampleDataStatus } from "./_lib/example-data";
 import { isModuleEnabled } from "@/modules/registry";
 import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
 import { Overview, RangeChips } from "./_components/overview";
@@ -30,7 +32,7 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
     canAssign || canInvite ? listMembers(tenant.id) : Promise.resolve(null),
     canInvite ? listInvites(tenant.id) : Promise.resolve([]),
     cookies(),
-    countExampleCalls(tenant.id),
+    exampleDataStatus(tenant.id),
   ]);
   const mine = !can(access, "calls.view_all");
 
@@ -38,10 +40,12 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
     slug: tenant.slug,
     can: { upload: canUpload, invite: canInvite, review: can(access, "calls.review"), assign: canAssign },
     // Example calls don't count: the step is about the company's own first recording.
-    callCount: calls.length - examples,
-    teamSize: (members?.length ?? 1) + invites.length,
+    callCount: calls.length - examples.calls,
+    // Example reps don't count as having invited your team.
+    teamSize: (members?.filter((m) => !isPlaceholderEmail(m.email)).length ?? 1) + invites.length,
     reviewedCount: calls.filter((c) => c.review).length,
-    taskCount: tasks.length,
+    // Example follow-ups (on example calls) don't count either.
+    taskCount: tasks.filter((t) => !t.callTitle.startsWith("Example - ")).length,
   });
   const setup = showSetup(steps, jar.get(setupCookieName(tenant.id))?.value === "1");
 
@@ -57,7 +61,7 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
       />
       {/* A new company can load made-up calls to try every page; then a bar says they're examples. */}
       {canUpload && calls.length === 0 && <ExampleCallsOffer slug={tenant.slug} />}
-      {canUpload && examples > 0 && <ExampleCallsBar slug={tenant.slug} count={examples} />}
+      {canUpload && examples.loaded && <ExampleCallsBar slug={tenant.slug} calls={examples.calls} reps={examples.reps} />}
       {setup && <SetupChecklist slug={tenant.slug} steps={steps} />}
       <Overview
         insights={summarize(inRange(dashboardCalls, range))}

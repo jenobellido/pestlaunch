@@ -266,15 +266,21 @@ the app without exposing real recordings. Scripts import server code through
 `scripts/allow-server-only.cjs`, which points the `server-only` guard at an
 empty module outside Next.
 
-**Example calls in the app.** A company can load the same 7 invented calls
-itself: a "Try it with example calls" card on the Overview while it has no
-calls, and a Load / Remove switch in Settings → Company (needs
-`calls.upload`). They come from `modules/calls/demo/example-calls.json`, the
-demo calls with their saved results (outcome, scorecard, coaching,
-sentiment), so loading runs no AI and costs nothing. Their recording path is
-a marker (`<tenant>/example-….none`), never a file, which is how they're told
-apart from real calls and removed without touching them. They don't count
-towards the setup checklist's "Upload your first call".
+**Example data in the app.** A company can load example data itself: a "Try
+it with example data" card on the Overview while it has no calls, and a Load
+/ Remove switch in Settings → Company (needs `calls.upload`). It's the 7
+invented demo calls (`modules/calls/demo/example-calls.json`, with their
+saved outcome, scorecard, coaching and sentiment, so no AI runs and nothing
+is charged) plus the 3 reps who made them, each call assigned to its rep, a
+few follow-ups (one for whoever loaded it, one done) and two coaching plays
+(`app/[tenant]/_lib/example-data.ts`). The reps are placeholder users made
+with Supabase's admin API (`core/auth/admin.ts`): a random password nobody
+sees and an `@example.invalid` address that can't receive email, so they can
+never sign in. Example calls have a marker recording path
+(`<tenant>/example-….none`), never a file. Removing deletes the example calls
+and the placeholder users, and their follow-ups and plays go with them; the
+admin helper refuses any other address, so real people are never touched.
+Example calls, reps and follow-ups don't count towards the setup checklist.
 
 ## Rep page
 

@@ -18,7 +18,7 @@ function useAction() {
   return { pending, error, run };
 }
 
-/** For a company with no calls yet: load 7 example calls to see every page working. */
+/** For a company with no calls yet: load the example data to see every page working. */
 export function ExampleCallsOffer({ slug }: { slug: string }) {
   const { pending, error, run } = useAction();
   return (
@@ -27,10 +27,10 @@ export function ExampleCallsOffer({ slug }: { slug: string }) {
         <Sparkles className="size-5" aria-hidden />
       </span>
       <div className="min-w-0 flex-1">
-        <h2 className="text-[15px] font-medium">Try it with example calls</h2>
+        <h2 className="text-[15px] font-medium">Try it with example data</h2>
         <p className="text-sm text-muted">
-          Load 7 made-up calls, already scored and coached, to see how everything works before you upload your own. You can
-          remove them anytime.
+          Load 7 made-up calls and 3 example reps (Jordan, Priya and Marcus), already scored and coached, with follow-ups to
+          work through. See how everything fits before you upload your own. Remove it anytime.
         </p>
         {error && (
           <p role="alert" className="mt-1 text-sm text-danger">
@@ -40,20 +40,20 @@ export function ExampleCallsOffer({ slug }: { slug: string }) {
       </div>
       <button type="button" disabled={pending} onClick={() => run(() => loadExamples(slug))} className={cn(primaryButton, "shrink-0")}>
         {pending && <Spinner className="size-4" />}
-        {pending ? "Loading…" : "Load example calls"}
+        {pending ? "Loading…" : "Load example data"}
       </button>
     </section>
   );
 }
 
 /** Shown while the example calls are in: a reminder they're made up, and a way to clear them. */
-export function ExampleCallsBar({ slug, count }: { slug: string; count: number }) {
+export function ExampleCallsBar({ slug, calls, reps }: { slug: string; calls: number; reps: number }) {
   const { pending, error, run } = useAction();
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl bg-accent/10 px-4 py-2.5 text-sm">
       <Sparkles className="size-4 shrink-0 text-accent" aria-hidden />
       <span className="min-w-0 flex-1">
-        {count} example calls are loaded. They&apos;re made up; upload a recording to see your own.
+        Example data is loaded: {calls} calls{reps > 0 && ` and ${reps} reps`}. It&apos;s made up; upload a recording to see your own.
       </span>
       {error && (
         <span role="alert" className="text-danger">
@@ -64,7 +64,7 @@ export function ExampleCallsBar({ slug, count }: { slug: string; count: number }
         type="button"
         disabled={pending}
         onClick={() => {
-          if (confirm("Remove the example calls? Your own calls stay.")) run(() => removeExamples(slug));
+          if (confirm("Remove the example calls, reps and their follow-ups? Your own data stays.")) run(() => removeExamples(slug));
         }}
         className="press inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium text-accent hover:bg-accent/15"
       >
@@ -75,18 +75,28 @@ export function ExampleCallsBar({ slug, count }: { slug: string; count: number }
   );
 }
 
-/** Settings → Company: load or remove the example calls at any time, even once there are real calls. */
-export function ExampleCallsSetting({ slug, count, canEdit }: { slug: string; count: number; canEdit: boolean }) {
+/** Settings → Company: load or remove the example data at any time, even once there's real data. */
+export function ExampleCallsSetting({
+  slug,
+  calls,
+  reps,
+  canEdit,
+}: {
+  slug: string;
+  calls: number;
+  reps: number;
+  canEdit: boolean;
+}) {
   const { pending, error, run } = useAction();
-  const loaded = count > 0;
+  const loaded = calls > 0 || reps > 0;
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div className="min-w-0 text-sm">
-        <p className="font-medium">{loaded ? `${count} example calls loaded` : "No example calls"}</p>
+        <p className="font-medium">{loaded ? `Loaded: ${calls} calls and ${reps} reps` : "Not loaded"}</p>
         <p className="text-muted">
           {loaded
-            ? "They show up everywhere with your own calls. Removing them leaves your own calls untouched."
-            : "Made-up calls, already scored and coached, to try every page. Nothing is processed or charged."}
+            ? "They show up alongside your own data. Removing them takes away the example calls, reps, follow-ups and plays, and nothing else."
+            : "7 made-up calls and 3 example reps, already scored and coached, with follow-ups and coaching plays. Nothing is processed or charged."}
         </p>
         {error && (
           <p role="alert" className="mt-1 text-danger">
@@ -100,7 +110,7 @@ export function ExampleCallsSetting({ slug, count, canEdit }: { slug: string; co
           disabled={pending}
           onClick={() => {
             if (!loaded) run(() => loadExamples(slug));
-            else if (confirm("Remove the example calls? Your own calls stay.")) run(() => removeExamples(slug));
+            else if (confirm("Remove the example calls, reps and their follow-ups? Your own data stays.")) run(() => removeExamples(slug));
           }}
           className={cn(
             "press inline-flex h-10 shrink-0 items-center gap-2 rounded-full px-4 text-sm font-medium",
@@ -108,7 +118,7 @@ export function ExampleCallsSetting({ slug, count, canEdit }: { slug: string; co
           )}
         >
           {pending && <Spinner className="size-4" />}
-          {loaded ? "Remove example calls" : "Load example calls"}
+          {loaded ? "Remove example data" : "Load example data"}
         </button>
       )}
     </div>

@@ -28,9 +28,10 @@ them.
 
 Beyond the brief, it's ready for a real team:
 
-- **Example calls:** a new company can load 7 made-up calls, already
-  scored and coached, to see every page working before uploading its own,
-  and remove them anytime (Overview, or Settings → Company). No AI runs.
+- **Example data:** a new company can load 7 made-up calls and 3 example
+  reps (who can't sign in), already scored and coached, with follow-ups and
+  coaching plays, to see every page working before uploading its own. Remove
+  it anytime (Overview, or Settings → Company). No AI runs.
 - A **Get set up** checklist on the Overview walks a new company through
   its first call, inviting the team, checking a score and assigning a
   follow-up. Steps tick off from what's actually in the workspace.

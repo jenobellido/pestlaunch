@@ -2,26 +2,41 @@
 
 import { refresh } from "next/cache";
 import { can, checkTenantAccess } from "@/core/tenancy";
-import { loadExampleCalls, removeExampleCalls } from "@/modules/calls/server";
+import { loadExampleData, removeExampleData } from "./example-data";
 
 export type ExampleResult = { ok: true } | { ok: false; error: string };
 
-/** Loads the 7 invented example calls into this company. No AI runs; their results come with them. */
-export async function loadExamples(slug: string): Promise<ExampleResult> {
+async function uploader(slug: string) {
   const result = await checkTenantAccess(slug);
-  if (!result.ok) return { ok: false, error: "Your session ended. Log in again." };
-  if (!can(result.access, "calls.upload")) return { ok: false, error: "You don't have permission to add calls." };
-  await loadExampleCalls(result.access.tenant.id);
+  if (!result.ok) return { error: "Your session ended. Log in again." } as const;
+  if (!can(result.access, "calls.upload")) return { error: "You don't have permission to change the example data." } as const;
+  return { tenantId: result.access.tenant.id, userId: result.access.user.id } as const;
+}
+
+/** Loads the example calls, reps, follow-ups and plays. No AI runs; their results come with them. */
+export async function loadExamples(slug: string): Promise<ExampleResult> {
+  const u = await uploader(slug);
+  if ("error" in u) return { ok: false, error: u.error! };
+  try {
+    await loadExampleData(u.tenantId, u.userId);
+  } catch (err) {
+    console.error("[examples] load failed", err instanceof Error ? err.message : err);
+    return { ok: false, error: "The example data couldn't be loaded. Try again." };
+  }
   refresh();
   return { ok: true };
 }
 
-/** Removes the example calls; the company's own calls stay. */
+/** Removes all example data; the company's own calls and people stay. */
 export async function removeExamples(slug: string): Promise<ExampleResult> {
-  const result = await checkTenantAccess(slug);
-  if (!result.ok) return { ok: false, error: "Your session ended. Log in again." };
-  if (!can(result.access, "calls.upload")) return { ok: false, error: "You don't have permission to remove calls." };
-  await removeExampleCalls(result.access.tenant.id);
+  const u = await uploader(slug);
+  if ("error" in u) return { ok: false, error: u.error! };
+  try {
+    await removeExampleData(u.tenantId);
+  } catch (err) {
+    console.error("[examples] remove failed", err instanceof Error ? err.message : err);
+    return { ok: false, error: "The example data couldn't be removed. Try again." };
+  }
   refresh();
   return { ok: true };
 }

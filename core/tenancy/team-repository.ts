@@ -149,6 +149,11 @@ export async function removeMember(tenantId: string, actor: Role, userId: string
   await db.delete(tenantMembers).where(and(eq(tenantMembers.tenantId, tenantId), eq(tenantMembers.userId, userId)));
 }
 
+/** Adds someone to the company with a role (used for example data; people normally join by invite). */
+export async function addMember(tenantId: string, userId: string, roleId: string, displayName: string) {
+  await db.insert(tenantMembers).values({ tenantId, userId, roleId, displayName }).onConflictDoNothing();
+}
+
 /** Keeps the name shown on calls and coaching in step with the user's profile. */
 export async function updateMemberDisplayName(userId: string, displayName: string) {
   await db.update(tenantMembers).set({ displayName }).where(eq(tenantMembers.userId, userId));
