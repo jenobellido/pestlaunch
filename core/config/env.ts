@@ -20,6 +20,11 @@ const schema = z.object({
    * use AI_CHAT_MODEL. Empty means AI_CHAT_MODEL for everything.
    */
   AI_CHAT_FAST_MODEL: z.string().default("gpt-5.4-mini"),
+  /**
+   * When set, creating a new company needs this code, so a deployed app isn't open to anyone.
+   * Joining a company through an invite link never needs it. Empty: sign-up is open.
+   */
+  SIGNUP_CODE: z.string().default(""),
 });
 
 /** Server-side environment, validated once at startup. */

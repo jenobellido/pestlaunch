@@ -1,8 +1,10 @@
 "use server";
 
+import { timingSafeEqual } from "node:crypto";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { acceptInvite, createTenantForOwner, getInviteByToken, TeamError } from "@/core/tenancy";
+import { serverEnv } from "@/core/config/env";
 import { requireUser } from "./session";
 import { createSupabaseServerClient } from "./supabase-server";
 
@@ -17,6 +19,17 @@ const credentials = {
   password: z.string().min(8, "Password must be at least 8 characters."),
 };
 const companyName = z.string().trim().min(2, "Enter your company name.").max(80);
+
+/** Whether new companies need the sign-up code (set SIGNUP_CODE on a deployed app). */
+export async function signupCodeRequired() {
+  return serverEnv.SIGNUP_CODE !== "";
+}
+
+function signupCodeMatches(value: FormDataEntryValue | null) {
+  const given = Buffer.from(typeof value === "string" ? value.trim() : "");
+  const expected = Buffer.from(serverEnv.SIGNUP_CODE);
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
 
 /** Only same-site paths, so a crafted ?next= can't redirect off-site. */
 function safeNextPath(value: FormDataEntryValue | null): string {
@@ -46,6 +59,10 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
   const inviteToken = String(formData.get("invite") ?? "");
   const invite = inviteToken ? await getInviteByToken(inviteToken) : null;
   if (inviteToken && !invite) return { error: "This invite has expired or was cancelled. Ask for a new one.", values };
+  // New companies need the access code when one is set; an invite is its own permission.
+  if (!invite && serverEnv.SIGNUP_CODE && !signupCodeMatches(formData.get("signupCode"))) {
+    return { error: "That access code isn't right. Ask PestLaunch for one, or use your invite link.", values };
+  }
 
   const parsed = z
     .object({

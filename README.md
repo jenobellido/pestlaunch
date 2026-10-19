@@ -131,7 +131,9 @@ ARCHITECTURE.md). The AI client works with any OpenAI-compatible API: to use Gro
 instead, set `AI_BASE_URL`, the model names and a Groq key as shown in
 `.env.example`. No code changes are needed.
 
-Open http://localhost:3000 and create an account. Locally, email confirmation
+Open http://localhost:3000 and create an account. On a deployed app, set
+`SIGNUP_CODE`: creating a new company then needs that access code, so the
+app isn't open to anyone, while invite links still work without it. Locally, email confirmation
 is off and confirmation emails are caught by Mailpit at http://127.0.0.1:56424.
 
 This project uses ports 56420–56429, so it can run beside other local
