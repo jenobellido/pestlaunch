@@ -95,8 +95,8 @@ export function ExampleCallsSetting({
         <p className="font-medium">{loaded ? `Loaded: ${calls} calls and ${reps} reps` : "Not loaded"}</p>
         <p className="text-muted">
           {loaded
-            ? "They show up alongside your own data. Removing them takes away the example calls, reps, follow-ups and plays, and nothing else."
-            : "7 made-up calls and 3 example reps, already scored and coached, with follow-ups and coaching plays. Nothing is processed or charged."}
+            ? "They show up alongside your own data. Removing them takes away the example calls, reps, follow-ups and coaching focus, and nothing else."
+            : "7 made-up calls and 3 example reps, already scored and coached, with follow-ups and coaching focus. Nothing is processed or charged."}
         </p>
         {error && (
           <p role="alert" className="mt-1 text-danger">

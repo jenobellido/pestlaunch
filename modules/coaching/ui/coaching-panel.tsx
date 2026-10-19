@@ -2,7 +2,14 @@ import { Target, ThumbsUp } from "lucide-react";
 import { Card, CardTitle } from "@/shared/ui/card";
 import type { CoachingFeedback } from "../model/types";
 
-export function CoachingPanel({ feedback }: { feedback: CoachingFeedback | undefined }) {
+export function CoachingPanel({
+  feedback,
+  improvementAction,
+}: {
+  feedback: CoachingFeedback | undefined;
+  /** Drawn under each improvement, e.g. "Make this a coaching focus" (the app layer fills it). */
+  improvementAction?: (improvement: CoachingFeedback["improvements"][number]) => React.ReactNode;
+}) {
   if (!feedback) return null;
   return (
     <Card>
@@ -41,6 +48,7 @@ export function CoachingPanel({ feedback }: { feedback: CoachingFeedback | undef
                   <span className="font-medium text-accent">Try: </span>
                   {p.suggestion}
                 </p>
+                {improvementAction?.(p)}
               </li>
             ))}
           </ul>

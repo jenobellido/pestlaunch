@@ -23,10 +23,10 @@ export async function assignPlay(
   detail: string | null,
 ): Promise<PlayResult> {
   const parsed = assignInput.safeParse({ assigneeId, title, detail });
-  if (!parsed.success) return { ok: false, error: "Give the play a short title." };
+  if (!parsed.success) return { ok: false, error: "Give the focus a short title (3 to 120 characters)." };
   const access = await checkTenantAccess(slug);
   if (!access.ok) return { ok: false, error: SESSION_ENDED };
-  if (!can(access.access, "coaching.manage")) return { ok: false, error: "You don't have permission to assign plays." };
+  if (!can(access.access, "coaching.manage")) return { ok: false, error: "You don't have permission to assign coaching." };
   const { tenant, user } = access.access;
   if (!(await listMembers(tenant.id)).some((m) => m.userId === parsed.data.assigneeId)) {
     return { ok: false, error: "That person isn't on the team." };

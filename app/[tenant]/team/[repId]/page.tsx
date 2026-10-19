@@ -228,8 +228,9 @@ async function RepBody({ params }: { params: PageProps<"/[tenant]/team/[repId]">
                 heading={
                   repId === user.id
                     ? undefined
-                    : { title: "Plays", description: `Coaching assigned to ${member.displayName.split(/\s+/)[0]}.` }
+                    : { title: "Coaching focus", description: `What ${member.displayName.split(/\s+/)[0]} is working on.` }
                 }
+                addFor={{ id: repId, name: member.displayName }}
               />
               <TasksCard
                 slug={tenant.slug}

@@ -754,10 +754,20 @@ three most-missed steps, the latest focus and recent calls. The app layer
 (`app/[tenant]/coaching/page.tsx`) builds a plain `CoachingCall` list from
 the calls and scorecards modules, so the coaching module imports neither.
 
-**Plays** (`coaching_plays`, owned by the coaching module): a concrete thing
-for one team member to work on. When a member misses the same scorecard step
-on at least two calls, their card suggests a play ("Work on 'Expectation
-Statement'"), and anyone with `coaching.manage` assigns it in one click. The
-assignee sees it under "Your plays" and marks it done. Managers see and
-remove every play. The buttons are app-layer server actions passed into the
-coaching module's page through slots.
+**Coaching focus** (stored as "plays", `coaching_plays`, owned by the coaching
+module): a concrete thing for one rep to work on. "Play" was sales jargon, so
+the screens say "coaching focus". Three ways to create one, all needing
+`coaching.manage`:
+- **Suggested:** when a rep misses the same scorecard step on at least two
+  calls, their Team card suggests a focus ("Work on 'Expectation
+  Statement'"), assigned in one click.
+- **Your own:** "Add a focus for <rep>" on the rep's page: a short title and,
+  optionally, what good looks like.
+- **From a call:** each coaching improvement on a call assigned to a rep has
+  "Make this <rep>'s focus", which saves the improvement with its "Try:"
+  line; it shows as done if that focus is already open. The coaching panel
+  takes this as an `improvementAction` slot, so the coaching module doesn't
+  know about assigning.
+The rep sees their focus on the Team page and their own page and marks it
+done; managers see and remove everyone's. The buttons are app-layer server
+actions passed into the coaching module through slots.

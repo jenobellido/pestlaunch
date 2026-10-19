@@ -10,6 +10,8 @@ import {
   listTasks,
 } from "@/modules/calls/server";
 import { CoachingPanel, getCoachingFeedback } from "@/modules/coaching";
+import { listPlays } from "@/modules/coaching/server";
+import { MakeFocusButton } from "../../team/_components/plays";
 import { getCallSentiment, SentimentPanel, sentimentRanges } from "@/modules/sentiment";
 import { getEnabledModuleIds } from "@/modules/registry";
 import {
@@ -42,13 +44,18 @@ export default async function Page({
   );
   if (!call) notFound();
 
-  const [enabled, recordingUrl, members, tasks, catalog] = await Promise.all([
+  // People who manage coaching can turn a call's coaching into a focus for its rep.
+  const canCoach = can(access, "coaching.manage") && !!call.employeeId;
+  const [enabled, recordingUrl, members, tasks, catalog, repPlays] = await Promise.all([
     getEnabledModuleIds(tenant.slug),
     getCallRecordingUrl(tenant.slug, callId),
     canAssign ? listMembers(tenant.id) : Promise.resolve(null),
     listTasks(tenant.id, { callId }),
     getCallTypes(tenant.id),
+    canCoach ? listPlays(tenant.id, { assigneeId: call.employeeId! }) : Promise.resolve([]),
   ]);
+  const focusFor = canCoach ? { id: call.employeeId!, name: call.employeeName ?? "this rep" } : null;
+  const openFocus = new Set(repPlays.filter((p) => p.status === "open").map((p) => p.title));
   // A reviewer picks from the company's enabled types, plus the call's current one.
   const reviewTypes = activeCallTypes(catalog)
     .concat(call.callType && !activeCallTypes(catalog).some((t) => t.key === call.callType) ? [findCallType(catalog, call.callType)] : [])
@@ -121,7 +128,22 @@ export default async function Page({
       }
     >
       {ready && enabled.has("coaching") && (
-        <CoachingPanel feedback={getCoachingFeedback(call.analyses)} />
+        <CoachingPanel
+          feedback={getCoachingFeedback(call.analyses)}
+          improvementAction={
+            focusFor
+              ? (p) => (
+                  <MakeFocusButton
+                    slug={tenant.slug}
+                    assignee={focusFor}
+                    title={p.point}
+                    detail={`Try: ${p.suggestion}`}
+                    alreadyAssigned={openFocus.has(p.point)}
+                  />
+                )
+              : undefined
+          }
+        />
       )}
       {sentiment && call.transcript && (
         <SentimentPanel sentiment={sentiment} transcript={call.transcript} durationSec={call.durationSec} />
