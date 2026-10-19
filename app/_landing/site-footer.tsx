@@ -9,7 +9,10 @@ export function SiteFooter() {
           <Logo />
           <p className="mt-2 text-sm text-muted">Call Intelligence for pest control companies.</p>
         </div>
-        <nav aria-label="Footer" className="flex gap-6 text-sm text-muted">
+        <nav aria-label="Footer" className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted">
+          <a href="#features" className="hover:text-fg">
+            Features
+          </a>
           <a href="#how" className="hover:text-fg">
             How it works
           </a>

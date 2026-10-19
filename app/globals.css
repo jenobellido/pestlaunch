@@ -246,11 +246,6 @@ textarea {
 }
 
 /* Landing page (app/_landing). Decorative loops, so they stop under reduced motion. */
-@keyframes landing-fade-in {
-  from {
-    opacity: 0;
-  }
-}
 @keyframes landing-bar {
   0%,
   100% {

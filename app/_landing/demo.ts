@@ -80,3 +80,11 @@ export const demoCoaching: CoachingFeedback = {
     },
   ],
 };
+
+/** The caller's mood across the call, as shares of the call, for the sentiment lane. */
+export const demoMood: { mood: "positive" | "neutral" | "negative"; share: number }[] = [
+  { mood: "neutral", share: 8 },
+  { mood: "negative", share: 14 },
+  { mood: "neutral", share: 30 },
+  { mood: "positive", share: 48 },
+];

@@ -3,6 +3,7 @@
 import { AudioLines, ClipboardCheck, MessageSquareText, Upload } from "lucide-react";
 import { motion } from "motion/react";
 import { EASE_OUT } from "@/shared/ui/motion";
+import { SectionHeading } from "./section-heading";
 
 const STAGES = [
   { icon: Upload, verb: "Upload", line: "Drop in a recording, or a whole day of them at once." },
@@ -15,16 +16,12 @@ const STAGES = [
 export function HowItWorks() {
   return (
     <section id="how" className="scroll-mt-20 border-y border-line bg-panel">
-      <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:py-28">
-        <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
-          transition={{ duration: 0.8, ease: EASE_OUT }}
-          className="max-w-2xl text-3xl leading-tight font-medium tracking-tight text-balance sm:text-4xl"
-        >
-          From a recording to a coaching note in about a minute.
-        </motion.h2>
+      <div className="mx-auto max-w-6xl px-4 py-24 sm:px-6 lg:py-32">
+        <SectionHeading
+          eyebrow="How it works"
+          title="From a recording to a coaching note in about a minute."
+          lede="Upload the recordings you already have, one or a whole day at once. PestLaunch does the listening."
+        />
 
         <div className="relative mt-16">
           {/* The connecting line: horizontal on wide screens, vertical on phones. */}
@@ -57,7 +54,8 @@ export function HowItWorks() {
                   <Icon className="size-5" aria-hidden />
                 </span>
                 <div>
-                  <h3 className="text-lg font-medium">{verb}</h3>
+                  <p className="text-xs font-medium text-muted tabular-nums">Step {i + 1}</p>
+                  <h3 className="mt-0.5 text-lg font-medium">{verb}</h3>
                   <p className="mt-1.5 max-w-[30ch] text-sm text-pretty text-muted">{line}</p>
                 </div>
               </motion.li>

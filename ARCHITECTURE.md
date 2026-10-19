@@ -12,7 +12,7 @@ proxy.ts                 Refreshes the Supabase session; sends signed-out users 
 instrumentation-client.ts  Runs in the browser before the app is interactive: guards view transitions
 app/                     Routing only: thin pages, layouts, route handlers
   page.tsx               Landing page (signed-in users go straight to their workspace)
-  _landing/              Landing sections, the 3D hero scene and its invented demo call
+  _landing/              Landing sections and the invented demo call they show
   (auth)/                /login, /signup, /onboarding
   [tenant]/              UI, e.g. /noble-pest/calls
     _components/         TenantNav (enabled modules, Settings, user menu), PageSkeleton
@@ -499,19 +499,20 @@ before it renders.
 
 | Section | What it shows |
 | --- | --- |
-| Hero | Headline and calls to action beside a 3D scene (`hero-scene.tsx`, react-three-fiber): a ring of sound bars coloured by speaker, like the call timeline, with particles spiralling into a glowing core. Calls turning into insight. |
-| Product preview | A reviewed call: the app's own `ScorecardPanel` and `CoachingPanel`, rendered with an invented call (`demo.ts`). It tilts flat as it scrolls in. |
-| Questions | The owner questions from PestLaunch's walkthrough, and where the app answers each one |
+| Hero | One centred column: headline, the two calls to action and three promises, over a faint grid and a soft blue glow |
+| Product preview | Right under the hero, as its picture: a reviewed call in a window frame, with the app's own `ScorecardPanel` and `CoachingPanel`, a speaker timeline and a caller-mood lane, rendered with an invented call (`demo.ts`). It tilts flat as it scrolls in. Three callouts below it: transcribed, scored, coached. |
 | How it works | Upload, Transcribe, Score, Coach, joined by a line that draws itself |
-| Features | A bento of five cells: scorecards, speaker timeline, manager review, follow-ups, roles |
-| Privacy | How recordings and company data are kept apart and deleted |
+| Features | A bento of six cells: scored on your manual, coaching that writes itself, sentiment across the call, follow-ups, manager review, roles for owners, managers and reps |
+| Questions | The owner questions from PestLaunch's walkthrough, numbered, and where the app answers each one |
+| Privacy | How recordings and company data are kept apart, card numbers masked and calls deleted |
+| Closing | A framed call to action over breathing sound bars |
 
-- **3D:** three.js through `@react-three/fiber`, loaded only in the browser
-  after the text has painted (`next/dynamic`, `ssr: false`). Colours come from
-  the theme tokens and follow the theme switch. The camera backs off to fit
-  the canvas, so the ring fits at any width. It stops drawing when scrolled
-  out of view, draws one still frame under reduced motion, and if WebGL isn't
-  available the hero keeps its CSS glow. Fewer bars and particles on phones.
+Every section after the hero opens with the same `SectionHeading` (eyebrow,
+title, lede), so they share one rhythm.
+
+- **No 3D:** an earlier version had a react-three-fiber hero. It was dropped
+  because the off-centre scene looked unbalanced, and the page no longer ships
+  three.js.
 - **Motion:** `motion/react` for entrances, staggered reveals and the scroll
   tilt (`shared/ui/motion.tsx`, ported from Freehold; `MotionProvider`
   honours reduced motion). Decorative CSS loops (`landing-bar`,
