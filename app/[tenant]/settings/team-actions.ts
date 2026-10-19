@@ -5,15 +5,18 @@ import { refresh } from "next/cache";
 import { z } from "zod";
 import {
   can,
+  canGrantRole,
   checkTenantAccess,
   createInvite,
   createRole,
   deleteRole,
+  getRole,
   removeMember,
   revokeInvite,
   setMemberRole,
   TeamError,
   updateRole,
+  withRequiredPermissions,
   type Permission,
   type TenantAccess,
 } from "@/core/tenancy";
@@ -105,17 +108,29 @@ export async function saveRole(
   const parsed = roleInput.safeParse({ name, permissions });
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0].message };
   return withPermission(slug, "roles.manage", async (access) => {
+    // Acting on calls needs seeing them, so required permissions come along (e.g. review → see every call).
+    const permissions = withRequiredPermissions(parsed.data.permissions);
     // Same rule as granting: you can't create or edit a role with more access than your own.
-    const extra = parsed.data.permissions.filter((p) => !access.permissions.includes(p as Permission));
+    const extra = permissions.filter((p) => !access.permissions.includes(p as Permission));
     if (extra.length > 0) throw new TeamError("A role can't have permissions you don't have yourself.");
-    if (roleId) await updateRole(access.tenant.id, roleId, parsed.data.name, parsed.data.permissions);
-    else await createRole(access.tenant.id, parsed.data.name, parsed.data.permissions);
+    if (roleId) {
+      // Nor change or weaken a role above you: you must hold everything it has today.
+      const current = await getRole(access.tenant.id, roleId);
+      if (current && !canGrantRole(access.role, current)) {
+        throw new TeamError("You can only edit roles with no more access than your own.");
+      }
+      await updateRole(access.tenant.id, roleId, parsed.data.name, permissions);
+    } else await createRole(access.tenant.id, parsed.data.name, permissions);
     return { ok: true, message: roleId ? "Role saved." : `Role "${parsed.data.name}" created.` };
   });
 }
 
 export async function removeRole(slug: string, roleId: string): Promise<TeamResult> {
   return withPermission(slug, "roles.manage", async (access) => {
+    const current = await getRole(access.tenant.id, roleId);
+    if (current && !canGrantRole(access.role, current)) {
+      throw new TeamError("You can only delete roles with no more access than your own.");
+    }
     await deleteRole(access.tenant.id, roleId);
     return { ok: true, message: "Role deleted." };
   });

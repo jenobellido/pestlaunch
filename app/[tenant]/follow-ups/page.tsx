@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { ListTodo } from "lucide-react";
 import { can, listMembers } from "@/core/tenancy";
-import { listCalls, listTasks } from "@/modules/calls/server";
+import { callScope, listCalls, listTasks } from "@/modules/calls/server";
 import { isModuleEnabled } from "@/modules/registry";
 import { cn } from "@/shared/lib/cn";
 import { Card, CardTitle } from "@/shared/ui/card";
@@ -45,7 +45,8 @@ async function FollowUpsBody({ params, searchParams }: PageProps<"/[tenant]/foll
     // People who assign follow-ups see the team's; everyone else only their own.
     listTasks(tenant.id, canAssign ? {} : { assigneeId: user.id }),
     canAssign ? listMembers(tenant.id) : Promise.resolve(null),
-    canAssign ? listCalls(slug) : Promise.resolve([]),
+    // Leaks come only from calls the viewer can see.
+    canAssign ? listCalls(slug, callScope({ userId: user.id, permissions: access.permissions })) : Promise.resolve([]),
     canAssign ? isModuleEnabled(slug, "scorecards") : Promise.resolve(false),
   ]);
 

@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { areasFor } from "../../_lib/areas";
 import { LayoutGrid } from "lucide-react";
 import { can, requireTenantAccess } from "@/core/tenancy";
 import { Field } from "@/shared/ui/form";
@@ -15,9 +17,11 @@ export default async function CompanySettingsPage({ params }: PageProps<"/[tenan
   const { tenant: slug } = await params;
   const access = await requireTenantAccess(slug);
   const { tenant } = access;
+  const areas = areasFor(access.permissions);
+  if (!areas.settings.company) notFound();
   const canCompany = can(access, "company.manage");
   const canModules = can(access, "modules.manage");
-  const canExamples = can(access, "calls.upload");
+  const canExamples = areas.exampleData;
   const examples = await exampleDataStatus(tenant.id);
 
   const modules: ModuleRow[] = moduleRegistry.map((m) => {

@@ -1,10 +1,13 @@
+import { notFound } from "next/navigation";
 import { can, listRoles, PERMISSIONS, requireTenantAccess, type Permission } from "@/core/tenancy";
+import { areasFor } from "../../_lib/areas";
 import { SettingsPage, SettingsSection } from "../_components/settings-frame";
 import { RolesSection } from "../_components/roles-section";
 
 export default async function RolesSettingsPage({ params }: PageProps<"/[tenant]/settings/roles">) {
   const { tenant: slug } = await params;
   const access = await requireTenantAccess(slug);
+  if (!areasFor(access.permissions).settings.roles) notFound();
   const roles = await listRoles(access.tenant.id);
 
   return (

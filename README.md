@@ -38,7 +38,7 @@ Beyond the brief, it's ready for a real team:
 - Invite people with a link.
 - Permission-based roles, with custom roles.
 - Calls belong to the rep who made them.
-- Reps only see their own calls.
+- Each role only sees its part of the app: a Rep gets their own calls, follow-ups and coaching, and Profile and Appearance in Settings; the rest is hidden and returns 404.
 - A landing page at `/` with a 3D hero (react-three-fiber), in both themes.
 
 ## How it works
@@ -181,8 +181,11 @@ sidebar), split into pages with a settings menu:
   whole company (needs `modules.manage`). Calls is the base module and is
   always on.
 - **Members:** everyone in the company and their role. Invite someone by
-  email and role, and copy the link to send them (needs `team.manage`).
+  email and role, and copy the link to send them (needs `team.manage`;
+  managers can see the list).
 - **Roles:** what each role can do, with custom roles (needs `roles.manage`).
+  Ticking a permission that needs another (like reviewing calls, which needs
+  seeing every call) ticks that one too.
   Every company starts with Owner, Manager and Rep.
 - **Call types:** how calls get their type (Automatic, or Ask on upload)
   and each kind of call with its scorecard (needs `calltypes.manage`). The

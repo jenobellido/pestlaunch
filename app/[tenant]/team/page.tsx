@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { can } from "@/core/tenancy";
 import { callScope, listCalls } from "@/modules/calls/server";
 import { CoachingPage, getCoachingFeedback, type CoachingCall } from "@/modules/coaching";
@@ -12,7 +13,10 @@ import { AssignPlayButton, PlaysCard } from "./_components/plays";
 export default async function Page({ params }: PageProps<"/[tenant]/team">) {
   const access = await requireModule(params, "coaching");
   const { tenant, user, permissions } = access;
-  const canManage = can(access, "coaching.manage");
+  // The team overview is for people who see everyone; others get their own page.
+  if (!can(access, "calls.view_all")) redirect(`/${tenant.slug}/team/${user.id}`);
+  // Coaching others needs seeing their calls too.
+  const canManage = can(access, "coaching.manage") && can(access, "calls.view_all");
   const [calls, scored, plays] = await Promise.all([
     // Without "calls.view_all" a member sees only their own coaching.
     listCalls(tenant.slug, callScope({ userId: user.id, permissions })),

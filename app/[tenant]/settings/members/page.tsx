@@ -1,4 +1,6 @@
 import { headers } from "next/headers";
+import { notFound } from "next/navigation";
+import { areasFor } from "../../_lib/areas";
 import { can, canGrantRole, listInvites, listMembers, listRoles, requireTenantAccess } from "@/core/tenancy";
 import { SettingsPage, SettingsSection } from "../_components/settings-frame";
 import { TeamSection } from "../_components/team-section";
@@ -7,6 +9,8 @@ export default async function MembersSettingsPage({ params }: PageProps<"/[tenan
   const { tenant: slug } = await params;
   const [access, h] = await Promise.all([requireTenantAccess(slug), headers()]);
   const { tenant, user, role } = access;
+  // Everyone's names and emails: only for people who manage or oversee the team.
+  if (!areasFor(access.permissions).settings.members) notFound();
   const canManage = can(access, "team.manage");
   const [members, roles, invites] = await Promise.all([
     listMembers(tenant.id),

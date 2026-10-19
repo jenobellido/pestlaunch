@@ -93,7 +93,7 @@ export default async function Page({
         id: m.userId,
         name: m.displayName,
       }))}
-      reviewFlags={ready ? reviewFlags : []}
+      reviewFlags={ready && can(access, "calls.review") ? reviewFlags : []}
       timelineBands={sentimentBands}
       timelineBandsLabel={sentimentBands ? "Sentiment" : undefined}
       lead={

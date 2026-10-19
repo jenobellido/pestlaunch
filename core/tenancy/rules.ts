@@ -1,4 +1,4 @@
-import type { Permission } from "./permissions";
+import { PERMISSION_REQUIRES, type Permission } from "./permissions";
 import type { Role } from "./types";
 
 // Access rules as pure functions, so they can be unit tested without a database.
@@ -6,6 +6,13 @@ import type { Role } from "./types";
 /** Whether the member has a permission. */
 export function can(access: { readonly permissions: readonly Permission[] }, permission: Permission) {
   return access.permissions.includes(permission);
+}
+
+/** The permissions plus everything they require (e.g. "calls.review" brings "calls.view_all"). */
+export function withRequiredPermissions<P extends string>(permissions: readonly P[]): P[] {
+  const all = new Set<string>(permissions);
+  for (const p of permissions) for (const needed of PERMISSION_REQUIRES[p as Permission] ?? []) all.add(needed);
+  return [...all] as P[];
 }
 
 /**

@@ -9,6 +9,9 @@ export type PlayResult = { ok: true } | { ok: false; error: string };
 
 const SESSION_ENDED = "Your session ended. Log in again.";
 
+/** Managing someone else's coaching needs "coaching.manage" and seeing their calls. */
+const coachesOthers = (access: Parameters<typeof can>[0]) => can(access, "coaching.manage") && can(access, "calls.view_all");
+
 const assignInput = z.object({
   assigneeId: z.uuid(),
   title: z.string().trim().min(3).max(120),
@@ -26,7 +29,11 @@ export async function assignPlay(
   if (!parsed.success) return { ok: false, error: "Give the focus a short title (3 to 120 characters)." };
   const access = await checkTenantAccess(slug);
   if (!access.ok) return { ok: false, error: SESSION_ENDED };
-  if (!can(access.access, "coaching.manage")) return { ok: false, error: "You don't have permission to assign coaching." };
+  // Coaching someone means seeing their calls: assigning needs both.
+  const self = parsed.data.assigneeId === access.access.user.id;
+  if (!can(access.access, "coaching.manage") || (!self && !can(access.access, "calls.view_all"))) {
+    return { ok: false, error: "You don't have permission to assign coaching." };
+  }
   const { tenant, user } = access.access;
   if (!(await listMembers(tenant.id)).some((m) => m.userId === parsed.data.assigneeId)) {
     return { ok: false, error: "That person isn't on the team." };
@@ -41,9 +48,9 @@ export async function setPlayDone(slug: string, playId: string, done: boolean): 
   const access = await checkTenantAccess(slug);
   if (!access.ok) return { ok: false, error: SESSION_ENDED };
   const play = z.uuid().safeParse(playId).success ? await findPlay(access.access.tenant.id, playId) : null;
-  if (!play) return { ok: false, error: "That play doesn't exist." };
-  if (play.assigneeId !== access.access.user.id && !can(access.access, "coaching.manage")) {
-    return { ok: false, error: "Only the person it's assigned to can update this play." };
+  if (!play) return { ok: false, error: "That coaching focus doesn't exist." };
+  if (play.assigneeId !== access.access.user.id && !coachesOthers(access.access)) {
+    return { ok: false, error: "Only the person it's assigned to can update this." };
   }
   await setPlayStatus(access.access.tenant.id, playId, done ? "done" : "open");
   refresh();
@@ -54,8 +61,8 @@ export async function setPlayDone(slug: string, playId: string, done: boolean): 
 export async function removePlay(slug: string, playId: string): Promise<PlayResult> {
   const access = await checkTenantAccess(slug);
   if (!access.ok) return { ok: false, error: SESSION_ENDED };
-  if (!can(access.access, "coaching.manage")) return { ok: false, error: "You don't have permission to remove plays." };
-  if (!z.uuid().safeParse(playId).success) return { ok: false, error: "That play doesn't exist." };
+  if (!coachesOthers(access.access)) return { ok: false, error: "You don't have permission to remove coaching." };
+  if (!z.uuid().safeParse(playId).success) return { ok: false, error: "That coaching focus doesn't exist." };
   await deletePlay(access.access.tenant.id, playId);
   refresh();
   return { ok: true };

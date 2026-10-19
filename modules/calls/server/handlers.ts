@@ -180,6 +180,8 @@ export async function assignCallHandler(req: Request, tenant: string, callId: st
   if (!viewer.permissions.includes("calls.assign")) return forbidden("assign calls");
   const body = assignRequest.safeParse(await req.json().catch(() => null));
   if (!body.success) return fail("Send the team member's id, or null to unassign.", 400);
+  // Only calls the viewer can see can be moved; otherwise it reads as not found.
+  if (!(await getCall(tenant, callId, callScope(viewer)))) return fail("Not found", 404);
   const { employeeId } = body.data;
   if (employeeId && !(await isMember(await tenantIdOf(tenant), employeeId))) {
     return fail("That person isn't on the team.", 400);

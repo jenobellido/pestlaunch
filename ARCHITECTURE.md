@@ -116,7 +116,17 @@ modules/<name>/
   permission, locked), Manager (calls and team) and Rep (upload only).
   Guards: nobody can grant a role, or build one, with permissions they don't
   have; only an owner can make someone an owner; a tenant can't lose its last
-  owner.
+  owner; nobody can edit or delete a role above their own. Some permissions
+  only make sense with another (`PERMISSION_REQUIRES`): assigning, reviewing
+  or deleting calls and managing coaching all need `calls.view_all`, so a
+  role that has one gets the other when it's saved (`withRequiredPermissions`),
+  and the role editor ticks it for you.
+- **Areas, not just actions.** `areasFor(permissions)` in
+  `app/[tenant]/_lib/areas.ts` decides which parts of the app a member sees:
+  Team (`calls.view_all`; without it the sidebar says "My coaching" and goes
+  to their own page), each Settings page, and example data
+  (`company.manage`). The sidebar, the settings menu and ⌘K hide what's not
+  theirs, and the page itself returns 404, so a typed URL gets nothing.
 - **Invites:** a link with a random token (`/invite/[token]`, valid 14 days).
   The invitee signs up (the email is locked to the invited address, and no
   company is created) or logs in, and joins with the invite's role. Only the
@@ -136,6 +146,9 @@ modules/<name>/
   be reassigned on the call page, which also flags a mismatch with the heard
   name. Without `calls.view_all` a member only sees their own calls
   and coaching, enforced in the queries (`callScope`), so other calls 404.
+  Every action that takes a call id loads it through the same scope first
+  (assigning the rep, review flags, follow-ups), and a follow-up can only go
+  to the call's rep or someone who can see every call.
 - **Authorization** is enforced in the app, not by RLS. Every table has RLS
   enabled with no policies, so Supabase's public REST API returns nothing.
   The server reads data over a direct Postgres connection and checks access
@@ -274,7 +287,7 @@ empty module outside Next.
 
 **Example data in the app.** A company can load example data itself: a "Try
 it with example data" card on the Overview while it has no calls, and a Load
-/ Remove switch in Settings → Company (needs `calls.upload`). It's the 7
+/ Remove switch in Settings → Company (needs `company.manage`). It's the 7
 invented demo calls (`modules/calls/demo/example-calls.json`, with their
 saved outcome, scorecard, coaching and sentiment, so no AI runs and nothing
 is charged) plus the 3 reps who made them, each call assigned to its rep, a
@@ -296,7 +309,8 @@ average score, trend (needs 4 scored calls), close rate and cancels saved;
 criteria for each (`stepCriteria`), as "what good sounds like"; a score-by-call
 chart linking to each call; the latest coaching focus with a "Try saying"
 line; their plays and follow-up tasks; and recent calls. A rep can open their
-own page; other reps' pages need `calls.view_all`.
+own page; other reps' pages need `calls.view_all`, and so does the Team list
+and its back link.
 
 ## Review and corrections
 
@@ -622,10 +636,12 @@ a server-side permission check.
 | Company | Company name | `company.manage` | `tenants.name`; the URL slug never changes |
 | Company | Modules | `modules.manage` | `tenant_modules` |
 | Call types | Detection mode, call types and scorecards | `calltypes.manage` | `tenants.call_type_mode`, `tenant_call_types` |
-| Members | Members, invites, member roles, remove | `team.manage`; everyone sees the member list | `tenant_members`, `tenant_invites` |
-| Roles | Custom roles and permissions | `roles.manage`; everyone sees the roles | `tenant_roles` |
+| Members | Members, invites, member roles, remove | `team.manage`; seen by anyone with `team.manage` or `calls.view_all` | `tenant_members`, `tenant_invites` |
+| Roles | Custom roles and permissions | `roles.manage`; seen by anyone with `roles.manage` or `team.manage` | `tenant_roles` |
 
-Without the permission a section shows read-only.
+A page someone can see but not change shows read-only. A page they can't see
+isn't in their menu or ⌘K and returns 404 (`areasFor`). A Rep sees Profile
+and Appearance only.
 
 ## Adding a module
 
@@ -647,7 +663,8 @@ so they run in well under a second and the same way in CI.
 | --- | --- |
 | Points, grades and which scorecard grades a call type | `modules/scorecards/model/grade.test.ts` |
 | Scoring a call: auto-awarded objections, quotes kept only when they're the employee's words | `modules/scorecards/model/score-call.test.ts` |
-| Permission checks and who may grant which role | `core/tenancy/rules.test.ts` |
+| Permission checks, who may grant which role, permissions that need another | `core/tenancy/rules.test.ts` |
+| Which parts of the app each set of permissions sees | `app/[tenant]/_lib/areas.test.ts` |
 | Transcript rules: dropping non-speech, accepting speaker splits, joining turns | `modules/calls/lib/transcript.test.ts` |
 | The Coaching page's per-person summaries (grouping, trend, most-missed items) | `modules/coaching/model/team.test.ts` |
 

@@ -17,6 +17,18 @@ export const PERMISSIONS = {
 } as const;
 
 export type Permission = keyof typeof PERMISSIONS;
+
+/**
+ * Permissions that only make sense together. You can't assign, review, delete or coach on calls
+ * you can't see, so those all need "calls.view_all". Saving a role adds what's required, and
+ * every action still checks it can see the call it acts on.
+ */
+export const PERMISSION_REQUIRES: Partial<Record<Permission, readonly Permission[]>> = {
+  "calls.assign": ["calls.view_all"],
+  "calls.review": ["calls.view_all"],
+  "calls.delete": ["calls.view_all"],
+  "coaching.manage": ["calls.view_all"],
+};
 export const ALL_PERMISSIONS = Object.keys(PERMISSIONS) as Permission[];
 
 export function isPermission(value: string): value is Permission {

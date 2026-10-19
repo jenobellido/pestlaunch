@@ -1,7 +1,8 @@
 "use server";
 
 import { refresh } from "next/cache";
-import { can, checkTenantAccess } from "@/core/tenancy";
+import { checkTenantAccess } from "@/core/tenancy";
+import { areasFor } from "./areas";
 import { loadExampleData, removeExampleData } from "./example-data";
 
 export type ExampleResult = { ok: true } | { ok: false; error: string };
@@ -9,7 +10,8 @@ export type ExampleResult = { ok: true } | { ok: false; error: string };
 async function uploader(slug: string) {
   const result = await checkTenantAccess(slug);
   if (!result.ok) return { error: "Your session ended. Log in again." } as const;
-  if (!can(result.access, "calls.upload")) return { error: "You don't have permission to change the example data." } as const;
+  // It adds and removes users and calls company-wide, so it's company setup, not uploading.
+  if (!areasFor(result.access.permissions).exampleData) return { error: "Only people who manage the company can change example data." } as const;
   return { tenantId: result.access.tenant.id, userId: result.access.user.id } as const;
 }
 

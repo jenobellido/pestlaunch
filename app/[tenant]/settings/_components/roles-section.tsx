@@ -5,6 +5,8 @@ import { Lock, Plus, Trash2 } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 import { primaryButton, secondaryButton, Spinner } from "@/shared/ui/button";
 import { FormAlert } from "@/shared/ui/form";
+import { PERMISSION_REQUIRES, type Permission } from "@/core/tenancy/permissions";
+import { withRequiredPermissions } from "@/core/tenancy/rules";
 import { removeRole, saveRole } from "../team-actions";
 
 export interface RoleRow {
@@ -114,7 +116,10 @@ function RoleEditor({
                   disabled={disabled}
                   onChange={(e) =>
                     setPermissions((current) =>
-                      e.target.checked ? [...current, p.key] : current.filter((k) => k !== p.key),
+                      e.target.checked
+                        ? withRequiredPermissions([...current, p.key])
+                        : // Dropping a permission drops the ones that need it ("see every call" takes "review" with it).
+                          current.filter((k) => k !== p.key && !(PERMISSION_REQUIRES[k as Permission] ?? []).includes(p.key as Permission)),
                     )
                   }
                   className="mt-0.5 size-4 shrink-0 accent-[var(--accent)]"

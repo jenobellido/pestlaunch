@@ -100,10 +100,13 @@ async function RepBody({ params }: { params: PageProps<"/[tenant]/team/[repId]">
 
   return (
     <PageStack>
-      <Link href={`/${tenant.slug}/team`} className="press inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
-        <ArrowLeft className="size-4" aria-hidden />
-        Team
-      </Link>
+      {/* Only people who see the whole team have a team list to go back to. */}
+      {can(access, "calls.view_all") && (
+        <Link href={`/${tenant.slug}/team`} className="press inline-flex items-center gap-1.5 text-sm text-muted hover:text-fg">
+          <ArrowLeft className="size-4" aria-hidden />
+          Team
+        </Link>
+      )}
       <PageHeader
         title={member.displayName}
         description={`${member.role.name} · ${ready.length} ${ready.length === 1 ? "call" : "calls"} reviewed${

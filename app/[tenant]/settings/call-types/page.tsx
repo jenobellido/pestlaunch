@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+import { areasFor } from "../../_lib/areas";
 import Link from "next/link";
 import { Plus, Sparkles } from "lucide-react";
 import { CALL_TYPE_GROUP_LABELS } from "@/core/calls";
@@ -13,6 +15,8 @@ export default async function CallTypesSettingsPage({ params }: PageProps<"/[ten
   const { tenant: slug } = await params;
   const access = await requireTenantAccess(slug);
   const canEdit = can(access, "calltypes.manage");
+  // Company setup; everyone can still read the scorecards on "How calls are graded".
+  if (!areasFor(access.permissions).settings.callTypes) notFound();
   const [types, mode, counts] = await Promise.all([
     getCallTypes(access.tenant.id),
     getCallTypeMode(access.tenant.id),

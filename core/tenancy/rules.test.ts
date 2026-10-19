@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ALL_PERMISSIONS, DEFAULT_ROLES, isPermission, type Permission } from "./permissions";
-import { can, canGrantRole } from "./rules";
+import { can, canGrantRole, withRequiredPermissions } from "./rules";
 import type { Role } from "./types";
 
 const role = (name: string, permissions: Permission[], isOwner = false): Role => ({
@@ -82,5 +82,25 @@ describe("canGrantRole", () => {
 
   it("allows granting a role with no permissions", () => {
     expect(canGrantRole(rep, role("Viewer", []))).toBe(true);
+  });
+});
+
+describe("withRequiredPermissions", () => {
+  it("adds seeing every call to permissions that act on calls", () => {
+    for (const p of ["calls.assign", "calls.review", "calls.delete", "coaching.manage"] as const) {
+      expect(withRequiredPermissions([p])).toContain("calls.view_all");
+    }
+  });
+
+  it("leaves permissions that need nothing alone", () => {
+    expect(withRequiredPermissions(["calls.upload"])).toEqual(["calls.upload"]);
+  });
+
+  it("doesn't duplicate", () => {
+    expect(withRequiredPermissions(["calls.review", "calls.view_all"]).filter((p) => p === "calls.view_all")).toHaveLength(1);
+  });
+
+  it("is satisfied by every default role", () => {
+    for (const r of DEFAULT_ROLES) expect(withRequiredPermissions(r.permissions).sort()).toEqual([...r.permissions].sort());
   });
 });

@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   Building2,
   ClipboardCheck,
+  ClipboardList,
   LayoutGrid,
   ListTodo,
   LogOut,
@@ -18,6 +19,7 @@ import { LogoMark } from "@/shared/ui/logo";
 import { Bone } from "@/shared/ui/page-header";
 import { listTasks } from "@/modules/calls/server";
 import { getEnabledModules } from "@/modules/registry";
+import { areasFor } from "../_lib/areas";
 import { CommandMenu, SearchButton, type CommandPage } from "./command-menu";
 import { NavLink } from "./nav-link";
 
@@ -38,7 +40,12 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
     badgeLabel: `${myOpen} open follow-up${myOpen === 1 ? "" : "s"} for you`,
   };
   const enabledIds = new Set<string>(enabled.map((m) => m.id));
-  const modules = enabled.flatMap((m) => m.nav ?? []).filter((n) => n.inSidebar !== false);
+  const areas = areasFor(access.permissions);
+  // Without the whole team in view, "Team" is just your own coaching: name it so and link there.
+  const modules = enabled
+    .flatMap((m) => m.nav ?? [])
+    .filter((n) => n.inSidebar !== false)
+    .map((n) => (n.href === "/team" && !areas.team ? { ...n, label: "My coaching", href: `/team/${user.id}` } : n));
   const displayName = user.name ?? user.email;
 
   // Icons are rendered here, on the server, so the client links get elements, not components.
@@ -83,9 +90,18 @@ export async function TenantNav({ params }: { params: Promise<{ tenant: string }
       : []),
     { href: `/${slug}/settings`, label: "Profile settings", icon: <UserRound aria-hidden />, keywords: "name account", searchOnly: true },
     { href: `/${slug}/settings/appearance`, label: "Appearance", icon: <Palette aria-hidden />, keywords: "theme dark light", searchOnly: true },
-    { href: `/${slug}/settings/company`, label: "Company settings", icon: <Building2 aria-hidden />, keywords: "modules features", searchOnly: true },
-    { href: `/${slug}/settings/members`, label: "Members", icon: <Users aria-hidden />, keywords: "invite people team roles", searchOnly: true },
-    { href: `/${slug}/settings/roles`, label: "Roles and permissions", icon: <ShieldCheck aria-hidden />, keywords: "access", searchOnly: true },
+    ...(areas.settings.company
+      ? [{ href: `/${slug}/settings/company`, label: "Company settings", icon: <Building2 aria-hidden />, keywords: "modules features example data", searchOnly: true }]
+      : []),
+    ...(areas.settings.members
+      ? [{ href: `/${slug}/settings/members`, label: "Members", icon: <Users aria-hidden />, keywords: "invite people team roles", searchOnly: true }]
+      : []),
+    ...(areas.settings.roles
+      ? [{ href: `/${slug}/settings/roles`, label: "Roles and permissions", icon: <ShieldCheck aria-hidden />, keywords: "access", searchOnly: true }]
+      : []),
+    ...(areas.settings.callTypes
+      ? [{ href: `/${slug}/settings/call-types`, label: "Call types", icon: <ClipboardList aria-hidden />, keywords: "scorecards setup", searchOnly: true }]
+      : []),
   ];
 
   return (

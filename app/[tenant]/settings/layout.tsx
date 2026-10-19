@@ -1,25 +1,26 @@
 import { Suspense } from "react";
 import { Building2, ClipboardList, Palette, ShieldCheck, UserRound, Users } from "lucide-react";
+import { requireTenantAccess } from "@/core/tenancy";
 import { Bone, PageStack } from "@/shared/ui/page-header";
+import { areasFor } from "../_lib/areas";
 import { SettingsHeader } from "./_components/settings-frame";
 import { SettingsNav } from "./_components/settings-nav";
 
 async function Menu({ params }: { params: Promise<{ tenant: string }> }) {
   const { tenant } = await params;
   const base = `/${tenant}/settings`;
+  // Only the pages this person can open; each page also checks for itself.
+  const can = areasFor((await requireTenantAccess(tenant)).permissions).settings;
   // Icons are rendered here, on the server, so the client links get elements, not components.
-  return (
-    <SettingsNav
-      items={[
-        { href: base, label: "Profile", icon: <UserRound aria-hidden /> },
-        { href: `${base}/appearance`, label: "Appearance", icon: <Palette aria-hidden /> },
-        { href: `${base}/company`, label: "Company", icon: <Building2 aria-hidden /> },
-        { href: `${base}/members`, label: "Members", icon: <Users aria-hidden /> },
-        { href: `${base}/roles`, label: "Roles", icon: <ShieldCheck aria-hidden /> },
-        { href: `${base}/call-types`, label: "Call types", icon: <ClipboardList aria-hidden /> },
-      ]}
-    />
-  );
+  const items = [
+    { href: base, label: "Profile", icon: <UserRound aria-hidden />, show: can.profile },
+    { href: `${base}/appearance`, label: "Appearance", icon: <Palette aria-hidden />, show: can.appearance },
+    { href: `${base}/company`, label: "Company", icon: <Building2 aria-hidden />, show: can.company },
+    { href: `${base}/members`, label: "Members", icon: <Users aria-hidden />, show: can.members },
+    { href: `${base}/roles`, label: "Roles", icon: <ShieldCheck aria-hidden />, show: can.roles },
+    { href: `${base}/call-types`, label: "Call types", icon: <ClipboardList aria-hidden />, show: can.callTypes },
+  ];
+  return <SettingsNav items={items.filter((i) => i.show).map(({ show: _show, ...i }) => i)} />;
 }
 
 function MenuSkeleton() {

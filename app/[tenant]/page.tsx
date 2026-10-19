@@ -4,6 +4,7 @@ import { LayoutGrid } from "lucide-react";
 import { can, listInvites, listMembers } from "@/core/tenancy";
 import { callScope, listCalls, listTasks } from "@/modules/calls/server";
 import { isPlaceholderEmail } from "@/core/auth/admin";
+import { areasFor } from "./_lib/areas";
 import { exampleDataStatus } from "./_lib/example-data";
 import { isModuleEnabled } from "@/modules/registry";
 import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
@@ -24,6 +25,8 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
   const canAssign = can(access, "calls.assign");
   const canInvite = can(access, "team.manage");
   const canUpload = can(access, "calls.upload");
+  // Example data is company setup; whoever manages the company sees every call, so "no calls" is company-wide.
+  const canExamples = areasFor(access.permissions).exampleData && can(access, "calls.view_all");
   const [calls, scored, tasks, members, invites, jar, examples] = await Promise.all([
     listCalls(tenant.slug, callScope({ userId: user.id, permissions })),
     isModuleEnabled(tenant.slug, "scorecards"),
@@ -60,8 +63,8 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
         actions={<RangeChips base={`/${tenant.slug}`} range={range} />}
       />
       {/* A new company can load made-up calls to try every page; then a bar says they're examples. */}
-      {canUpload && calls.length === 0 && <ExampleCallsOffer slug={tenant.slug} />}
-      {canUpload && examples.loaded && <ExampleCallsBar slug={tenant.slug} calls={examples.calls} reps={examples.reps} />}
+      {canExamples && calls.length === 0 && <ExampleCallsOffer slug={tenant.slug} />}
+      {canExamples && examples.loaded && <ExampleCallsBar slug={tenant.slug} calls={examples.calls} reps={examples.reps} />}
       {setup && <SetupChecklist slug={tenant.slug} steps={steps} />}
       <Overview
         insights={summarize(inRange(dashboardCalls, range))}

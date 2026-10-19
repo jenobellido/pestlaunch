@@ -7,7 +7,7 @@ import { activeCallTypes, findCallType } from "@/core/calls";
 import { getCallTypes } from "@/core/calls/server";
 import { can, checkTenantAccess } from "@/core/tenancy";
 import type { CallReview } from "@/modules/calls";
-import { applyCallReview, getCall, rescoreCall } from "@/modules/calls/server";
+import { applyCallReview, callScope, getCall, rescoreCall } from "@/modules/calls/server";
 import { getAnalysisSteps } from "@/modules/registry.server";
 import { getScorecardResult, overrideScorecardItem } from "@/modules/scorecards";
 
@@ -34,7 +34,9 @@ async function forReview(slug: string, callId: string) {
   const result = await checkTenantAccess(slug);
   if (!result.ok) return { error: "Your session ended. Log in again." } as const;
   if (!can(result.access, "calls.review")) return { error: "You don't have permission to review calls." } as const;
-  const call = z.uuid().safeParse(callId).success ? await getCall(slug, callId) : null;
+  // Only calls the reviewer can see; another rep's call reads as not found.
+  const scope = callScope({ userId: result.access.user.id, permissions: result.access.permissions });
+  const call = z.uuid().safeParse(callId).success ? await getCall(slug, callId, scope) : null;
   if (!call) return { error: "That call doesn't exist." } as const;
   if (call.status !== "ready") return { error: "Wait until the call has finished processing." } as const;
   const { user, tenant } = result.access;
