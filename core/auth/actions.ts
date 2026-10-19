@@ -1,6 +1,7 @@
 "use server";
 
 import { timingSafeEqual } from "node:crypto";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { acceptInvite, createTenantForOwner, getInviteByToken, TeamError } from "@/core/tenancy";
@@ -29,6 +30,14 @@ function signupCodeMatches(value: FormDataEntryValue | null) {
   const given = Buffer.from(typeof value === "string" ? value.trim() : "");
   const expected = Buffer.from(serverEnv.SIGNUP_CODE);
   return given.length === expected.length && timingSafeEqual(given, expected);
+}
+
+/** The address this request came in on, e.g. https://pestlaunch.vercel.app. */
+async function requestOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
 }
 
 /** Only same-site paths, so a crafted ?next= can't redirect off-site. */
@@ -81,7 +90,9 @@ export async function signUp(_prev: FormState, formData: FormData): Promise<Form
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-    options: { data: { full_name: fullName } },
+    // The confirmation email links back to whichever host this was opened on (the live site,
+    // not Supabase's Site URL default), where /auth/confirm signs them in.
+    options: { data: { full_name: fullName }, emailRedirectTo: `${await requestOrigin()}/auth/confirm` },
   });
   if (error || !data.user) return { error: error?.message ?? "Could not create account.", values };
 

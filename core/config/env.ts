@@ -27,5 +27,17 @@ const schema = z.object({
   SIGNUP_CODE: z.string().default(""),
 });
 
-/** Server-side environment, validated once at startup. */
-export const serverEnv = schema.parse(process.env);
+type ServerEnv = z.infer<typeof schema>;
+let parsed: ServerEnv | null = null;
+
+/**
+ * Server-side environment, validated on first use (then cached). Not at import: `next build`
+ * loads route modules to collect their config, and a build shouldn't need runtime secrets.
+ * A missing or bad variable still fails loudly, on the first request that needs it.
+ */
+export const serverEnv: ServerEnv = new Proxy({} as ServerEnv, {
+  get(_, key) {
+    parsed ??= schema.parse(process.env);
+    return parsed[key as keyof ServerEnv];
+  },
+});

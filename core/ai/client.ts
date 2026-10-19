@@ -7,7 +7,7 @@ import { modelOrder, type ModelTier } from "./models";
 // and the model names (see .env.example). Plain fetch keeps it dependency-free. Neither Groq
 // nor OpenAI trains on API data by default, which the test brief requires for the recordings.
 
-const BASE_URL = serverEnv.AI_BASE_URL.replace(/\/+$/, "");
+const baseUrl = () => serverEnv.AI_BASE_URL.replace(/\/+$/, "");
 
 /**
  * Reasoning models (gpt-oss, OpenAI's gpt-5 and o-series) take a reasoning effort; OpenAI's own
@@ -47,7 +47,7 @@ async function isOutOfCredits(res: Response) {
 /** Retries rate limits and server errors with backoff, honouring Retry-After. */
 async function request(path: string, init: RequestInit): Promise<Response> {
   for (let attempt = 1; ; attempt++) {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetch(`${baseUrl()}${path}`, {
       ...init,
       headers: { Authorization: `Bearer ${serverEnv.AI_API_KEY}`, ...init.headers },
     });

@@ -8,7 +8,11 @@ async function ConfirmNotice({ searchParams }: { searchParams: PageProps<"/login
   if (!confirm) return null;
   return (
     <div className="mb-5">
-      <FormAlert tone="info">Check your email to confirm your account, then log in.</FormAlert>
+      {confirm === "failed" ? (
+        <FormAlert>That confirmation link didn&apos;t work or has expired. Log in, or sign up again for a new one.</FormAlert>
+      ) : (
+        <FormAlert tone="info">Check your email for a link to confirm your account. It signs you straight in.</FormAlert>
+      )}
     </div>
   );
 }

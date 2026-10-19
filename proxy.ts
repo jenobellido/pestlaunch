@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { redirectWithSession, updateSession } from "@/core/auth/proxy-session";
 
-const PUBLIC_PATHS = new Set(["/", "/login", "/signup"]);
+const PUBLIC_PATHS = new Set(["/", "/login", "/signup", "/auth/confirm"]);
 const AUTH_PAGES = new Set(["/login", "/signup"]);
 
 export async function proxy(request: NextRequest) {

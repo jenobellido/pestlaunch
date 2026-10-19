@@ -142,6 +142,14 @@ modules/<name>/
 - Auth checks call `connection()` so they always run per request and never
   end up in a prerendered or prefetched shell.
 
+Server settings (`core/config/env.ts`) are validated on first use, not at
+import, and the database connects on first use, so `next build` never needs
+runtime secrets; a missing variable still fails loudly on the first request.
+Sign-up works with or without Supabase's "Confirm email": with it off
+(the deployed demo) the person goes straight in; with it on, the email links
+back to the host sign-up was opened on, and `/auth/confirm` exchanges the
+link's code for a session.
+
 ## Call processing
 
 Recordings never pass through our API, because they're often bigger than
