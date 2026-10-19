@@ -1,0 +1,2108 @@
+[
+ {
+  "fileName": "Example - ants in the kitchen (new customer).mp3",
+  "daysAgo": 0,
+  "callType": "new_customer",
+  "durationSec": 180,
+  "employeeName": "Jordan",
+  "transcript": [
+   {
+    "end": 5.769230769230769,
+    "text": "Thanks for calling Brightside Pest Control, this is Jordan. How can I help you today?",
+    "start": 0,
+    "speaker": "employee"
+   },
+   {
+    "end": 13.292307692307691,
+    "text": "Hi Jordan, I've got ants all over my kitchen counters and I'm kind of at my wit's end.",
+    "start": 6.369230769230769,
+    "speaker": "customer"
+   },
+   {
+    "end": 22.738461538461536,
+    "text": "Oh no, I'm sorry, ants on the counters where you cook is the worst. I can definitely take care of that for you.",
+    "start": 13.892307692307691,
+    "speaker": "employee"
+   },
+   {
+    "end": 31.799999999999997,
+    "text": "I'm just going to ask you a few questions so I can make sure we get you the right plan, sound good?",
+    "start": 23.338461538461537,
+    "speaker": "employee"
+   },
+   {
+    "end": 33.9,
+    "text": "Sure.",
+    "start": 32.4,
+    "speaker": "customer"
+   },
+   {
+    "end": 40.65384615384615,
+    "text": "When did you first start seeing them, and where do they seem to be coming from?",
+    "start": 34.5,
+    "speaker": "employee"
+   },
+   {
+    "end": 52.40769230769231,
+    "text": "About a week ago. They come in under the back door and go straight for the sink. I have two kids and a dog, so I'm worried about sprays.",
+    "start": 41.253846153846155,
+    "speaker": "customer"
+   },
+   {
+    "end": 63.00769230769231,
+    "text": "Totally understand. So it sounds like you want the ants gone fast, and something that's safe around the kids and the dog. Does that sound right?",
+    "start": 53.00769230769231,
+    "speaker": "employee"
+   },
+   {
+    "end": 65.1076923076923,
+    "text": "Exactly.",
+    "start": 63.60769230769231,
+    "speaker": "customer"
+   },
+   {
+    "end": 73.4,
+    "text": "Great. I'll walk you through our service, and then we'll talk price and get you scheduled if it sounds good.",
+    "start": 65.70769230769231,
+    "speaker": "employee"
+   },
+   {
+    "end": 90.15384615384616,
+    "text": "Your technician will treat the whole foundation outside, so the ants are stopped before they get in. Inside we use pet friendly baits at the back door and under the sink, which take out the colony, not just the ones you see.",
+    "start": 74,
+    "speaker": "employee"
+   },
+   {
+    "end": 101.52307692307693,
+    "text": "Then we come back every three months to keep them out, and if you see any ants in between, we come back for free. Any questions so far?",
+    "start": 90.75384615384615,
+    "speaker": "employee"
+   },
+   {
+    "end": 105.2,
+    "text": "No, that sounds good. How much is it?",
+    "start": 102.12307692307692,
+    "speaker": "customer"
+   },
+   {
+    "end": 118.49230769230769,
+    "text": "Normally the first visit is two hundred ninety nine, but this week we're taking a hundred off for new customers, so it's one ninety nine, and then forty nine a month after that.",
+    "start": 105.8,
+    "speaker": "employee"
+   },
+   {
+    "end": 124.47692307692307,
+    "text": "Hmm, that's a bit more than I was hoping. Another company quoted me less.",
+    "start": 119.09230769230768,
+    "speaker": "customer"
+   },
+   {
+    "end": 134.69230769230768,
+    "text": "I hear you, it's smart to compare. If I'm understanding you right, you just want to be sure you're getting real value for the money?",
+    "start": 125.07692307692307,
+    "speaker": "employee"
+   },
+   {
+    "end": 136.79230769230767,
+    "text": "Yeah, pretty much.",
+    "start": 135.29230769230767,
+    "speaker": "customer"
+   },
+   {
+    "end": 154.3153846153846,
+    "text": "That makes sense. The big difference is we treat the whole yard and foundation every time and come back free in between, so you won't be paying again if they show up. Would Tuesday morning or Thursday afternoon work better for the first visit?",
+    "start": 137.39230769230767,
+    "speaker": "employee"
+   },
+   {
+    "end": 156.4153846153846,
+    "text": "Tuesday morning works.",
+    "start": 154.9153846153846,
+    "speaker": "customer"
+   },
+   {
+    "end": 172.0153846153846,
+    "text": "Perfect. I have you down for Tuesday between eight and ten at 42 Maple Lane. Your technician will call when he's on his way. And if anything else comes up, spiders, wasps, anything, just give us a call first.",
+    "start": 157.0153846153846,
+    "speaker": "employee"
+   },
+   {
+    "end": 177.61538461538458,
+    "text": "Thank you so much for calling in today, we really appreciate your business.",
+    "start": 172.61538461538458,
+    "speaker": "employee"
+   },
+   {
+    "end": 179.71538461538458,
+    "text": "Thank you, bye.",
+    "start": 178.21538461538458,
+    "speaker": "customer"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Pest",
+     "value": "ants"
+    },
+    {
+     "label": "Service address",
+     "value": "42 Maple Lane"
+    },
+    {
+     "label": "Appointment",
+     "value": "Tuesday between eight and ten"
+    },
+    {
+     "label": "Price quoted",
+     "value": "$199 first visit, $49 monthly"
+    },
+    {
+     "label": "Technician",
+     "value": "treat foundation, pet-friendly baits"
+    },
+    {
+     "label": "Service plan",
+     "value": "3-monthly visits, free in between"
+    }
+   ],
+   "summary": "The employee answered the call and explained the ant treatment plan. The customer agreed to the service and scheduled a first visit for Tuesday morning at 42 Maple Lane. The call ended with the appointment booked.",
+   "followUps": [],
+   "resolution": "booked",
+   "cancelReason": null
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "green",
+    "items": [
+     {
+      "item": "Validate",
+      "passed": true,
+      "reason": "The employee acknowledged the specific ant problem in the kitchen with empathy.",
+      "section": "Validate",
+      "criteria": "Early on, acknowledges the customer's specific reason for calling with genuine empathy (names the actual situation, not a vague 'sorry about that').",
+      "evidence": "ants on the counters where you cook is the worst"
+     },
+     {
+      "item": "Confidence Statement",
+      "passed": true,
+      "reason": "The employee clearly reassured the customer they could help.",
+      "section": "Validate",
+      "criteria": "Clearly tells the customer they can help and will take care of it, putting the customer at ease (e.g. 'I can definitely take care of this for you').",
+      "evidence": "I can definitely take care of that for you"
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": true,
+      "reason": "The employee explained the next step before asking questions.",
+      "section": "Validate",
+      "criteria": "Before asking questions, tells the customer what happens next (e.g. 'I'm going to ask you a few questions so I can...').",
+      "evidence": "I'm just going to ask you a few questions so I can make sure we get you the right plan"
+     },
+     {
+      "item": "Investigate",
+      "passed": true,
+      "reason": "The employee asked open-ended questions to investigate the issue.",
+      "section": "Understand",
+      "criteria": "Asks questions, mostly open-ended (who, what, when, where, why, how), to understand the situation and its root cause before solving it.",
+      "evidence": "When did you first start seeing them, and where do they seem to be coming from?"
+     },
+     {
+      "item": "Summary Statement",
+      "passed": true,
+      "reason": "The employee summarized the customer's needs and checked for accuracy.",
+      "section": "Understand",
+      "criteria": "Repeats back what the customer needs or values in their own terms and checks it's right (e.g. 'So it sounds like you're looking for... does that sound right?').",
+      "evidence": "you want the ants gone fast, and something that's safe around the kids and the dog. Does that sound right?"
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": true,
+      "reason": "The employee set expectations before presenting the solution.",
+      "section": "Understand",
+      "criteria": "Before presenting the solution, prepares the customer for what's next (e.g. 'I'll walk you through... then we'll get you scheduled').",
+      "evidence": "I'll walk you through our service, and then we'll talk price and get you scheduled"
+     },
+     {
+      "item": "Present Solution",
+      "passed": true,
+      "reason": "The employee explained a tailored treatment plan and why it matters.",
+      "section": "Solve",
+      "criteria": "Explains the solution in specific detail tailored to this customer: what will be done, how, and why it matters for their situation.",
+      "evidence": "Your technician will treat the whole foundation outside, so the ants are stopped before they get in"
+     },
+     {
+      "item": "Consensus",
+      "passed": true,
+      "reason": "The employee checked for questions before moving on.",
+      "section": "Solve",
+      "criteria": "Checks the customer agrees or has questions before moving on (e.g. 'Does that work for you?', 'Any questions before we talk price?').",
+      "evidence": "Any questions so far?"
+     },
+     {
+      "item": "Close",
+      "passed": false,
+      "reason": "The line quoted for this step counts for Re-Close; this step needs its own moment in the call.",
+      "section": "Solve",
+      "criteria": "Asks for the commitment or confirms the action (books the appointment, sets up the change). When the solution has no cost, agreeing to it counts as the close.",
+      "evidence": null
+     },
+     {
+      "item": "Pricing",
+      "passed": true,
+      "reason": "The employee gave the regular price first, then the discounted price after building value.",
+      "section": "Pricing",
+      "criteria": "Presents price after building value: the regular (anchor) price first, then the sale price with any discount, then moves on to a close.",
+      "evidence": "Normally the first visit is two hundred ninety nine, but this week we're taking a hundred off"
+     },
+     {
+      "item": "Agree",
+      "passed": true,
+      "reason": "The employee acknowledged the customer's price comparison objection without debating.",
+      "section": "Objections",
+      "criteria": "When the customer objects, first agrees with or acknowledges their point of view, with no debate.",
+      "evidence": "I hear you, it's smart to compare"
+     },
+     {
+      "item": "Restate & Insinuate",
+      "passed": true,
+      "reason": "The employee restated the concern and suggested the underlying issue was value.",
+      "section": "Objections",
+      "criteria": "Restates the objection in their own words and suggests a possible reason, so the customer confirms the real concern.",
+      "evidence": "you just want to be sure you're getting real value for the money?"
+     },
+     {
+      "item": "Resolve",
+      "passed": true,
+      "reason": "The employee addressed the value concern by explaining added service benefits.",
+      "section": "Objections",
+      "criteria": "Addresses the concern with a solution and builds more value.",
+      "evidence": "we treat the whole yard and foundation every time and come back free in between"
+     },
+     {
+      "item": "Re-Close",
+      "passed": true,
+      "reason": "The employee re-closed after resolving the objection by asking for the appointment.",
+      "section": "Objections",
+      "criteria": "Confidently asks for the sale again after resolving the objection, in a low-pressure way. Passes if the customer commits on their own right after the concern is resolved.",
+      "evidence": "Would Tuesday morning or Thursday afternoon work better for the first visit?"
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": true,
+      "reason": "The employee confirmed the appointment details and next step near the end.",
+      "section": "Verify",
+      "criteria": "Wraps up loose ends and sets expectations going forward: confirms details such as date and time, address, notes for the technician or what happens next.",
+      "evidence": "Tuesday between eight and ten at 42 Maple Lane. Your technician will call when he's on his way"
+     },
+     {
+      "item": "Offer final information",
+      "passed": true,
+      "reason": "The employee invited the customer to call for other pest needs.",
+      "section": "Verify",
+      "criteria": "Invites the customer to call for any other pest needs or questions (one-stop shop); on sales calls, mentions the referral program.",
+      "evidence": "if anything else comes up, spiders, wasps, anything, just give us a call first"
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": true,
+      "reason": "The employee thanked the customer near the end of the call.",
+      "section": "Verify",
+      "criteria": "Genuinely thanks the customer near the end of the call.",
+      "evidence": "Thank you so much for calling in today, we really appreciate your business"
+     }
+    ],
+    "points": 16,
+    "maxPoints": 17,
+    "thresholds": {
+     "gold": 17,
+     "green": 14
+    },
+    "scorecardId": "sales",
+    "scorecardName": "Sales Calls"
+   },
+   "coaching": {
+    "focus": "Mention the referral program at the end of the call.",
+    "strengths": [
+     "Employee validated the customer's frustration with empathy: 'Oh no, I'm sorry, ants on the counters where you cook is the worst.'",
+     "Employee used open-ended questions to uncover root cause: 'When did you first start seeing them, and where do they seem to be coming from?'",
+     "Employee summarized the customer's needs accurately: 'So it sounds like you want the ants gone fast, and something that's safe around the kids and the dog. Does that sound right?'"
+    ],
+    "improvements": [
+     {
+      "point": "Mention the referral program at the end of the call.",
+      "quote": null,
+      "suggestion": "By the way, we have a referral program where you can earn a discount for each friend you refer."
+     },
+     {
+      "point": "Ask about other pest concerns earlier in the conversation.",
+      "quote": null,
+      "suggestion": "Do you have any other pest concerns we should address today?"
+     },
+     {
+      "point": "Confirm the customer's contact number before closing.",
+      "quote": null,
+      "suggestion": "Could you please confirm your phone number so we can reach you if needed?"
+     }
+    ]
+   },
+   "sentiment": {
+    "turns": [
+     {
+      "end": 5.769230769230769,
+      "start": 0,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 13.292307692307691,
+      "start": 6.369230769230769,
+      "speaker": "customer",
+      "intensity": 2,
+      "sentiment": "negative"
+     },
+     {
+      "end": 22.738461538461536,
+      "start": 13.892307692307691,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 31.799999999999997,
+      "start": 23.338461538461537,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 33.9,
+      "start": 32.4,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 40.65384615384615,
+      "start": 34.5,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 52.40769230769231,
+      "start": 41.253846153846155,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "negative"
+     },
+     {
+      "end": 63.00769230769231,
+      "start": 53.00769230769231,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 65.1076923076923,
+      "start": 63.60769230769231,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 73.4,
+      "start": 65.70769230769231,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 90.15384615384616,
+      "start": 74,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 101.52307692307693,
+      "start": 90.75384615384615,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 105.2,
+      "start": 102.12307692307692,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 118.49230769230769,
+      "start": 105.8,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 124.47692307692307,
+      "start": 119.09230769230768,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "negative"
+     },
+     {
+      "end": 134.69230769230768,
+      "start": 125.07692307692307,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 136.79230769230767,
+      "start": 135.29230769230767,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 154.3153846153846,
+      "start": 137.39230769230767,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 156.4153846153846,
+      "start": 154.9153846153846,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 172.0153846153846,
+      "start": 157.0153846153846,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 177.61538461538458,
+      "start": 172.61538461538458,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 179.71538461538458,
+      "start": 178.21538461538458,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     }
+    ],
+    "version": 1
+   }
+  }
+ },
+ {
+  "fileName": "Example - mice quote, wants to think (new customer).mp3",
+  "daysAgo": 2,
+  "callType": "new_customer",
+  "durationSec": 39,
+  "employeeName": "Marcus",
+  "transcript": [
+   {
+    "end": 2.3076923076923075,
+    "text": "Brightside Pest Control, this is Marcus.",
+    "start": 0,
+    "speaker": "employee"
+   },
+   {
+    "end": 10.215384615384615,
+    "text": "Hi, I think I have mice in my garage. I hear scratching at night. How much do you charge?",
+    "start": 2.9076923076923076,
+    "speaker": "customer"
+   },
+   {
+    "end": 15.046153846153846,
+    "text": "For mice it's usually about two fifty for the first visit.",
+    "start": 10.815384615384614,
+    "speaker": "employee"
+   },
+   {
+    "end": 17.569230769230767,
+    "text": "Okay. What does that include?",
+    "start": 15.646153846153844,
+    "speaker": "customer"
+   },
+   {
+    "end": 23.55384615384615,
+    "text": "We put out traps and check them. It depends on what the tech finds.",
+    "start": 18.169230769230765,
+    "speaker": "employee"
+   },
+   {
+    "end": 29.92307692307692,
+    "text": "That's more than I thought. I think I need to talk to my husband first.",
+    "start": 24.15384615384615,
+    "speaker": "customer"
+   },
+   {
+    "end": 35.138461538461534,
+    "text": "Okay, no problem. Just give us a call back when you're ready.",
+    "start": 30.523076923076918,
+    "speaker": "employee"
+   },
+   {
+    "end": 37.238461538461536,
+    "text": "Okay, thanks.",
+    "start": 35.738461538461536,
+    "speaker": "customer"
+   },
+   {
+    "end": 39.33846153846154,
+    "text": "Bye.",
+    "start": 37.83846153846154,
+    "speaker": "employee"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Pest",
+     "value": "mice"
+    },
+    {
+     "label": "Price quoted",
+     "value": "$250"
+    },
+    {
+     "label": "Service includes",
+     "value": "traps and checks"
+    },
+    {
+     "label": "Customer says price higher than expected",
+     "value": "yes"
+    },
+    {
+     "label": "Customer wants to talk to husband",
+     "value": "yes"
+    }
+   ],
+   "summary": "The employee, Marcus, answered a call from a prospective customer who said they had mice in their garage and asked about pricing. Marcus quoted $250 for the first visit and explained the service would include traps and checks. The customer said the price was higher than expected and needed to discuss it with her husband, so Marcus asked them to call back when ready.",
+   "followUps": [],
+   "resolution": "follow_up_needed",
+   "cancelReason": null
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "below",
+    "items": [
+     {
+      "item": "Validate",
+      "passed": false,
+      "reason": "The employee did not acknowledge the customer's mice concern with empathy.",
+      "section": "Validate",
+      "criteria": "Early on, acknowledges the customer's specific reason for calling with genuine empathy (names the actual situation, not a vague 'sorry about that').",
+      "evidence": null
+     },
+     {
+      "item": "Confidence Statement",
+      "passed": false,
+      "reason": "The employee did not clearly state they could help or take care of the issue.",
+      "section": "Validate",
+      "criteria": "Clearly tells the customer they can help and will take care of it, putting the customer at ease (e.g. 'I can definitely take care of this for you').",
+      "evidence": null
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "The employee did not set expectations before asking questions.",
+      "section": "Validate",
+      "criteria": "Before asking questions, tells the customer what happens next (e.g. 'I'm going to ask you a few questions so I can...').",
+      "evidence": null
+     },
+     {
+      "item": "Investigate",
+      "passed": false,
+      "reason": "The employee did not ask investigative questions to understand the situation.",
+      "section": "Understand",
+      "criteria": "Asks questions, mostly open-ended (who, what, when, where, why, how), to understand the situation and its root cause before solving it.",
+      "evidence": null
+     },
+     {
+      "item": "Summary Statement",
+      "passed": false,
+      "reason": "The employee did not summarize the customer's needs or check understanding.",
+      "section": "Understand",
+      "criteria": "Repeats back what the customer needs or values in their own terms and checks it's right (e.g. 'So it sounds like you're looking for... does that sound right?').",
+      "evidence": null
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "The employee did not prepare the customer before presenting a solution.",
+      "section": "Understand",
+      "criteria": "Before presenting the solution, prepares the customer for what's next (e.g. 'I'll walk you through... then we'll get you scheduled').",
+      "evidence": null
+     },
+     {
+      "item": "Present Solution",
+      "passed": false,
+      "reason": "The employee gave only a generic service description without tailoring or explaining value.",
+      "section": "Solve",
+      "criteria": "Explains the solution in specific detail tailored to this customer: what will be done, how, and why it matters for their situation.",
+      "evidence": null
+     },
+     {
+      "item": "Consensus",
+      "passed": false,
+      "reason": "The employee did not check for agreement or questions before moving on.",
+      "section": "Solve",
+      "criteria": "Checks the customer agrees or has questions before moving on (e.g. 'Does that work for you?', 'Any questions before we talk price?').",
+      "evidence": null
+     },
+     {
+      "item": "Close",
+      "passed": false,
+      "reason": "The employee did not ask for a commitment or attempt to book the service.",
+      "section": "Solve",
+      "criteria": "Asks for the commitment or confirms the action (books the appointment, sets up the change). When the solution has no cost, agreeing to it counts as the close.",
+      "evidence": null
+     },
+     {
+      "item": "Pricing",
+      "passed": false,
+      "reason": "The employee gave price immediately without building value, anchoring, discounting, or closing.",
+      "section": "Pricing",
+      "criteria": "Presents price after building value: the regular (anchor) price first, then the sale price with any discount, then moves on to a close.",
+      "evidence": null
+     },
+     {
+      "item": "Agree",
+      "passed": false,
+      "reason": "The employee did not acknowledge or agree with the customer's concern about price and needing to ask her husband.",
+      "section": "Objections",
+      "criteria": "When the customer objects, first agrees with or acknowledges their point of view, with no debate.",
+      "evidence": null
+     },
+     {
+      "item": "Restate & Insinuate",
+      "passed": false,
+      "reason": "The employee did not restate the objection or explore the real concern.",
+      "section": "Objections",
+      "criteria": "Restates the objection in their own words and suggests a possible reason, so the customer confirms the real concern.",
+      "evidence": null
+     },
+     {
+      "item": "Resolve",
+      "passed": false,
+      "reason": "The employee did not resolve the customer's concern or build additional value.",
+      "section": "Objections",
+      "criteria": "Addresses the concern with a solution and builds more value.",
+      "evidence": null
+     },
+     {
+      "item": "Re-Close",
+      "passed": false,
+      "reason": "The employee did not ask for the sale again after the objection.",
+      "section": "Objections",
+      "criteria": "Confidently asks for the sale again after resolving the objection, in a low-pressure way. Passes if the customer commits on their own right after the concern is resolved.",
+      "evidence": null
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": true,
+      "reason": "The employee set the next step near the end of the call.",
+      "section": "Verify",
+      "criteria": "Wraps up loose ends and sets expectations going forward: confirms details such as date and time, address, notes for the technician or what happens next.",
+      "evidence": "Just give us a call back when you're ready."
+     },
+     {
+      "item": "Offer final information",
+      "passed": false,
+      "reason": "The employee did not invite other questions, mention other pest needs, or the referral program.",
+      "section": "Verify",
+      "criteria": "Invites the customer to call for any other pest needs or questions (one-stop shop); on sales calls, mentions the referral program.",
+      "evidence": null
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": false,
+      "reason": "The employee did not thank the customer near the end of the call.",
+      "section": "Verify",
+      "criteria": "Genuinely thanks the customer near the end of the call.",
+      "evidence": null
+     }
+    ],
+    "points": 1,
+    "maxPoints": 17,
+    "thresholds": {
+     "gold": 17,
+     "green": 14
+    },
+    "scorecardId": "sales",
+    "scorecardName": "Sales Calls"
+   },
+   "coaching": {
+    "focus": "Ask for a specific appointment time before ending the call.",
+    "strengths": [
+     "He gave a clear price for the first visit.",
+     "He explained that traps would be set and checked.",
+     "He offered to take a callback when ready."
+    ],
+    "improvements": [
+     {
+      "point": "Present the regular price first, then the discounted price, and close with a scheduling question.",
+      "quote": "For mice it's usually about two fifty for the first visit.",
+      "suggestion": "Our regular price for a first visit is $250, but we’re currently offering a 20% discount, so it’s only $200. Would you like to schedule a visit for Tuesday or Wednesday?"
+     },
+     {
+      "point": "Handle objections using the four-step approach.",
+      "quote": null,
+      "suggestion": "I hear you, $250 can feel high. Let me explain why it’s worth it. Our service includes traps and a follow-up visit if needed, which saves you time and money in the long run. Does that help address your concern?"
+     },
+     {
+      "point": "Mention the referral program at the end of the call.",
+      "quote": null,
+      "suggestion": "By the way, we have a referral program that gives you a discount for each friend you refer. Would you like me to share more details?"
+     }
+    ]
+   },
+   "sentiment": {
+    "turns": [
+     {
+      "end": 2.3076923076923075,
+      "start": 0,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 10.215384615384615,
+      "start": 2.9076923076923076,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 15.046153846153846,
+      "start": 10.815384615384614,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 17.569230769230767,
+      "start": 15.646153846153844,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 23.55384615384615,
+      "start": 18.169230769230765,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 29.92307692307692,
+      "start": 24.15384615384615,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "negative"
+     },
+     {
+      "end": 35.138461538461534,
+      "start": 30.523076923076918,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 37.238461538461536,
+      "start": 35.738461538461536,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 39.33846153846154,
+      "start": 37.83846153846154,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     }
+    ],
+    "version": 1
+   }
+  }
+ },
+ {
+  "fileName": "Example - cancel request, saved with re-service (retention).mp3",
+  "daysAgo": 3,
+  "callType": "retention",
+  "durationSec": 96,
+  "employeeName": "Priya",
+  "transcript": [
+   {
+    "end": 2.692307692307692,
+    "text": "Thanks for calling Brightside, this is Priya.",
+    "start": 0,
+    "speaker": "employee"
+   },
+   {
+    "end": 6.369230769230769,
+    "text": "Hi, I'd like to cancel my service please.",
+    "start": 3.292307692307692,
+    "speaker": "customer"
+   },
+   {
+    "end": 15.046153846153846,
+    "text": "Absolutely, I can help you with that. What's the address on the account? Let me just take a quick look here.",
+    "start": 6.969230769230769,
+    "speaker": "employee"
+   },
+   {
+    "end": 17.184615384615384,
+    "text": "It's 7 Willow Court.",
+    "start": 15.646153846153846,
+    "speaker": "customer"
+   },
+   {
+    "end": 30.092307692307692,
+    "text": "Thank you. I see you've been with us about two years and your last visit was three weeks ago. If you don't mind me asking, how has the service been for you?",
+    "start": 17.784615384615385,
+    "speaker": "employee"
+   },
+   {
+    "end": 39.15384615384615,
+    "text": "It was fine until this summer, but I keep seeing spiders on the porch and it feels like I'm paying for nothing.",
+    "start": 30.692307692307693,
+    "speaker": "customer"
+   },
+   {
+    "end": 48.98461538461538,
+    "text": "That makes sense, I'm sorry. So the service was good, but lately you're seeing spiders on the porch and it doesn't feel worth it?",
+    "start": 39.753846153846155,
+    "speaker": "employee"
+   },
+   {
+    "end": 51.08461538461538,
+    "text": "Yes, exactly.",
+    "start": 49.58461538461538,
+    "speaker": "customer"
+   },
+   {
+    "end": 60.91538461538461,
+    "text": "I totally understand. You've been a loyal customer, so let me offer a couple of options first, and you tell me what you think.",
+    "start": 51.684615384615384,
+    "speaker": "employee"
+   },
+   {
+    "end": 79.2076923076923,
+    "text": "I can send our lead technician out this week for a free re-service. He'll sweep the webs and treat the porch, eaves and windows really thoroughly, and I'll put a note on your account so the porch gets extra attention every visit. How does that sound?",
+    "start": 61.51538461538461,
+    "speaker": "employee"
+   },
+   {
+    "end": 82.5,
+    "text": "Okay, that sounds fair. Let's try that.",
+    "start": 79.8076923076923,
+    "speaker": "customer"
+   },
+   {
+    "end": 94.25384615384615,
+    "text": "Great. I have him coming Thursday between one and three. You don't need to be home. Thank you so much for giving us the chance to make it right.",
+    "start": 83.1,
+    "speaker": "employee"
+   },
+   {
+    "end": 96.35384615384615,
+    "text": "Thanks, Priya.",
+    "start": 94.85384615384615,
+    "speaker": "customer"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Service address",
+     "value": "7 Willow Court"
+    },
+    {
+     "label": "Pest",
+     "value": "spiders"
+    },
+    {
+     "label": "Technician",
+     "value": "lead technician"
+    },
+    {
+     "label": "Appointment",
+     "value": "Thursday between one and three"
+    },
+    {
+     "label": "Cancellation reason",
+     "value": "Service quality"
+    },
+    {
+     "label": "Retention offer",
+     "value": "free re-service"
+    }
+   ],
+   "summary": "The employee answered the call from a customer who wanted to cancel service due to spiders on the porch. The employee offered a free re-service and the customer accepted, scheduling a technician for Thursday between one and three. The cancellation was avoided.",
+   "followUps": [],
+   "resolution": "retained",
+   "cancelReason": "Service quality"
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "gold",
+    "items": [
+     {
+      "item": "Validate & Confidence Statement",
+      "passed": true,
+      "reason": "The employee acknowledged the request and gave confidence without agreeing to cancel.",
+      "section": "Validate",
+      "criteria": "Acknowledges the customer and says they'll take care of them, without agreeing up front to cancel the account.",
+      "evidence": "Absolutely, I can help you with that."
+     },
+     {
+      "item": "Transition Statement",
+      "passed": true,
+      "reason": "The employee bridged into account review by asking for the address and saying they would look.",
+      "section": "Validate",
+      "criteria": "Moves the call forward with a short bridge, e.g. asks for the account address and says they'll take a quick look.",
+      "evidence": "What's the address on the account? Let me just take a quick look here."
+     },
+     {
+      "item": "Do Your Research",
+      "passed": true,
+      "reason": "The employee researched and referenced customer tenure and recent service.",
+      "section": "Validate",
+      "criteria": "Looks into the account and uses what they find: how long they've been a customer, contract, recent services or re-services, past issues.",
+      "evidence": "I see you've been with us about two years and your last visit was three weeks ago."
+     },
+     {
+      "item": "Investigate",
+      "passed": true,
+      "reason": "The employee asked an open-ended question to understand the cancellation reason.",
+      "section": "Understand",
+      "criteria": "Asks open-ended questions to find the real reason for cancelling, without interrogating or asking too many.",
+      "evidence": "If you don't mind me asking, how has the service been for you?"
+     },
+     {
+      "item": "Validate & Summary Statement",
+      "passed": true,
+      "reason": "The employee validated and summarized the customer's issue.",
+      "section": "Understand",
+      "criteria": "Repeats back their understanding of the reason for cancelling and validates it (e.g. 'So the service has been good, but lately you're seeing more ants?').",
+      "evidence": "That makes sense, I'm sorry. So the service was good, but lately you're seeing spiders on the porch and it doesn't feel worth it?"
+     },
+     {
+      "item": "Validate & Expectation Statement",
+      "passed": true,
+      "reason": "The employee stayed collaborative and prepared the customer for options.",
+      "section": "Understand",
+      "criteria": "Stays on the customer's side and prepares them for options (e.g. 'Let me offer a couple of options and you tell me what you think').",
+      "evidence": "let me offer a couple of options first, and you tell me what you think."
+     },
+     {
+      "item": "Present Solution",
+      "passed": true,
+      "reason": "The employee offered a specific tailored solution to address the spiders.",
+      "section": "Solve",
+      "criteria": "Offers a specific solution tailored to the root cause to keep the customer: free re-service, back-to-back services, a set technician or time, a pause, a waived payment or a price drop.",
+      "evidence": "I can send our lead technician out this week for a free re-service."
+     },
+     {
+      "item": "Consensus",
+      "passed": true,
+      "reason": "The employee asked whether the proposed solution worked for the customer.",
+      "section": "Solve",
+      "criteria": "Asks whether the solution works for the customer (e.g. 'How does that sound?').",
+      "evidence": "How does that sound?"
+     },
+     {
+      "item": "Repeat (when necessary)",
+      "passed": true,
+      "reason": "The first offer was accepted, so no repeat solution was necessary.",
+      "section": "Solve",
+      "criteria": "If the first offer is declined, asks more questions and offers another solution. Passes if the first offer was accepted.",
+      "evidence": "Great."
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": true,
+      "reason": "The employee concluded by confirming the appointment window and expectations.",
+      "section": "Verify",
+      "criteria": "Wraps up loose ends and sets expectations going forward: confirms details such as date and time, address, notes for the technician or what happens next.",
+      "evidence": "I have him coming Thursday between one and three. You don't need to be home."
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": true,
+      "reason": "The employee thanked the customer near the end of the call.",
+      "section": "Verify",
+      "criteria": "Genuinely thanks the customer near the end of the call.",
+      "evidence": "Thank you so much for giving us the chance to make it right."
+     },
+     {
+      "item": "Leave a Teaser",
+      "passed": true,
+      "reason": "The customer was kept, so a comeback teaser was not needed.",
+      "section": "Verify",
+      "criteria": "For a customer who still cancels, ends with an incentive to come back (e.g. a free initial service if they return). Passes if the customer was kept.",
+      "evidence": "Great. I have him coming Thursday between one and three."
+     }
+    ],
+    "points": 12,
+    "maxPoints": 12,
+    "thresholds": {
+     "gold": 12,
+     "green": 11
+    },
+    "scorecardId": "retention",
+    "scorecardName": "Retention Calls"
+   },
+   "coaching": {
+    "focus": "Add an expectation statement before asking questions to set the stage.",
+    "strengths": [
+     "Employee acknowledged the customer's frustration: \"That makes sense, I'm sorry.\"",
+     "Employee offered a tailored solution: \"I can send our lead technician out this week for a free re-service.\"",
+     "Employee confirmed appointment details and thanked the customer: \"Great. I have him coming Thursday between one and three. You don't need to be home. Thank you so much for giving us the chance to make it right.\""
+    ],
+    "improvements": [
+     {
+      "point": "Include an expectation statement before asking questions to set the stage.",
+      "quote": null,
+      "suggestion": "I'm going to ask a few questions so I can better understand your situation."
+     },
+     {
+      "point": "Ask a more specific open-ended question about the spiders to uncover root cause.",
+      "quote": null,
+      "suggestion": "Can you tell me what kind of spiders you’re seeing and how often you notice them on the porch?"
+     }
+    ]
+   },
+   "sentiment": {
+    "turns": [
+     {
+      "end": 2.692307692307692,
+      "start": 0,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 6.369230769230769,
+      "start": 3.292307692307692,
+      "speaker": "customer",
+      "intensity": 2,
+      "sentiment": "negative"
+     },
+     {
+      "end": 15.046153846153846,
+      "start": 6.969230769230769,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 17.184615384615384,
+      "start": 15.646153846153846,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 30.092307692307692,
+      "start": 17.784615384615385,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 39.15384615384615,
+      "start": 30.692307692307693,
+      "speaker": "customer",
+      "intensity": 2,
+      "sentiment": "negative"
+     },
+     {
+      "end": 48.98461538461538,
+      "start": 39.753846153846155,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 51.08461538461538,
+      "start": 49.58461538461538,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 60.91538461538461,
+      "start": 51.684615384615384,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 79.2076923076923,
+      "start": 61.51538461538461,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 82.5,
+      "start": 79.8076923076923,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 94.25384615384615,
+      "start": 83.1,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 96.35384615384615,
+      "start": 94.85384615384615,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     }
+    ],
+    "version": 1
+   }
+  }
+ },
+ {
+  "fileName": "Example - cancelling because moving (retention).mp3",
+  "daysAgo": 5,
+  "callType": "retention",
+  "durationSec": 27,
+  "employeeName": "Marcus",
+  "transcript": [
+   {
+    "end": 2.3076923076923075,
+    "text": "Brightside Pest Control, this is Marcus.",
+    "start": 0,
+    "speaker": "employee"
+   },
+   {
+    "end": 9.061538461538461,
+    "text": "Hi, I need to cancel. We're moving out of state at the end of the month.",
+    "start": 2.9076923076923076,
+    "speaker": "customer"
+   },
+   {
+    "end": 12.738461538461538,
+    "text": "Okay, I can cancel that. What's the address?",
+    "start": 9.661538461538461,
+    "speaker": "employee"
+   },
+   {
+    "end": 14.838461538461537,
+    "text": "18 Cedar Road.",
+    "start": 13.338461538461537,
+    "speaker": "customer"
+   },
+   {
+    "end": 16.93846153846154,
+    "text": "Alright, that's cancelled.",
+    "start": 15.438461538461537,
+    "speaker": "employee"
+   },
+   {
+    "end": 19.076923076923073,
+    "text": "Is there any fee?",
+    "start": 17.538461538461537,
+    "speaker": "customer"
+   },
+   {
+    "end": 23.138461538461534,
+    "text": "No, you're past your first year, so no fee.",
+    "start": 19.676923076923075,
+    "speaker": "employee"
+   },
+   {
+    "end": 25.238461538461536,
+    "text": "Great, thanks.",
+    "start": 23.738461538461536,
+    "speaker": "customer"
+   },
+   {
+    "end": 27.338461538461537,
+    "text": "Okay, bye.",
+    "start": 25.838461538461537,
+    "speaker": "employee"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Service address",
+     "value": "18 Cedar Road"
+    },
+    {
+     "label": "Cancellation reason",
+     "value": "Moving"
+    },
+    {
+     "label": "Cancellation fee",
+     "value": "None"
+    }
+   ],
+   "summary": "Marcus answered the call and the customer requested to cancel because they are moving out of state. Marcus confirmed the cancellation and explained that there would be no fee. The call ended with the service cancelled.",
+   "followUps": [],
+   "resolution": "cancelled",
+   "cancelReason": "Moving"
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "below",
+    "items": [
+     {
+      "item": "Validate & Confidence Statement",
+      "passed": false,
+      "reason": "No validation or confidence statement",
+      "section": "Validate",
+      "evidence": null
+     },
+     {
+      "item": "Transition Statement",
+      "passed": false,
+      "reason": "Did not say they would take a quick look",
+      "section": "Validate",
+      "evidence": null
+     },
+     {
+      "item": "Do Your Research",
+      "passed": true,
+      "reason": "Used account info to explain fee",
+      "section": "Validate",
+      "evidence": "No, you're past your first year, so no fee"
+     },
+     {
+      "item": "Investigate",
+      "passed": false,
+      "reason": "No open-ended question about cancellation reason",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Validate & Summary Statement",
+      "passed": false,
+      "reason": "Did not repeat or validate reason",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Validate & Expectation Statement",
+      "passed": false,
+      "reason": "Did not prepare options",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Present Solution",
+      "passed": false,
+      "reason": "No solution offered",
+      "section": "Solve",
+      "evidence": null
+     },
+     {
+      "item": "Consensus",
+      "passed": false,
+      "reason": "No consensus asked",
+      "section": "Solve",
+      "evidence": null
+     },
+     {
+      "item": "Repeat (when necessary)",
+      "passed": false,
+      "reason": "No repeat solution",
+      "section": "Solve",
+      "evidence": null
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": false,
+      "reason": "No conclusion or expectations set",
+      "section": "Verify",
+      "evidence": null
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": false,
+      "reason": "No thanks given",
+      "section": "Verify",
+      "evidence": null
+     },
+     {
+      "item": "Leave a Teaser",
+      "passed": false,
+      "reason": "No teaser offered",
+      "section": "Verify",
+      "evidence": null
+     }
+    ],
+    "points": 1,
+    "maxPoints": 12,
+    "scorecardId": "retention"
+   },
+   "coaching": {
+    "focus": "Validate the customer's situation and express empathy before agreeing to cancel.",
+    "strengths": [
+     "He confirmed the cancellation promptly.",
+     "He provided accurate information about the fee.",
+     "He closed the call politely."
+    ],
+    "improvements": [
+     {
+      "point": "Validate the customer's situation and express empathy before agreeing to cancel.",
+      "quote": "Okay, I can cancel that.",
+      "suggestion": "I’m sorry to hear you’re moving; I understand how stressful that can be."
+     },
+     {
+      "point": "Ask open‑ended questions to uncover the real reason for cancellation.",
+      "quote": "Okay, I can cancel that.",
+      "suggestion": "Can you tell me a bit more about why you’re considering canceling?"
+     },
+     {
+      "point": "Offer a tailored solution before confirming cancellation.",
+      "quote": null,
+      "suggestion": "We have a few options that might help you keep your service, like a free re‑service or a discounted rate."
+     }
+    ]
+   }
+  }
+ },
+ {
+  "fileName": "Example - moving an appointment (scheduling).mp3",
+  "daysAgo": 6,
+  "callType": "scheduling",
+  "durationSec": 60,
+  "employeeName": "Priya",
+  "transcript": [
+   {
+    "end": 4.230769230769231,
+    "text": "Thanks for calling Brightside, this is Priya, how can I help?",
+    "start": 0,
+    "speaker": "employee"
+   },
+   {
+    "end": 13.676923076923078,
+    "text": "Hi, I got a text that my service is tomorrow, but I won't be home and you need to get into the garage.",
+    "start": 4.8307692307692305,
+    "speaker": "customer"
+   },
+   {
+    "end": 21.584615384615383,
+    "text": "No problem at all, thanks for letting us know ahead of time. I can definitely move that for you.",
+    "start": 14.276923076923076,
+    "speaker": "employee"
+   },
+   {
+    "end": 27.569230769230767,
+    "text": "What days work best for you next week, and is morning or afternoon better?",
+    "start": 22.184615384615384,
+    "speaker": "employee"
+   },
+   {
+    "end": 30.861538461538462,
+    "text": "Wednesday or Friday afternoon would be best.",
+    "start": 28.16923076923077,
+    "speaker": "customer"
+   },
+   {
+    "end": 41.07692307692307,
+    "text": "Got it, so you need someone there when you're home, Wednesday or Friday afternoon. I have Friday between one and three open. Does that work?",
+    "start": 31.46153846153846,
+    "speaker": "employee"
+   },
+   {
+    "end": 43.176923076923075,
+    "text": "Perfect.",
+    "start": 41.676923076923075,
+    "speaker": "customer"
+   },
+   {
+    "end": 54.16153846153846,
+    "text": "You're all set for Friday between one and three. I've added a note that the technician needs access to the garage. Anything else I can help with?",
+    "start": 43.776923076923076,
+    "speaker": "employee"
+   },
+   {
+    "end": 56.261538461538464,
+    "text": "No, that's it.",
+    "start": 54.761538461538464,
+    "speaker": "customer"
+   },
+   {
+    "end": 60.323076923076925,
+    "text": "Thanks so much for calling, have a great day.",
+    "start": 56.861538461538466,
+    "speaker": "employee"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Appointment",
+     "value": "Friday between one and three"
+    },
+    {
+     "label": "Technician",
+     "value": "needs access to garage"
+    }
+   ],
+   "summary": "Priya from Brightside answered the call and rescheduled the customer's service to Friday between one and three, noting garage access. The appointment was booked.",
+   "followUps": [],
+   "resolution": "resolved",
+   "cancelReason": null
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "below",
+    "items": [
+     {
+      "item": "Validate",
+      "passed": true,
+      "reason": "Corrected by Second Owner.",
+      "section": "Validate",
+      "evidence": null,
+      "corrected": true,
+      "autoAwarded": false
+     },
+     {
+      "item": "Confidence Statement",
+      "passed": true,
+      "reason": "Provided confidence statement.",
+      "section": "Validate",
+      "evidence": "I can definitely move that for you."
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "No expectation statement before questions.",
+      "section": "Validate",
+      "evidence": null
+     },
+     {
+      "item": "Investigate",
+      "passed": true,
+      "reason": "Asked open-ended question.",
+      "section": "Understand",
+      "evidence": "What days work best for you next week, and is morning or afternoon better?"
+     },
+     {
+      "item": "Summary Statement",
+      "passed": true,
+      "reason": "Summarized customer's needs.",
+      "section": "Understand",
+      "evidence": "Got it, so you need someone there when you're home, Wednesday or Friday afternoon."
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "No expectation statement before solution.",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Present Solution",
+      "passed": true,
+      "reason": "Presented solution details.",
+      "section": "Solve",
+      "evidence": "I have Friday between one and three open. Does that work?"
+     },
+     {
+      "item": "Consensus",
+      "passed": true,
+      "reason": "Checked agreement.",
+      "section": "Solve",
+      "evidence": "Does that work?"
+     },
+     {
+      "item": "Close",
+      "passed": true,
+      "reason": "Confirmed appointment.",
+      "section": "Solve",
+      "evidence": "You're all set for Friday between one and three."
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": true,
+      "reason": "Wrapped up and set expectations.",
+      "section": "Verify",
+      "evidence": "Thanks so much for calling, have a great day."
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": true,
+      "reason": "Thanked customer.",
+      "section": "Verify",
+      "evidence": "Thanks so much for calling, have a great day."
+     },
+     {
+      "item": "Offer final information",
+      "passed": false,
+      "reason": "No final info offered.",
+      "section": "Verify",
+      "evidence": null
+     }
+    ],
+    "points": 9,
+    "maxPoints": 12,
+    "scorecardId": "all_calls"
+   },
+   "coaching": {
+    "focus": "Add an expectation statement before asking questions.",
+    "strengths": [
+     "Acknowledged the customer's situation with empathy and thanked them for the advance notice.",
+     "Summarized the customer's requested schedule to confirm understanding.",
+     "Closed the call with a friendly thank you and well wishes."
+    ],
+    "improvements": [
+     {
+      "point": "Add an expectation statement before asking questions.",
+      "quote": null,
+      "suggestion": "I'm going to ask a few questions so I can find the best time for you."
+     },
+     {
+      "point": "Confirm the technician's access to the garage with the customer.",
+      "quote": "I've added a note that the technician needs access to the garage.",
+      "suggestion": "Just to confirm, the technician will need access to the garage. Is that correct?"
+     },
+     {
+      "point": "Ask for the customer's name to personalize the interaction.",
+      "quote": null,
+      "suggestion": "Could you please confirm your name for the record?"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "fileName": "Example - declined card update (billing).mp3",
+  "daysAgo": 8,
+  "callType": "billing",
+  "durationSec": 47,
+  "employeeName": "Jordan",
+  "transcript": [
+   {
+    "end": 1.5,
+    "text": "Hello?",
+    "start": 0,
+    "speaker": "customer"
+   },
+   {
+    "end": 6.330769230769231,
+    "text": "Hi, this is Jordan with Brightside Pest Control. Is this Sam?",
+    "start": 2.1,
+    "speaker": "employee"
+   },
+   {
+    "end": 8.430769230769231,
+    "text": "Yes.",
+    "start": 6.930769230769231,
+    "speaker": "customer"
+   },
+   {
+    "end": 18.646153846153844,
+    "text": "Hi Sam, I'm just calling because the card on file for your monthly service was declined. I can help you get that updated real quick.",
+    "start": 9.03076923076923,
+    "speaker": "employee"
+   },
+   {
+    "end": 25.015384615384615,
+    "text": "Oh, I got a new card last month. Can I give it to you now?",
+    "start": 19.246153846153845,
+    "speaker": "customer"
+   },
+   {
+    "end": 27.92307692307692,
+    "text": "Absolutely. Go ahead whenever you're ready.",
+    "start": 25.615384615384613,
+    "speaker": "employee"
+   },
+   {
+    "end": 30.446153846153845,
+    "text": "Okay, I'll read it out.",
+    "start": 28.52307692307692,
+    "speaker": "customer"
+   },
+   {
+    "end": 37.96923076923076,
+    "text": "Perfect, I've got that new card saved, and I ran this month's payment, so you're all caught up.",
+    "start": 31.046153846153842,
+    "speaker": "employee"
+   },
+   {
+    "end": 45.107692307692304,
+    "text": "You'll get an email receipt in a few minutes. Thanks so much, Sam, have a good one.",
+    "start": 38.569230769230764,
+    "speaker": "employee"
+   },
+   {
+    "end": 47.2076923076923,
+    "text": "Thanks, you too.",
+    "start": 45.7076923076923,
+    "speaker": "customer"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Customer name",
+     "value": "Sam"
+    },
+    {
+     "label": "Employee name",
+     "value": "Jordan"
+    },
+    {
+     "label": "Card updated",
+     "value": "new card"
+    },
+    {
+     "label": "Payment processed",
+     "value": "this month's payment"
+    },
+    {
+     "label": "Email receipt",
+     "value": "sent"
+    },
+    {
+     "label": "Service plan",
+     "value": "monthly"
+    }
+   ],
+   "summary": "Jordan from Brightside Pest Control called Sam to update a declined card. Sam provided a new card, which Jordan saved and used to process the current month's payment. The call ended with confirmation that an email receipt would be sent.",
+   "followUps": [],
+   "resolution": "resolved",
+   "cancelReason": null
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "below",
+    "items": [
+     {
+      "item": "Validate",
+      "passed": true,
+      "reason": "Employee acknowledged the specific reason for the call.",
+      "section": "Validate",
+      "evidence": "I'm just calling because the card on file for your monthly service was declined. I can help you get that updated real quick."
+     },
+     {
+      "item": "Confidence Statement",
+      "passed": true,
+      "reason": "Employee expressed confidence in resolving the issue.",
+      "section": "Validate",
+      "evidence": "I can help you get that updated real quick."
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "No expectation statement before asking questions.",
+      "section": "Validate",
+      "evidence": null
+     },
+     {
+      "item": "Investigate",
+      "passed": false,
+      "reason": "Employee did not ask any investigative questions.",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Summary Statement",
+      "passed": false,
+      "reason": "No summary of customer needs was provided.",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "No expectation statement before presenting solution.",
+      "section": "Understand",
+      "evidence": null
+     },
+     {
+      "item": "Present Solution",
+      "passed": true,
+      "reason": "Employee explained the solution in detail.",
+      "section": "Solve",
+      "evidence": "I've got that new card saved, and I ran this month's payment, so you're all caught up."
+     },
+     {
+      "item": "Consensus",
+      "passed": false,
+      "reason": "No consensus or question was asked.",
+      "section": "Solve",
+      "evidence": null
+     },
+     {
+      "item": "Close",
+      "passed": true,
+      "reason": "Employee confirmed the action, closing the call.",
+      "section": "Solve",
+      "evidence": "I've got that new card saved, and I ran this month's payment, so you're all caught up."
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": true,
+      "reason": "Employee wrapped up loose ends and set expectations.",
+      "section": "Verify",
+      "evidence": "You'll get an email receipt in a few minutes. Thanks so much, Sam, have a good one."
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": true,
+      "reason": "Employee thanked the customer.",
+      "section": "Verify",
+      "evidence": "Thanks so much, Sam, have a good one."
+     },
+     {
+      "item": "Offer final information",
+      "passed": false,
+      "reason": "No final information or referral program offered.",
+      "section": "Verify",
+      "evidence": null
+     }
+    ],
+    "points": 6,
+    "maxPoints": 12,
+    "scorecardId": "all_calls"
+   },
+   "coaching": {
+    "focus": "Add an empathy statement and expectation before asking for card details.",
+    "strengths": [
+     "Quickly confirmed the new card and processed the payment.",
+     "Maintained a friendly tone throughout the call.",
+     "Provided a clear confirmation that the payment was completed."
+    ],
+    "improvements": [
+     {
+      "point": "Include an empathy statement and expectation before asking for card details.",
+      "quote": null,
+      "suggestion": "I’m sorry to hear your card was declined—let’s get that updated quickly."
+     },
+     {
+      "point": "Ask an open‑ended question to confirm the new card details and ensure accuracy.",
+      "quote": null,
+      "suggestion": "Could you please read out the new card number and the expiration date so I can update it correctly?"
+     },
+     {
+      "point": "Confirm the payment and ask for agreement before closing.",
+      "quote": "Perfect, I've got that new card saved, and I ran this month's payment, so you're all caught up.",
+      "suggestion": "Does that look good to you, Sam?"
+     }
+    ]
+   }
+  }
+ },
+ {
+  "fileName": "Example - roaches still showing up (re-service).mp3",
+  "daysAgo": 12,
+  "callType": "reservice",
+  "durationSec": 55,
+  "employeeName": "Priya",
+  "transcript": [
+   {
+    "end": 2.3076923076923075,
+    "text": "Brightside Pest Control, this is Priya.",
+    "start": 0,
+    "speaker": "employee"
+   },
+   {
+    "end": 9.061538461538461,
+    "text": "Hi, you treated for roaches last week, but I'm still seeing a few in the bathroom.",
+    "start": 2.9076923076923076,
+    "speaker": "customer"
+   },
+   {
+    "end": 16.2,
+    "text": "I'm sorry you're still seeing them, that's frustrating after a treatment. I'll get this taken care of.",
+    "start": 9.661538461538461,
+    "speaker": "employee"
+   },
+   {
+    "end": 21.030769230769227,
+    "text": "Where are you seeing them, and are they big or small?",
+    "start": 16.799999999999997,
+    "speaker": "employee"
+   },
+   {
+    "end": 25.09230769230769,
+    "text": "Small ones, mostly around the bathroom sink at night.",
+    "start": 21.63076923076923,
+    "speaker": "customer"
+   },
+   {
+    "end": 44.153846153846146,
+    "text": "That's helpful. Seeing a few in the first couple of weeks is normal while the bait works, but let's not wait. I'll send the technician back for a free re-service to put fresh bait under the sink and seal the gaps around the pipes. Does Monday morning work?",
+    "start": 25.69230769230769,
+    "speaker": "employee"
+   },
+   {
+    "end": 46.292307692307695,
+    "text": "Monday morning is fine.",
+    "start": 44.753846153846155,
+    "speaker": "customer"
+   },
+   {
+    "end": 52.66153846153846,
+    "text": "You're booked for Monday between eight and ten, no charge. Thanks for letting us know.",
+    "start": 46.892307692307696,
+    "speaker": "employee"
+   },
+   {
+    "end": 54.761538461538464,
+    "text": "Thank you.",
+    "start": 53.261538461538464,
+    "speaker": "customer"
+   }
+  ],
+  "outcome": {
+   "details": [
+    {
+     "label": "Employee name",
+     "value": "Priya"
+    },
+    {
+     "label": "Pest",
+     "value": "roaches"
+    },
+    {
+     "label": "Appointment",
+     "value": "Monday between eight and ten"
+    },
+    {
+     "label": "Technician",
+     "value": "free re-service"
+    }
+   ],
+   "summary": "The employee called the customer to address remaining roaches after last treatment. The employee scheduled a free re-service on Monday between 8-10. The call ended with the appointment booked.",
+   "followUps": [],
+   "resolution": "booked",
+   "cancelReason": null
+  },
+  "analyses": {
+   "scorecards": {
+    "grade": "below",
+    "items": [
+     {
+      "item": "Validate",
+      "passed": true,
+      "reason": "The employee acknowledged the specific continued roach activity and empathized with the frustration.",
+      "section": "Validate",
+      "criteria": "Early on, acknowledges the customer's specific reason for calling with genuine empathy (names the actual situation, not a vague 'sorry about that').",
+      "evidence": "I'm sorry you're still seeing them, that's frustrating after a treatment."
+     },
+     {
+      "item": "Confidence Statement",
+      "passed": true,
+      "reason": "The employee clearly reassured the customer they would handle it.",
+      "section": "Validate",
+      "criteria": "Clearly tells the customer they can help and will take care of it, putting the customer at ease (e.g. 'I can definitely take care of this for you').",
+      "evidence": "I'll get this taken care of."
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "The employee did not explain the next step before asking questions.",
+      "section": "Validate",
+      "criteria": "Before asking questions, tells the customer what happens next (e.g. 'I'm going to ask you a few questions so I can...').",
+      "evidence": null
+     },
+     {
+      "item": "Investigate",
+      "passed": true,
+      "reason": "The employee asked questions to understand where and what type of roaches were being seen.",
+      "section": "Understand",
+      "criteria": "Asks questions, mostly open-ended (who, what, when, where, why, how), to understand the situation and its root cause before solving it.",
+      "evidence": "Where are you seeing them, and are they big or small?"
+     },
+     {
+      "item": "Summary Statement",
+      "passed": false,
+      "reason": "The employee did not summarize the customer's need in their own terms and check for accuracy.",
+      "section": "Understand",
+      "criteria": "Repeats back what the customer needs or values in their own terms and checks it's right (e.g. 'So it sounds like you're looking for... does that sound right?').",
+      "evidence": null
+     },
+     {
+      "item": "Expectation Statement",
+      "passed": false,
+      "reason": "The employee did not set expectations before presenting the solution.",
+      "section": "Understand",
+      "criteria": "Before presenting the solution, prepares the customer for what's next (e.g. 'I'll walk you through... then we'll get you scheduled').",
+      "evidence": null
+     },
+     {
+      "item": "Present Solution",
+      "passed": true,
+      "reason": "The employee gave a specific re-service plan tailored to the bathroom sink issue.",
+      "section": "Solve",
+      "criteria": "Explains the solution in specific detail tailored to this customer: what will be done, how, and why it matters for their situation.",
+      "evidence": "I'll send the technician back for a free re-service to put fresh bait under the sink and seal the gaps around the pipes."
+     },
+     {
+      "item": "Consensus",
+      "passed": true,
+      "reason": "The employee checked whether the proposed appointment worked for the customer.",
+      "section": "Solve",
+      "criteria": "Checks the customer agrees or has questions before moving on (e.g. 'Does that work for you?', 'Any questions before we talk price?').",
+      "evidence": "Does Monday morning work?"
+     },
+     {
+      "item": "Close",
+      "passed": true,
+      "reason": "The employee confirmed the appointment was booked.",
+      "section": "Solve",
+      "criteria": "Asks for the commitment or confirms the action (books the appointment, sets up the change). When the solution has no cost, agreeing to it counts as the close.",
+      "evidence": "You're booked for Monday between eight and ten, no charge."
+     },
+     {
+      "item": "Provide a Conclusion",
+      "passed": true,
+      "reason": "The employee concluded by confirming the appointment window and no charge.",
+      "section": "Verify",
+      "criteria": "Wraps up loose ends and sets expectations going forward: confirms details such as date and time, address, notes for the technician or what happens next.",
+      "evidence": "You're booked for Monday between eight and ten, no charge."
+     },
+     {
+      "item": "Thank the Customer",
+      "passed": true,
+      "reason": "The employee thanked the customer near the end of the call.",
+      "section": "Verify",
+      "criteria": "Genuinely thanks the customer near the end of the call.",
+      "evidence": "Thanks for letting us know."
+     },
+     {
+      "item": "Offer final information",
+      "passed": false,
+      "reason": "The employee did not invite the customer to call for other pest needs or questions.",
+      "section": "Verify",
+      "criteria": "Invites the customer to call for any other pest needs or questions (one-stop shop); on sales calls, mentions the referral program.",
+      "evidence": null
+     }
+    ],
+    "points": 8,
+    "maxPoints": 12,
+    "thresholds": {
+     "gold": 12,
+     "green": 11
+    },
+    "scorecardId": "all_calls",
+    "scorecardName": "All Calls"
+   },
+   "coaching": {
+    "focus": "Add an expectation statement before asking questions to set the stage",
+    "strengths": [
+     "Empathized with the customer’s frustration: \"I'm sorry you're still seeing them, that's frustrating after a treatment.\", \"Asked an open‑ended question to gather details: \"Where are you seeing them, and are they big or small?\", \"Provided a clear solution and closed the call: \"I'll send the technician back for a free re-service ... Does Monday morning work?\""
+    ],
+    "improvements": [
+     {
+      "point": "Add an expectation statement before asking questions to set the stage",
+      "quote": null,
+      "suggestion": "I’m going to ask a few questions so I can pinpoint exactly where the roaches are coming from."
+     },
+     {
+      "point": "Explain why the re‑service is free and what the technician will do",
+      "quote": "Seeing a few in the first couple of weeks is normal while the bait works",
+      "suggestion": "Because the bait takes a few days to work, we’re offering a free re‑service to ensure the problem is fully addressed."
+     },
+     {
+      "point": "Ask if there are any other pest concerns before closing",
+      "quote": null,
+      "suggestion": "Is there anything else you’re noticing that we should address during the visit?"
+     }
+    ]
+   },
+   "sentiment": {
+    "turns": [
+     {
+      "end": 2.3076923076923075,
+      "start": 0,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 9.061538461538461,
+      "start": 2.9076923076923076,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "negative"
+     },
+     {
+      "end": 16.2,
+      "start": 9.661538461538461,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 21.030769230769227,
+      "start": 16.799999999999997,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 25.09230769230769,
+      "start": 21.63076923076923,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 44.153846153846146,
+      "start": 25.69230769230769,
+      "speaker": "employee",
+      "intensity": 2,
+      "sentiment": "positive"
+     },
+     {
+      "end": 46.292307692307695,
+      "start": 44.753846153846155,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "neutral"
+     },
+     {
+      "end": 52.66153846153846,
+      "start": 46.892307692307696,
+      "speaker": "employee",
+      "intensity": 1,
+      "sentiment": "positive"
+     },
+     {
+      "end": 54.761538461538464,
+      "start": 53.261538461538464,
+      "speaker": "customer",
+      "intensity": 1,
+      "sentiment": "positive"
+     }
+    ],
+    "version": 1
+   }
+  }
+ }
+]

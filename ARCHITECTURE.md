@@ -266,6 +266,16 @@ the app without exposing real recordings. Scripts import server code through
 `scripts/allow-server-only.cjs`, which points the `server-only` guard at an
 empty module outside Next.
 
+**Example calls in the app.** A company can load the same 7 invented calls
+itself: a "Try it with example calls" card on the Overview while it has no
+calls, and a Load / Remove switch in Settings → Company (needs
+`calls.upload`). They come from `modules/calls/demo/example-calls.json`, the
+demo calls with their saved results (outcome, scorecard, coaching,
+sentiment), so loading runs no AI and costs nothing. Their recording path is
+a marker (`<tenant>/example-….none`), never a file, which is how they're told
+apart from real calls and removed without touching them. They don't count
+towards the setup checklist's "Upload your first call".
+
 ## Rep page
 
 `/[tenant]/team/[repId]` (linked from each team member's card on Team):

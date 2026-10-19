@@ -61,7 +61,7 @@ export const DEMO_CALLS: DemoCall[] = [
       ["employee", "Thanks for calling Brightside, this is Priya."],
       ["customer", "Hi, I'd like to cancel my service please."],
       ["employee", "Absolutely, I can help you with that. What's the address on the account? Let me just take a quick look here."],
-      ["customer", "It's 7 Birch Court."],
+      ["customer", "It's 7 Willow Court."],
       ["employee", "Thank you. I see you've been with us about two years and your last visit was three weeks ago. If you don't mind me asking, how has the service been for you?"],
       ["customer", "It was fine until this summer, but I keep seeing spiders on the porch and it feels like I'm paying for nothing."],
       ["employee", "That makes sense, I'm sorry. So the service was good, but lately you're seeing spiders on the porch and it doesn't feel worth it?"],

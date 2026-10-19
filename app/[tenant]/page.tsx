@@ -2,10 +2,11 @@ import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { LayoutGrid } from "lucide-react";
 import { can, listInvites, listMembers } from "@/core/tenancy";
-import { callScope, listCalls, listTasks } from "@/modules/calls/server";
+import { callScope, countExampleCalls, listCalls, listTasks } from "@/modules/calls/server";
 import { isModuleEnabled } from "@/modules/registry";
 import { Bone, PageHeader, PageStack } from "@/shared/ui/page-header";
 import { Overview, RangeChips } from "./_components/overview";
+import { ExampleCallsBar, ExampleCallsOffer } from "./_components/example-calls";
 import { SetupChecklist } from "./_components/setup-checklist";
 import { requireModule } from "./_lib/require-module";
 import { toDashboardCalls } from "./_lib/dashboard-calls";
@@ -20,7 +21,8 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
   const range = parseRange((await searchParams).range);
   const canAssign = can(access, "calls.assign");
   const canInvite = can(access, "team.manage");
-  const [calls, scored, tasks, members, invites, jar] = await Promise.all([
+  const canUpload = can(access, "calls.upload");
+  const [calls, scored, tasks, members, invites, jar, examples] = await Promise.all([
     listCalls(tenant.slug, callScope({ userId: user.id, permissions })),
     isModuleEnabled(tenant.slug, "scorecards"),
     // People who assign follow-ups see the team's tasks; everyone else only their own.
@@ -28,13 +30,15 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
     canAssign || canInvite ? listMembers(tenant.id) : Promise.resolve(null),
     canInvite ? listInvites(tenant.id) : Promise.resolve([]),
     cookies(),
+    countExampleCalls(tenant.id),
   ]);
   const mine = !can(access, "calls.view_all");
 
   const steps = setupSteps({
     slug: tenant.slug,
-    can: { upload: can(access, "calls.upload"), invite: canInvite, review: can(access, "calls.review"), assign: canAssign },
-    callCount: calls.length,
+    can: { upload: canUpload, invite: canInvite, review: can(access, "calls.review"), assign: canAssign },
+    // Example calls don't count: the step is about the company's own first recording.
+    callCount: calls.length - examples,
     teamSize: (members?.length ?? 1) + invites.length,
     reviewedCount: calls.filter((c) => c.review).length,
     taskCount: tasks.length,
@@ -51,6 +55,9 @@ async function OverviewBody({ params, searchParams }: PageProps<"/[tenant]">) {
         icon={LayoutGrid}
         actions={<RangeChips base={`/${tenant.slug}`} range={range} />}
       />
+      {/* A new company can load made-up calls to try every page; then a bar says they're examples. */}
+      {canUpload && calls.length === 0 && <ExampleCallsOffer slug={tenant.slug} />}
+      {canUpload && examples > 0 && <ExampleCallsBar slug={tenant.slug} count={examples} />}
       {setup && <SetupChecklist slug={tenant.slug} steps={steps} />}
       <Overview
         insights={summarize(inRange(dashboardCalls, range))}

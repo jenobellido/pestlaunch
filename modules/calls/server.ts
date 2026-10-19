@@ -17,3 +17,4 @@ export { createTask, deleteTask, findTask, listTasks, setTaskStatus, type CallTa
 export { toCsv } from "./lib/csv";
 export { searchCalls } from "./server/search";
 export type { CallSearchHit } from "./lib/search";
+export { countExampleCalls, loadExampleCalls, removeExampleCalls } from "./server/example-calls";
